@@ -1,0 +1,78 @@
+>> init
+>> a = grid2(100);
+>> la = lap(a);
+>> n = length(la);
+>> b = randn(n,1); b = b - mean(b);
+>> x = lapAmdSolver(la,b);  % for a singular system
+>> norm(la*x-b)
+
+ans =
+
+   2.0448e-11
+
+>> la2 = la; la2(1,1) = la2(1,1) + 1;
+>> x = amdSolver(la2,b);  % for a nonsingular system
+>> norm(la2*x-b)
+
+ans =
+
+   2.5316e-12
+
+>> f = amdSolver(la2);
+>> x = f(b);
+>> norm(la2*x-b)
+
+ans =
+
+   1.2061e-12
+
+--------------------
+
+>> a = grid2(100);
+>> [ai,aj] = find(tril(a));
+>> g = yins.Graph(ai,aj);
+>> % that was java
+>> methods(g)
+
+Methods for class yins.Graph:
+
+Graph          components     equals         hashCode       notifyAll      treeToArray    
+bfsWalk        dfs            getClass       makeBackEdges  setGraph       wait           
+bigIndepSet    dump           getDfs         notify         toString       
+
+% for example, the following will compute a dfs ordering of the vertices
+
+>> g.dfs();
+>> ord = g.getDfs();
+
+% now, let's make a tree by a fast heuristic
+
+>> T = yins.Tree.growRandTree(g,1);
+
+% to look at it, let's plot it.
+% First, we need coordinates for the vertices.  Grid2 will give them to us
+
+>> [a,~,xy] = grid2(100);
+>> pa = double(T.parentArray + 1);
+>> t = sparse(1:n,pa,1,n,n); t = t + t';
+
+>> gplot(t,xy)
+
+% now, let's compute the total stretch
+% need a weighted graph for this, so let me add the weights:
+
+>> [ai,aj,av] = find(tril(a));
+>> g = yins.WeightedGraph(ai,aj,av);
+>> T.compTotalStretch(g)
+
+ans =
+
+      251652
+
+>> aveStretch = ans / length(av)
+
+aveStretch =
+
+   12.7097
+
+

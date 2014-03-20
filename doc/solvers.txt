@@ -1,0 +1,28 @@
+Here are two examples of how to use the solvers.
+
+First, for a positive definite matrix:
+
+a = randn(6); a = a * a';
+b = randn(6,1);
+x = amdSolver(a,b); % get the solution to the linear system
+norm(a*x-b)
+
+f = amdSolver(a); % get a function that solves systems in a
+norm(a*f(b)-b)
+
+
+To solve a Laplacian system, it is easiest to do it by reducing it
+to a positive definite system.  Assuming that the underlying graph is
+connected, the following will work:
+
+a = rand(6); a = a + a'; a = a - diag(diag(a));
+la = lap(a);
+b = randn(6,1); b = b - mean(b);
+x = lapWrapSolver('amdSolver',la,b);
+norm(la*x-b)
+
+Or, to get a function, try
+
+f = lapWrapSolver('amdSolver',la);
+norm(la*f(b)-b)
+

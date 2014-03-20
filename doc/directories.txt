@@ -1,0 +1,34 @@
+This describes the directory structure, and its logic.
+When you create a new directory, type "svn add dirname"
+so that it will be added into the subversion repository.
+
+Directories:
+
+  .    : This is the base directory.  Keep it as clean as possible.
+         Only put readmes and initialization code.
+
+  doc : documentation / instructions on how to use code
+
+  data : data that has or can be used to extract matrices
+	 
+  java : for java code
+    It has one subdirectory right now called "yins".
+    we should probably change that to something like lapsolve, or the
+    name of our project.
+  
+
+
+  matlab : for matlab code
+    solvers : for solving systems of equations
+    generators : generate systems of equations
+    sparsify : for code to sparsify matrices, and test approximation
+       quality
+    cut : code to cut graphs
+    util : various utility routines in matlab
+
+
+
+
+
+
+
