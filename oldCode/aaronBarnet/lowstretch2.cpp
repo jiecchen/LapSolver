@@ -9,6 +9,7 @@
 #include <boost/graph/graph_traits.hpp>
 #include <boost/pending/mutable_queue.hpp>
 
+#include <cstdio>
 using namespace boost;
 
 // from graph.hpp because had to change def of graph

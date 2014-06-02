@@ -7,8 +7,8 @@
 #include "graph.hpp"
 #include "boost/graph/subgraph.hpp"
 #include <time.h>
+#include <cstdio>
 using namespace boost;
-
 
 /*
   Type definitions
