@@ -53,6 +53,3 @@ function x = internal(laperm,p,L2,b,opts)
   x = x(:);
 
 end
-  
-
-

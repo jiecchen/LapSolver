@@ -17,5 +17,3 @@ if (isempty(b)),
 else
   x = lapWrapSolver('amdSolver',la,b);
 end
-
-    

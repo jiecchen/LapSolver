@@ -3,9 +3,9 @@ function v = isLap(m)
 %
 % return true if is symmetric and laplacian
 % tests for
-%  row-sums near zero
 %  symmetric
 %  non-pos off diags
+%  row-sums near zero
 %
 
 

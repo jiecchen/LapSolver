@@ -21,7 +21,7 @@ package yins;
  *
  * Warning: this class does no range checking!!!
  *
- * It is first-on first-off
+ * It is first-in first-out
 */
 public class IntQueue
 {
@@ -40,7 +40,7 @@ public class IntQueue
      */
     public IntQueue(int maxLen) 
     {
-	q = new int[maxLen];
+        q = new int[maxLen];
     }
 
 
@@ -51,11 +51,11 @@ public class IntQueue
      */    
     public void init(int entry) 
     {
-	q[0] = entry;
+        q[0] = entry;
 
-	qLen = 1;
-	
-	qPtr = 0;
+        qLen = 1;
+        
+        qPtr = 0;
 
     }
 
@@ -66,24 +66,24 @@ public class IntQueue
      */    
     public void init() 
     {
-	qLen = 0;
-	qPtr = 0;
+        qLen = 0;
+        qPtr = 0;
 
     }
 
     public boolean hasMore()
     {
-	return (qPtr < qLen);
+        return (qPtr < qLen);
     }
     
     /** 
-     * Pulls off a queue item in first-on first-off order
+     * Pulls off a queue item in first-in first-out order
      * 
      * @return the queue item
      */
     public int pull() 
     {
-	return q[qPtr++];
+        return q[qPtr++];
     }
 
     /** 
@@ -94,7 +94,7 @@ public class IntQueue
      */
     public void add(int entry)
     {
-	q[qLen++] = entry;
+        q[qLen++] = entry;
     }
-	
+        
 }

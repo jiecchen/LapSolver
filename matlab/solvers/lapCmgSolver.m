@@ -16,5 +16,3 @@ if (isempty(b)),
 else
   x = lapWrapSolver('cmgSolver',la,b,opts);
 end
-
-    

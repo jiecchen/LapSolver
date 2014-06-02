@@ -3,7 +3,7 @@ function x = voltSolve(aflow,solver)
 % function x = voltSolve(laflow,solver)
 %
 % for solving flow problems produced by flowProblem,
-% usins irls on the voltages.
+% using irls on the voltages.
 %
 % the key is that it sets up potentials of node 1 to 1
 % of node 2 to 0,

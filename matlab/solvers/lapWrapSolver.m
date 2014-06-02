@@ -19,7 +19,7 @@ function x = lapWrapSolver(solvername,la,b,opts)
 %  b = randn(length(la),1); b = b - mean(b);
 %  x = lapWrapSolver('iccSolver',la,b); norm(la*x-b)
 %  f = lapWrapSolver('iccSolver',la); norm(la*f(b)-b)
-%  g = lapWrapSolver('iccSolver'); f = g(la); norm(la*f(b)-b)  
+%  g = lapWrapSolver('iccSolver'); f = g(la); norm(la*f(b)-b)
 %
 % Copyright Daniel Spielman, 2013, Yale University.
 % This file of the LapSolve package.
@@ -86,4 +86,3 @@ function x = internal(g2,n,b)
     x = x(:);
     
 end
-

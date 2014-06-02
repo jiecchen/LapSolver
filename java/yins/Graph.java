@@ -7,7 +7,7 @@
  *
  * A sparse UNWEIGHTED static graph class.
  * keeps an adj list for each vertex, 
- * not nec sorted
+ * not necessarily sorted
  * produces edge back indices only when needed
  *
  * Meant for use inside matlab, but this causes 0/1 indexing problems!
@@ -82,93 +82,93 @@ public class Graph
 
 
     public Graph (int[] i, int[] j) {
-	this.setGraph(i,j);
+        this.setGraph(i,j);
     }
 
 
     
     /**
      *  expects input as
-     *  [i,] = find(tril(T)),
+     *  [i,j] = find(tril(T)),
      *  so, each entry of i should be larger than corresp entry of j
      */
     public void setGraph (int[] i, int[] j) {
-	int len; // the length of i
+        int len; // the length of i
 
-	dfs = null;
-	comp = null;
-	seen = null;
+        dfs = null;
+        comp = null;
+        seen = null;
 
-	
-	len = i.length;
-	if ((j.length != len)) {
-	    throw new Error("inputs must all have the same length");
-	}
+        
+        len = i.length;
+        if ((j.length != len)) {
+            throw new Error("inputs must all have the same length");
+        }
 
-	//-------------------------
-	// compute max node index
-	//
-	this.nv = 0;
-	for (int a = 0; a < len; a++) {
-	    if (i[a] > nv)
-		nv = i[a];
-	    if (j[a] > nv)
-		nv = i[a];
-	}
-
-
-	//-------------------------
-	// downshift i and j by 1
-	// 
-	for (int a = 0; a < len; a++) {
-	    i[a] = i[a] - 1;
-	    j[a] = j[a] - 1;
-
-	    // report error if self-loops
-	    if (i[a] == j[a]) {
-		throw new Error("Self-loops are not allowed.");
-	    }
-	}
+        //-------------------------
+        // compute max node index
+        //
+        this.nv = 0;
+        for (int a = 0; a < len; a++) {
+            if (i[a] > nv)
+                nv = i[a];
+            if (j[a] > nv)
+                nv = j[a];
+        }
 
 
-	//-----------------------------------------
-	//  count how many times each node occurrs
-	
-	deg = new int[nv];
-	for (int a = 0; a < nv; a++) {
-	    deg[a] = 0;
-	}
+        //-------------------------
+        // downshift i and j by 1
+        // 
+        for (int a = 0; a < len; a++) {
+            i[a] = i[a] - 1;
+            j[a] = j[a] - 1;
 
-	for (int a = 0; a < len; a++) {
-	    if (i[a] > j[a]) {
-		deg[i[a]] = deg[i[a]] + 1;
-		deg[j[a]] = deg[j[a]] + 1;
-	    }
-	}
+            // report error if self-loops
+            if (i[a] == j[a]) {
+                throw new Error("Self-loops are not allowed.");
+            }
+        }
 
 
-	//---------------------------
-	// build the graph
+        //-----------------------------------------
+        //  count how many times each node occurrs
+        
+        deg = new int[nv];
+        for (int a = 0; a < nv; a++) {
+            deg[a] = 0;
+        }
 
-	int[] tmpdeg = new int[nv];
+        for (int a = 0; a < len; a++) {
+            if (i[a] > j[a]) {
+                deg[i[a]] = deg[i[a]] + 1;
+                deg[j[a]] = deg[j[a]] + 1;
+            }
+        }
 
-	nbrs = new int[nv][];
 
-	for (int a = 0; a < nv; a++) {
-	    nbrs[a] = new int[deg[a]];
-	    tmpdeg[a] = 0;
-	}
+        //---------------------------
+        // build the graph
 
-	for (int a = 0; a < len; a++) {
-	    if (i[a] > j[a]) {
-	    
-		// backInd[i[a]][tmpdeg[i[a]]] = tmpdeg[j[a]];
-		// backInd[j[a]][tmpdeg[j[a]]] = tmpdeg[i[a]];
-		
-		nbrs[i[a]][tmpdeg[i[a]]++] = j[a];
-		nbrs[j[a]][tmpdeg[j[a]]++] = i[a];
-	    }
-	}
+        int[] tmpdeg = new int[nv];
+
+        nbrs = new int[nv][];
+
+        for (int a = 0; a < nv; a++) {
+            nbrs[a] = new int[deg[a]];
+            tmpdeg[a] = 0;
+        }
+
+        for (int a = 0; a < len; a++) {
+            if (i[a] > j[a]) {
+            
+                // backInd[i[a]][tmpdeg[i[a]]] = tmpdeg[j[a]];
+                // backInd[j[a]][tmpdeg[j[a]]] = tmpdeg[i[a]];
+                
+                nbrs[i[a]][tmpdeg[i[a]]++] = j[a];
+                nbrs[j[a]][tmpdeg[j[a]]++] = i[a];
+            }
+        }
     }
 
     /*
@@ -177,59 +177,59 @@ public class Graph
      *
      */
     public void makeBackEdges() {
-	backInd = new int[nv][];
+        backInd = new int[nv][];
 
-	int[] count = new int[nv];
-	
-	for (int a = 0; a < nv; a++) {
-	    backInd[a] = new int[deg[a]];
-	    count[a] = 0;
-	}
+        int[] count = new int[nv];
+        
+        for (int a = 0; a < nv; a++) {
+            backInd[a] = new int[deg[a]];
+            count[a] = 0;
+        }
 
-	for (int a = 0; a < nv; a++) {
-	    for (int i = 0; i < deg[a]; i++) {
-		int nbr = nbrs[a][i];
-		backInd[nbr][count[nbr]++] = i;
-	    }
-	}
+        for (int a = 0; a < nv; a++) {
+            for (int i = 0; i < deg[a]; i++) {
+                int nbr = nbrs[a][i];
+                backInd[nbr][count[nbr]++] = i;
+            }
+        }
     }
     
     /** 
-     * walk in BFS order, setting the fiel bfs
+     * walk in BFS order, setting the field bfs
      * assumes connected
      */
     public int[] bfsWalk(int root) {
 
-	bfs = new int[nv];
-	depth = new int[nv];
-	seen = new boolean[nv];
+        bfs = new int[nv];
+        depth = new int[nv];
+        seen = new boolean[nv];
 
-	for (int i = 0; i < nv; i++) {
-	    seen[i] = false;
-	}
-	
-	depth[root] = 0;
-	bfs[0] = root;
-	seen[root] = true;
-	
-	int bfsPtr = 1;
-	int curPtr = 1;
-	int curNode = root;
+        for (int i = 0; i < nv; i++) {
+            seen[i] = false;
+        }
+        
+        depth[root] = 0;
+        bfs[0] = root;
+        seen[root] = true;
+        
+        int bfsPtr = 1;
+        int curPtr = 1;
+        int curNode = root;
 
-	while (curPtr < nv) {
-	    int nbr;
-	    for (int i = 0; i < deg[curNode]; i++) {
-		nbr = nbrs[curNode][i];
-		if (!seen[nbr]) {
-		    bfs[bfsPtr++] = nbr;
-		    depth[nbr] = depth[curNode]+1;
-		    seen[nbr] = true;
-		}
-	    }
-	    curNode = bfs[curPtr++];
-	}
+        while (curPtr < nv) {
+            int nbr;
+            for (int i = 0; i < deg[curNode]; i++) {
+                nbr = nbrs[curNode][i];
+                if (!seen[nbr]) {
+                    bfs[bfsPtr++] = nbr;
+                    depth[nbr] = depth[curNode]+1;
+                    seen[nbr] = true;
+                }
+            }
+            curNode = bfs[curPtr++];
+        }
 
-	return bfs;
+        return bfs;
     }
 
 
@@ -239,41 +239,41 @@ public class Graph
      */
     public int[] dfs () {
 
-	int c = 0;
-	
-	seen = new boolean[nv];
-	comp = new int[nv];
-	for (int i = 0; i < nv; i++) {
-	    seen[i] = false;
-	    comp[i] = 0;
-	}
-	    
-	dfsPtr = 0;
-	dfs = new int[nv];
-	parent = new int[nv];
+        int c = 0;
+        
+        seen = new boolean[nv];
+        comp = new int[nv];
+        for (int i = 0; i < nv; i++) {
+            seen[i] = false;
+            comp[i] = 0;
+        }
+            
+        dfsPtr = 0;
+        dfs = new int[nv];
+        parent = new int[nv];
 
-	for (int x = 0; x < nv; x++) {
-	    if (!seen[x]) {
-		dfsSub(x,c);
-		c = c + 1;
-	    }
-	}
-	
-	return dfs;
+        for (int x = 0; x < nv; x++) {
+            if (!seen[x]) {
+                dfsSub(x,c);
+                c = c + 1;
+            }
+        }
+        
+        return dfs;
     }
 
     private void dfsSub(int x, int c) {
-	dfs[dfsPtr++] = x;
-	seen[x] = true;
-	comp[x] = c;
-	for (int i = 0; i < deg[x]; i++) 
-	    if (!seen[nbrs[x][i]]) {
-		parent[nbrs[x][i]] = x;
-		dfsSub(nbrs[x][i],c);
-	    }
+        dfs[dfsPtr++] = x;
+        seen[x] = true;
+        comp[x] = c;
+        for (int i = 0; i < deg[x]; i++) 
+            if (!seen[nbrs[x][i]]) {
+                parent[nbrs[x][i]] = x;
+                dfsSub(nbrs[x][i],c);
+            }
 
     }
-	
+        
     public int[] getDfs () {return dfs;}
 
 
@@ -284,39 +284,39 @@ public class Graph
      */
     public int[] components () {
 
-	int[] order = new int[nv];
+        int[] order = new int[nv];
 
-	seen = new boolean[nv];
-	comp = new int[nv];
-	
-	for (int i = 0; i < nv; i++) {
-	    comp[i] = 0;
-	}
+        seen = new boolean[nv];
+        comp = new int[nv];
+        
+        for (int i = 0; i < nv; i++) {
+            comp[i] = 0;
+        }
 
 
-	int c = 0;
-	for (int x = 0; x < nv; x++) {
-	    if (comp[x] == 0) {
-		c = c + 1;
-		comp[x] = c;
-		int ptr = 0;
-		int orderLen = 1;
-		order[ptr] = x;
-		
-		while (ptr < orderLen) {
-		    int curNode = order[ptr];
-		    for (int i = 0; i < deg[curNode]; i++) {
-			int nbr = nbrs[curNode][i];
-			if (comp[nbr] == 0) {
-			    comp[nbr] = c;
-			    order[orderLen++] = nbr;
-			}
-		    }
-		    ptr++;
-		}
-	    }
-	}
-	return comp;
+        int c = 0;
+        for (int x = 0; x < nv; x++) {
+            if (comp[x] == 0) {
+                c = c + 1;
+                comp[x] = c;
+                int ptr = 0;
+                int orderLen = 1;
+                order[ptr] = x;
+                
+                while (ptr < orderLen) {
+                    int curNode = order[ptr];
+                    for (int i = 0; i < deg[curNode]; i++) {
+                        int nbr = nbrs[curNode][i];
+                        if (comp[nbr] == 0) {
+                            comp[nbr] = c;
+                            order[orderLen++] = nbr;
+                        }
+                    }
+                    ptr++;
+                }
+            }
+        }
+        return comp;
     }
 
     
@@ -327,19 +327,19 @@ public class Graph
 
     public int[] treeToArray() {
 
-	dfs();
-	
-	int[] pArray = new int[nv];
+        dfs();
+        
+        int[] pArray = new int[nv];
 
-	// set all others to parent
-	for (int i = 0; i < nv; i++)
-	    pArray[i] = parent[i];
+        // set all others to parent
+        for (int i = 0; i < nv; i++)
+            pArray[i] = parent[i];
 
-	// set root to itself
-	pArray[dfs[0]] = dfs[0];
+        // set root to itself
+        pArray[dfs[0]] = dfs[0];
 
-	return pArray;
-	
+        return pArray;
+        
     }
 
 
@@ -351,64 +351,64 @@ public class Graph
      * return the char vector of the set
      */
     public int[] bigIndepSet() {
-	int[] charv = new int[nv];
+        int[] charv = new int[nv];
 
-	// 1 if in mis, 0 if not, -1 if unassigned
-	for (int i = 0; i < nv; i++) {
-	    charv[i] = -1;
-	}
-
-
-	// form link lists for every degree, by ints
-	// -1 if empty
-	// list[v] is the next item after v
-	int[] list = new int[nv];
-	for (int i = 0; i < nv; i++) {
-	    list[i] = -1;
-	}
-
-	// also, keep a head of each list
-	// -1 if empty
-	int[] head = new int[nv];
-	for (int i = 0; i < nv; i++) {
-	    head[i] = -1;
-	}
-
-	for (int v = 0; v < nv; v++) {
-	    int d = deg[v];
-	    list[v] = head[d];
-	    head[d] = v;
-	}
+        // 1 if in mis, 0 if not, -1 if unassigned
+        for (int i = 0; i < nv; i++) {
+            charv[i] = -1;
+        }
 
 
-	// now, start making the mis
-	for (int d = 0; d < nv; d++) {
-	    int v = head[d];
-	    while (v != -1) {
-		if (charv[v] == -1) {
-		    charv[v] = 1;
-		    for (int i = 0; i < deg[v]; i++) {
-			charv[nbrs[v][i]] = 0;
-		    }
-		}
-		v = list[v];
-	    }
-	}
-	
-	return charv;
+        // form link lists for every degree, by ints
+        // -1 if empty
+        // list[v] is the next item after v
+        int[] list = new int[nv];
+        for (int i = 0; i < nv; i++) {
+            list[i] = -1;
+        }
+
+        // also, keep a head of each list
+        // -1 if empty
+        int[] head = new int[nv];
+        for (int i = 0; i < nv; i++) {
+            head[i] = -1;
+        }
+
+        for (int v = 0; v < nv; v++) {
+            int d = deg[v];
+            list[v] = head[d];
+            head[d] = v;
+        }
+
+
+        // now, start making the mis
+        for (int d = 0; d < nv; d++) {
+            int v = head[d];
+            while (v != -1) {
+                if (charv[v] == -1) {
+                    charv[v] = 1;
+                    for (int i = 0; i < deg[v]; i++) {
+                        charv[nbrs[v][i]] = 0;
+                    }
+                }
+                v = list[v];
+            }
+        }
+        
+        return charv;
     }
 
     
 
     public void dump() {
 
-	for (int x = 0 ; x < nv; x++) {
-	    System.out.print(x +" : ");
-	    for (int i = 0; i < deg[x]; i++) 
-		System.out.print(nbrs[x][i] + " ");
-	    System.out.println();
-	}
-	
+        for (int x = 0 ; x < nv; x++) {
+            System.out.print(x +" : ");
+            for (int i = 0; i < deg[x]; i++) 
+                System.out.print(nbrs[x][i] + " ");
+            System.out.println();
+        }
+        
     }
 
 

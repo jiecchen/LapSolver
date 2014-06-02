@@ -14,5 +14,3 @@ if (isempty(b)),
 else
   x = lapWrapSolver('iccSolver',la,b,opts);
 end
-
-    
