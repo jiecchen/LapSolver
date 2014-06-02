@@ -1,2 +1,7 @@
+# build files
 *.o
 *.class
+
+# misc
+.DS_Store
+
