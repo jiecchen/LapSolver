@@ -348,57 +348,6 @@ public class Tree
      */
     public double totStretchTraverse (int kid, int node, int curComp)
     {
-<<<<<<< HEAD
-	double stretch = 0;
-	
-	// now, traverse 
-	aux.init(kid);
-
-	aux2.init();  // the list of those we encounter
-	
-	while (aux.hasMore()) {
-	    int curNode = aux.pull();
-
-	    // note: following test is unnecessary
-	    // except when we are handling the root of the tree
-
-	    if (comp[curNode] != curComp) {
-		for (int i = 0; i < nodes[curNode].numKids(); i++)
-		    aux.add(nodes[curNode].getKid(i));
-		
-		// put node on list to change comp
-		aux2.add(curNode);
-		
-		// now, go over the edges to check if can now compute stretch
-		for (int i = 0; i < E.deg[curNode]; i++) {
-		    if (comp[E.nbrs[curNode][i]] == curComp) {
-			int nbr = E.nbrs[curNode][i];
-			double len = 1/E.weights[curNode][i];
-			stretch += (depth[curNode] + depth[nbr] -  2*depth[node])/len;
-			
-			/*
-			System.out.println("(" + curNode + ", " + nbr + ") " + ", " + len + " : " +
-					   + (depth[curNode] + depth[nbr] - 2*depth[node]));
-			*/
-		    }
-		} // for (int i)
-		
-	    } // if (comp[node]
-	    
-	}  // while auxPtr
-		
-	
-	//--------------------------------------------
-	// 
-	// finally, recomp all the nodes we've seen
-
-	while(aux2.hasMore()) {
-	    int curNode = aux2.pull();
-	    comp[curNode] = curComp;
-	}
-
-	return stretch;
-=======
         double stretch = 0;
         
         // now, traverse 
@@ -448,7 +397,6 @@ public class Tree
         }
     
         return stretch;
->>>>>>> FETCH_HEAD
     }
     
 
