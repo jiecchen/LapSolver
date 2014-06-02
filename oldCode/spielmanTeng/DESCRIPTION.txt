@@ -1,0 +1,11 @@
+This is code that Shanghua Teng and Dan Spielman
+wrote a long long time ago.
+
+Most of it probably won't be useful.
+
+For now, I include it for 
+
+st_mexIO
+
+which has routines for converting matlab sparse matrices
+to graphs in C.
