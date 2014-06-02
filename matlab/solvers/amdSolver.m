@@ -28,4 +28,3 @@ if ~isempty(b)
 else
     x = f;
 end
-

@@ -5,7 +5,7 @@ function [ind,val] = bestCut2(a,v,kmin,kmax)
 % order the vertices by v and return
 % the prefix in this order that yields the sparsest cut.
 %
-% do not look at sets of size between kmin and kmax
+% only look at sets of size between kmin and kmax
 
 n = length(a);
     

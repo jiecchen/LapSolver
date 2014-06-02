@@ -28,5 +28,3 @@ end
 
 a = sparse(ai+1,aj+1,1,n^2,n^2);
 a = (a + a' > 0);
-
-  

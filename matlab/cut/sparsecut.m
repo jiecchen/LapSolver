@@ -49,4 +49,3 @@ nh = n-1-k;
 						 (sumwt(end)-sumwt(k:nh))));
 
 st = find(v <= vp(ind+k-1));
-

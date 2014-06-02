@@ -17,4 +17,3 @@ else
 end
 
 c = nnz(a(s,sc))/min(nnz(s),nnz(sc));
-

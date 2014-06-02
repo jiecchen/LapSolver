@@ -36,4 +36,3 @@ function x = internal(l,u,p,b)
   x = x(:);
 
 end
-  

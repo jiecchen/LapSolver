@@ -19,5 +19,3 @@ cuts = cuts(1:(n-1));
 [wt,where] = min(cuts);
 
 ind = perm(1:where);
-
-
