@@ -1,0 +1,24 @@
+import spgraph
+g = spgraph.rand(5)
+g.printMe()
+g.stCollapse()
+g.printMe()
+
+x1 = spgraph.basicSPgraph()
+y = spgraph.basicSPgraph()
+x2 = spgraph.basicSPgraph()
+z = spgraph.seriesMerge(x1,y)
+
+zz = spgraph.parallelMerge(z, x2)
+
+
+y1 = spgraph.basicSPgraph()
+y2 = spgraph.basicSPgraph()
+y3 = spgraph.parallelMerge(y1, y2)
+
+
+z.printMe()
+z.stCollapse()
+print "ran z.stCollapse()"
+z.printMe()
+

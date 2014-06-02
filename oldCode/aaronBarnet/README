@@ -1,0 +1,64 @@
+Aaron Barnet  8/24/07
+List of files added to SVN
+
+GENERAL PURPOSE CODE
+graph.h/c - c module to handle basic graph funtions (load/save binIJV's and
+  PArrays), but does not deal with trees
+graph.hpp/.cpp - cpp module to define BGL types
+priorityq.h/.c - c module implementing a heap based MIN priority Q (can
+  decrease key of entries) (meaning of value/key reversed in source code)
+
+CALCULATING STRETCH
+calcstretch.cpp - (deprecated for c versions) c++ program to calculate stretch of spanning tree
+calcstrethc.c - c program to calculate stretch of a spanning tree of an
+  unweighted graph
+calcstretch2.c - (preferred version) c program to calc stretch a spanning tree
+  in a weighted graph
+calcstretchtree.c/h - module that contains tree data structures as well as
+  calcstretchc2's stretch calc code
+
+CLUSTERING
+graphcluster.cpp - cluster nodes using Dan's modified dijkstra heuristric
+  (more paths to node means node is seen as closer than it would otherwise be)
+graphclusterpr.cpp - cluster using the page rank algorith (unweighted graph)
+graphclusterwpr.cpp - cluster using weighted version of page rank
+weightedPageRank.hpp/cpp - module for graphclusterwpr.cpp
+profile.hpp/cpp - class used by graphclusterwpr to keep track of what is
+taking up time			 
+
+LOWSTRETCH TREES
+lowstretch.cpp - Sam's program minus PETc code (uses Dan's alg)
+lowstretch2.cpp - my attempt to speed up lowstretch using alternative data
+ structs (actually slower than lowstretch.cpp)
+dijkstratree.c - generate spanning tree using dijkstra
+doubledijkstratree.c - generate spanning tree using 2 levels of dijkstra tree
+(mini dijkstra trees treeted as nodes of a larger dijkstratree)
+
+RANDOM TREES
+randtree.c - create a pseudo random spanning tree by adding all edges from
+  graph in random order that do not create cycles
+randimprove.c - program that attempts to improve a spanning tree by randomly
+  replacing portions of the tree with new random edges
+randedgeprob.c - program to calculate probabilities of edges in graph being in
+  spanning tree given by randtree.c
+cyclepoprandtree.c - create a random spanning tree using cycle popping random
+  walk (uniform prob. distribution over all possible spanning trees)
+cyclepoprandedgeprob.c - program to calculate the probabilities of edges in a
+  graph being in the spanning tree created by cyclepoprandtree.c
+cyclepoprandtreemodule.c/h - module that contains code to actually implement
+  random walks
+weightedselection.c/h - module that allows random selection from a group of
+  elements with different weights
+
+TREE IMPROVEMENT (Note these programs have options controllable by enums at
+    top of file)
+treeimprove.c - improve stretch of tree by recursiviely breaking up tree and
+ using edges that minimizing sum of path lengths between all nodes
+  (i.e. minimizing stretch assuming we have a complete graph)
+treeimprove2.c - improve stretch by recursively breaking up tree and looking
+  at actual stretch of trees (also has option of breaking every edge and
+    trying replacement)
+treeimprove4.c - improve stretch like in treeimprove2.c but we add virtual
+  edges to to check (current setup has weird order of ops: 1) pick edge to break
+  2) add virt edges 3) recursive 4) replace edge picked in first stage.)
+treeimprovetree.h/c - tree data type used by treeimprove programs
