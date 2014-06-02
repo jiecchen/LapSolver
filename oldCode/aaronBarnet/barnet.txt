@@ -1,0 +1,72 @@
+This is a short example of how to use Aaron Barnet's code,
+written by Dan Spielman long after.  It is assuming a different
+directory structure, but you can probably fix that.
+
+First, start matlab and cd to the codepre directory like
+>> cd codepre
+
+Now, make sure that your paths are correct, by typing
+>> init
+
+Make a simple graph, like:
+>> [a,jnk,xy] = grid2(40);
+
+To see your graph, you can plot it:
+>> gplot(a,xy)
+
+Now, let's generate a random spanning tree of this graph,
+using barnet's randtree
+
+First, we will save the graph
+>> binSaveIJV(a,'tmp.ijv')
+
+Then, we'll run Barnet's code.
+For simplicity, we will change to his directory to do it,
+and assume that we've compiled his code into that directory.
+
+>> cd barnet/
+>> !./randtree
+run like ./randtree GRAPH_IN.BINIJV TREE_OUT.PARRAY
+
+>> !./randtree ../tmp.ijv ../tree_out.parray
+exiting at 0.006086 seconds
+
+As parray is also a binary format, we need to read it back in to matlab.
+>> pa = binReadParray('tree_out.parray');
+
+This represents a tree as a vector.
+The node pa[i] is the parent of node i.
+The root is a self-loop.
+
+In case you'd like to try plotting it, first
+turn it into a sparse matrix like:
+>> t = sparse(1:1600, pa, 1, 1600, 1600);
+>> t = t + t';
+>> t = double(t > 0);
+>> t = t - diag(diag(t));
+>> gplot(t,xy)
+
+Now, let's use Barnet's code to calculate the stretch:
+>> binSaveIJV(t,'tree_out.ijv')
+>> cd barnet
+>> !./calcstretchc
+run like ./calcstretchc GRAPH TREE
+>> !./calcstretchc ../tmp.ijv ../tree_out.ijv
+finished getting graph and tree at 0.005322 seconds
+the stretch is: 29154.000000, the average stretch is: 4.672115
+exiting at 0.005725 seconds
+
+Finally, let's try making a random improvement to the tree
+>> !./treeimprove ../tmp.ijv ../tree_out.parray ../tree_imp.parray
+exiting at 0.009593 seconds
+
+And, let's use Barnet's code to see what the new stretch is:
+>> !./calcstretchc2 ../tmp.ijv ../tree_imp.parray
+finished getting graph and tree at 0.005380 seconds
+the stretch is: 25228.000000, the average stretch is: 4.042949
+exiting at 0.005735 seconds
+
+It's better!
+
+
+
