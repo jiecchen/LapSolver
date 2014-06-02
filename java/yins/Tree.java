@@ -15,6 +15,7 @@
  * Edges of the tree can have lengths, which should be reciprocals of weights.
  * When given as inputs, they will be as weights.
  *
+ * Issue: this code does not check if the input it gets is really a tree.
  */
 
 package yins;
@@ -375,7 +376,7 @@ public class Tree
 			stretch += (depth[curNode] + depth[nbr] -  2*depth[node])/len;
 			
 			/*
-			System.out.println("(" + curNode + ", " + nbr + ") : " +
+			System.out.println("(" + curNode + ", " + nbr + ") " + ", " + len + " : " +
 					   + (depth[curNode] + depth[nbr] - 2*depth[node]));
 			*/
 		    }

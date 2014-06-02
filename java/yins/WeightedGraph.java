@@ -105,6 +105,27 @@ public class WeightedGraph
     }
 
 
+    /**
+     * set up the graph so that it can be input through setGraph
+     * is meant for calls from java: zero indexed, and no clear ordering on i and j
+     *
+     **/
+    public void setGraphJava (int[] i, int[] j, double[] v) {
+	int len = i.length;
+
+	for (int x = 0; x < len; x++) {
+	    if (i[x] < j[x]) {
+		int tmp = i[x]+1;
+		i[x] = j[x]+1;
+		j[x] = tmp;
+	    } else {
+		i[x] = i[x] + 1;
+		j[x] = j[x] + 1;
+	    }
+	}
+	setGraph(i,j,v);
+    }
+
     
     /**
      *  expects input as
@@ -370,7 +391,30 @@ public class WeightedGraph
 	
     }
 
+    /* if the graph is a tree,
+       this turns it into a Tree class object
+    */
+    public Tree treeToTree() {
+	int[] pArray = treeToArray();
 
+	// now, compute all the edge weights
+	double[] wt = new double[nv];
+
+	for (int u = 0; u < nv; u++) {
+	    int v = pArray[u];
+	    if (v != u) {
+		for (int j = 0; j < deg[v]; j++)
+		    if (nbrs[v][j] == u)
+			wt[u] = weights[v][j];
+
+	    }
+
+	}
+
+	return new Tree(pArray,wt);
+
+
+    }
 
     public void dump() {
 
