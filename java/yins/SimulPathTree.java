@@ -8,15 +8,18 @@
  *
  *  javac -classpath ~/rep/YINSmat/java/:. SimulPathTree.java 
  *
-example usage from Matlab:
 
+ the only good routine in here right now is edgeGrow
+
+ example usage from Matlab:
+
+a = del3Graph(10000)
 [ai,aj,av] = find(tril(a));
 g = WeightedGraph(ai,aj,av);
 spt = SimulPathTree(g);
-tr = spt.growTree;
-tr.compTotalStretch(g)
-ans / length(ai)
-log(length(a))
+tr = spt.edgeGrow;
+trt = tr.treeToTree;
+trt.compTotalStretch(g)/length(ai)
 
 */
 
@@ -58,7 +61,7 @@ public class SimulPathTree
 
     public class EdgeEvent 
     {
-	int y;
+	int u;
 	int v;
 	double time;
 	double rate;
@@ -381,12 +384,10 @@ public class SimulPathTree
     }
     */
 
-
-
-    public WeightedGraph growTreeE() {
+    public WeightedGraph edgeGrow() {
 
 	Logger logger = new Logger();
-	//	logger.start("SimulPathTree.log");
+	logger.start("SimulPathTree.log");
 
 	
 	ijvI = new int[g.nv-1];
@@ -400,7 +401,27 @@ public class SimulPathTree
 	rates = new double[g.ne];
 	EdgeEvent[] events = new EdgeEvent[g.ne];
 
-	PriorityQueue<EdgeEvent> pq = new PriorityQueue<EdgeEvent>(g.nv, new Comparator<EdgeEvent>() {
+	g.makeBackEdges();
+	int edgeNum = 0;
+	int[][] edgeNums = new int[g.nv][];
+	for (int u = 0; u < g.nv; u++) {
+	    edgeNums[u] = new int[g.deg[u]];
+	    for (int i = 0; i < g.deg[u]; i++) {
+		int v = g.nbrs[u][i];
+		if (u < v)
+		    edgeNums[u][i] = edgeNum++;
+		else
+		    edgeNums[u][i] = edgeNums[v][g.backInd[u][i]];
+	    }
+	}
+
+	for (int u = 0; u < g.nv; u++) 
+	    for (int i = 0; i < g.deg[u]; i++) 
+		logger.write("(" + u + ", " + g.nbrs[u][i] + "), " + edgeNums[u][i]);
+
+
+
+	PriorityQueue<EdgeEvent> pq = new PriorityQueue<EdgeEvent>(g.ne, new Comparator<EdgeEvent>() {
 		public int compare(EdgeEvent X, EdgeEvent Y) {
 		    return (X.time > Y.time ? 1 : -1 );
 		} });
@@ -408,49 +429,31 @@ public class SimulPathTree
 
 	for (int u = 0; u < g.nv; u++) 
 	    for (int i = 0; i < g.deg[u]; i++) {
-		v = g.nbrs[u][i];
-		if (u > v) {
-		    double rate = rand.nextDouble();
-		    ------
-	    times[i] = Double.POSITIVE_INFINITY;
-	    events[i] = null;
-	}
+		int v = g.nbrs[u][i];
+		if (u < v)   // so, we include each edge just once
+		    {
+			double rate = rand.nextDouble();
+			int e = edgeNums[u][i];
+			double wt = g.weights[u][i];
+			times[e] = rate/wt;
+
+			EdgeEvent ev = new EdgeEvent(u, v, rate/wt, rate, wt);
+			events[e] = ev;
+			pq.add(ev);
+		    }
+	    }
 
 	int ijvInd = 0;
 
-	
-	
-	// load up the pq with events for every vertex
-	for (int u = 0; u < g.nv; u++) {
-	    for (int i = 0; i < g.deg[u]; i++) {
-		int v = g.nbrs[u][i];
-		double wt = g.weights[u][i];
-		double t = rates[u] / wt;
-
-		if (t < times[v]) {
-		    times[v] = t;
-
-		    // if was on pq, remove it
-		    if (events[v] != null) 
-			pq.remove(events[v]);
-		    
-		    NodeEvent ev = new NodeEvent(v, u, t, rates[u], wt);
-		    pq.add(ev);
-		    events[v] = ev;
-		    
-		}
-	    }
-	}
-
-	
 	UnionFind uf = new UnionFind(g.nv);
 
 	while (ijvInd < g.nv-1) {
-	    NodeEvent ev = pq.poll();
-	    int u = ev.node;
-	    int v = ev.from;
+	    EdgeEvent ev = pq.poll();
 
-	    logger.write(ev.time + ", (" + u + ", " + v + "), " + ev.rate);
+	    int u = ev.u;
+	    int v = ev.v;
+
+	    // logger.write(ev.time + ", (" + u + ", " + v + "), " + ev.rate);
 
 	    // if in different comps, add that edge
 	    if (uf.find(u) != uf.find(v)) {
@@ -462,31 +465,45 @@ public class SimulPathTree
 		ijvInd++;
 		
 
-		logger.write("(" + u + ", " + v + ", " + ev.wt + ")");
+		logger.write("(" + ev.u + ", " + ev.v + ", " + ev.wt + ")");
 	    }
 
-	    
-	    
-	    // for each nbr of u, try to place it
+	    // for each edge attached to u, see if gives a lower time
 	    for (int i = 0; i < g.deg[u]; i++) {
-		v = g.nbrs[u][i];
-		if (uf.find(v) != uf.find(u)) {
-		    double wt = g.weights[u][i];
+		int e = edgeNums[u][i];
+		double wt = g.weights[u][i];
+		double t = ev.time + ev.rate / wt;
+		if (t < times[e]) {
+		    times[e] = t;
 
-		    double t = ev.time + ev.rate / wt;
-		    if (t < times[v]) {
-			times[v] = t;
-
-			// if was on pq, remove it
-			// if (events[v] != null) 
-			//    pq.remove(events[v]);
+		    // if was on pq, remove it
+		    if (events[e] != null) 
+			pq.remove(events[e]);
 		    
-			NodeEvent ev2 = new NodeEvent(v, u, t, ev.rate, wt);
-			pq.add(ev2);
-			events[v] = ev2;
-		    }
+		    EdgeEvent ev2 = new EdgeEvent(u, g.nbrs[u][i], t, ev.rate, wt);
+		    pq.add(ev2);
+		    events[e] = ev2;
 		}
 	    }
+
+	    // for each edge attached to v, see if gives a lower time
+	    for (int i = 0; i < g.deg[v]; i++) {
+		int e = edgeNums[v][i];
+		double wt = g.weights[v][i];
+		double t = ev.time + ev.rate / wt;
+		if (t < times[e]) {
+		    times[e] = t;
+
+		    // if was on pq, remove it
+		    if (events[e] != null) 
+			pq.remove(events[e]);
+		    
+		    EdgeEvent ev2 = new EdgeEvent(v, g.nbrs[v][i], t, ev.rate, wt);
+		    pq.add(ev2);
+		    events[e] = ev2;
+		}
+	    }
+	    
 	}
 	
 	WeightedGraph wg = new WeightedGraph();
@@ -495,7 +512,6 @@ public class SimulPathTree
 	// return wg.treeToTree();
 	return wg;
 
-    }
-
+	    }
 
 }

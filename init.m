@@ -13,3 +13,4 @@ addpath([root, 'matlab/sparsify']);
 addpath([root, 'matlab/cut']);
 
 javaaddpath java
+import yins.*;
