@@ -8,7 +8,7 @@ function stretch = testDel3()
     [ai,aj,av] = find(tril(a));
     g = WeightedGraph();
     g.fromMatlab(ai, aj, av);
-    spt = SimulPathTree(g);
+    spt = SimulPathLSST(g);
     tr = spt.edgeGrow;
     trt = tr.treeToTree;
     stretch = trt.compTotalStretch(g)/length(ai);
