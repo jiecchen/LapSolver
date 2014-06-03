@@ -1,4 +1,0 @@
-note that these should be compiled from the directory above this one,
-like
-javac yins/Sampler2.java 
-in the "java" directory
