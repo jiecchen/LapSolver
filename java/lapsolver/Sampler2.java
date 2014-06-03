@@ -7,7 +7,7 @@
  *
  *
  */
-package yins;
+package lapsolver;
 
 import java.util.Random;
 

@@ -22,7 +22,7 @@
  *
  */
 
-package yins;
+package lapsolver;
 
 public class Graph {
 
@@ -64,8 +64,6 @@ public class Graph {
     //  initialized by dfs()
     //
     private int[] parent;
-    private int root;
-
 
     public Graph(int[] i, int[] j) {
         this.setGraph(i, j);
@@ -73,106 +71,86 @@ public class Graph {
 
     /**
      * expects input as
-     * [i,j] = find(tril(T)),
-     * so, each entry of i should be larger than corresp entry of j
+     * [src,dst] = find(tril(T)),
+     * so, each entry of src should be larger than corresponding entry of dst
      */
-    public void setGraph(int[] i, int[] j) {
-        int len; // the length of i
+    public void setGraph(int [] src, int [] dst) {
+        int len = src.length; // the length of i
 
         dfs = null;
         comp = null;
         seen = null;
 
-        len = i.length;
-        if ((j.length != len)) {
+        if (dst.length != len) {
             throw new Error("inputs must all have the same length");
         }
 
         //-------------------------
         // compute max node index
         //
-        this.nv = 0;
-        for (int a = 0; a < len; a++) {
-            if (i[a] > nv)
-                nv = i[a];
-            if (j[a] > nv)
-                nv = j[a];
+        nv = 0;
+        for (int i = 0; i < len; i++) {
+            if (src[i] > nv)
+                nv = src[i];
+            if (dst[i] > nv)
+                nv = dst[i];
         }
 
 
-        //-------------------------
-        // downshift i and j by 1
-        // 
-        for (int a = 0; a < len; a++) {
-            i[a] = i[a] - 1;
-            j[a] = j[a] - 1;
+        //-----------------------------------------------------------
+        // downshift i and j by 1 to convert from MATLAB conventions
+        //
+        for (int i = 0; i < len; i++) {
+            src[i] = src[i] - 1;
+            dst[i] = dst[i] - 1;
 
             // report error if self-loops
-            if (i[a] == j[a]) {
+            if (src[i] == dst[i]) {
                 throw new Error("Self-loops are not allowed.");
             }
         }
 
 
         //-----------------------------------------
-        //  count how many times each node occurrs
-
+        //  count how many times each node occurs
+        //
         deg = new int[nv];
-        for (int a = 0; a < nv; a++) {
-            deg[a] = 0;
-        }
+        for (int i = 0; i < nv; i++)
+            deg[i] = 0;
 
-        for (int a = 0; a < len; a++) {
-            if (i[a] > j[a]) {
-                deg[i[a]] = deg[i[a]] + 1;
-                deg[j[a]] = deg[j[a]] + 1;
+        for (int i = 0; i < len; i++) {
+            if (src[i] > dst[i]) {
+                deg[src[i]]++;
+                deg[dst[i]]++;
             }
         }
-
 
         //---------------------------
         // build the graph
 
         int[] tmpdeg = new int[nv];
 
+        /*
+         * The back indices satisfy
+         * nbrs[nbrs[x][i],backInd[x][i]] = x
+         *
+         */
+
         nbrs = new int[nv][];
-
-        for (int a = 0; a < nv; a++) {
-            nbrs[a] = new int[deg[a]];
-            tmpdeg[a] = 0;
-        }
-
-        for (int a = 0; a < len; a++) {
-            if (i[a] > j[a]) {
-
-                // backInd[i[a]][tmpdeg[i[a]]] = tmpdeg[j[a]];
-                // backInd[j[a]][tmpdeg[j[a]]] = tmpdeg[i[a]];
-
-                nbrs[i[a]][tmpdeg[i[a]]++] = j[a];
-                nbrs[j[a]][tmpdeg[j[a]]++] = i[a];
-            }
-        }
-    }
-
-    /*
-     * The back indices satisfy
-     * nbrs[nbrs[x][i],backInd[x][i]] = x
-     *
-     */
-    public void makeBackEdges() {
         backInd = new int[nv][];
 
-        int[] count = new int[nv];
-
-        for (int a = 0; a < nv; a++) {
-            backInd[a] = new int[deg[a]];
-            count[a] = 0;
+        for (int i = 0; i < nv; i++) {
+            nbrs[i] = new int[deg[i]];
+            tmpdeg[i] = 0;
         }
 
-        for (int a = 0; a < nv; a++) {
-            for (int i = 0; i < deg[a]; i++) {
-                int nbr = nbrs[a][i];
-                backInd[nbr][count[nbr]++] = i;
+        for (int i = 0; i < len; i++) {
+            if (src[i] > dst[i]) {
+                backInd[src[i]][tmpdeg[src[i]]] = tmpdeg[dst[i]];
+                backInd[dst[i]][tmpdeg[dst[i]]] = tmpdeg[src[i]];
+
+                nbrs[src[i]][tmpdeg[src[i]]++] = dst[i];
+                nbrs[dst[i]][tmpdeg[dst[i]]++] = src[i];
             }
         }
     }
@@ -182,7 +160,6 @@ public class Graph {
      * assumes connected
      */
     public int[] bfsWalk(int root) {
-
         bfs = new int[nv];
         depth = new int[nv];
         seen = new boolean[nv];
@@ -221,7 +198,6 @@ public class Graph {
      * could easily break the stack
      */
     public int[] dfs() {
-
         int c = 0;
 
         seen = new boolean[nv];

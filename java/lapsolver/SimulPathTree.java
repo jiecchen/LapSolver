@@ -13,7 +13,7 @@ the only good routine in here right now is edgeGrow
 
 example usage from Matlab:
 
-a = del3Graph(10000)
+a = del3Graph(10000);
 [ai,aj,av] = find(tril(a));
 g = WeightedGraph(ai,aj,av);
 spt = SimulPathTree(g);
@@ -23,7 +23,7 @@ trt.compTotalStretch(g)/length(ai)
 
  */
 
-package yins;
+package lapsolver;
 
 import java.util.Comparator;
 import java.util.PriorityQueue;
@@ -140,7 +140,7 @@ public class SimulPathTree {
         }
 
         WeightedGraph wg = new WeightedGraph();
-        wg.setGraphJava(ijvI, ijvJ, ijvV);
+        wg.fromMatlab(ijvI, ijvJ, ijvV);
 
         // return wg.treeToTree();
         return wg;
@@ -230,7 +230,7 @@ public class SimulPathTree {
         }
 
         WeightedGraph wg = new WeightedGraph();
-        wg.setGraphJava(ijvI, ijvJ, ijvV);
+        wg.fromMatlab(ijvI, ijvJ, ijvV);
 
         // return wg.treeToTree();
         return wg;
@@ -356,7 +356,7 @@ public class SimulPathTree {
         }
 
         WeightedGraph wg = new WeightedGraph();
-        wg.setGraphJava(ijvI, ijvJ, ijvV);
+        wg.fromMatlab(ijvI, ijvJ, ijvV);
 
         // return wg.treeToTree();
         return wg;
@@ -458,7 +458,7 @@ public class SimulPathTree {
 	}
 	
 	WeightedGraph wg = new WeightedGraph();
-	wg.setGraphJava(ijvI,ijvJ,ijvV);
+	wg.fromMatlab(ijvI,ijvJ,ijvV);
 
 	// return wg.treeToTree();
 	return wg;

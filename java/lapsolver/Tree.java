@@ -18,7 +18,7 @@
  * Issue: this code does not check if the input it gets is really a tree.
  */
 
-package yins;
+package lapsolver;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -641,7 +641,6 @@ public class Tree {
          * Create a node by specifying its parent
          *
          * @param p parent
-         * @return a node
          */
         public TreeNode(int p) {
             parent = p;
@@ -658,14 +657,17 @@ public class Tree {
         public void setParent(int p) {
             parent = p;
         }
+
         public void addKid(int k) {
-            kids.add(new Integer(k));
+            kids.add(k);
         }
+
         public int numKids() {
             return kids.size();
         }
+
         public int getKid(int i) {
-            return ((Integer) kids.get(i)).intValue();
+            return kids.get(i);
         }
     }
 }

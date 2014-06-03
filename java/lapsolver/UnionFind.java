@@ -8,7 +8,7 @@
  *
  */
 
-package yins;
+package lapsolver;
 
 public class UnionFind {
     //-----------------------

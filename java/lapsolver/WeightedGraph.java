@@ -22,7 +22,7 @@
  *
  */
 
-package yins;
+package lapsolver;
 
 public class WeightedGraph {
     //-----------------------
@@ -50,8 +50,10 @@ public class WeightedGraph {
 
 
     // only computed if call compWtedDeg
-    public double[] wtedDeg;
-    public double volume; // the sum of the weights
+    public double[] weightedDeg;
+
+    // the sum of all weighted degrees
+    public double volume;
 
     //-----------------------------
     //  nbrs[nbrs[x][i],backInd[x][i]] = x
@@ -79,8 +81,8 @@ public class WeightedGraph {
     private int[] parent;
     private int root;
 
-    public WeightedGraph(int[] i, int[] j, double[] v) {
-        this.setGraph(i, j, v);
+    public WeightedGraph(int[] src, int[] dst, double[] weight) {
+        fromEdgeList(src, dst, weight);
     }
 
     /**
@@ -88,56 +90,51 @@ public class WeightedGraph {
      * [i,j,v] = find(tril(T)),
      * so, each entry of i should be larger than corresp entry of j
      */
-    public void setGraph(int[] i, int[] j, double[] v) {
-        int len; // the length of i
+    public void fromEdgeList(int[] src, int[] dst, double[] weight) {
+        ne = src.length; // the length of i
 
         dfs = null;
         comp = null;
         seen = null;
 
-        len = i.length;
-        if ((j.length != len) || (v.length != len)) {
+        if ((dst.length != ne) || (weight.length != ne)) {
             throw new Error("inputs must all have the same length");
+        }
+
+        // Ensure src[i] > dst[i], src[i] != dst[i] \forall i
+        for (int i = 0; i < ne; i++) {
+            int lower = Math.min(src[i], dst[i]);
+            int upper = Math.max(src[i], dst[i]);
+
+            dst[i] = lower;
+            src[i] = upper;
+
+            if (src[i] == dst[i]) {
+                throw new Error("Self-loops are not allowed.");
+            }
         }
 
         //-------------------------
         // compute max node index
         //
-        this.nv = 0;
-        this.ne = 0;
-        for (int a = 0; a < len; a++) {
-            if (i[a] > nv)
-                nv = i[a];
-            if (j[a] > nv)
-                nv = j[a];
-        }
-
-        //-------------------------
-        // downshift i and j by 1
-        //
-        for (int a = 0; a < len; a++) {
-            i[a] = i[a] - 1;
-            j[a] = j[a] - 1;
-
-            // report error if self-loops
-            if (i[a] == j[a]) {
-                throw new Error("Self-loops are not allowed.");
-            }
+        nv = 0;
+        for (int i = 0; i < ne; i++) {
+            if (src[i] > nv)
+                nv = src[i];
+            if (dst[i] > nv)
+                nv = dst[i];
         }
 
         //-----------------------------------------
-        //  count how many times each node occurrs
+        //  count how many times each node occurs
         deg = new int[nv];
-        for (int a = 0; a < nv; a++) {
-            deg[a] = 0;
+        for (int i = 0; i < nv; i++) {
+            deg[i] = 0;
         }
 
-        for (int a = 0; a < len; a++) {
-            if (i[a] > j[a]) {
-                ne++;
-                deg[i[a]] = deg[i[a]] + 1;
-                deg[j[a]] = deg[j[a]] + 1;
-            }
+        for (int i = 0; i < ne; i++) {
+            deg[src[i]]++;
+            deg[dst[i]]++;
         }
 
         //---------------------------
@@ -147,50 +144,48 @@ public class WeightedGraph {
         nbrs = new int[nv][];
         weights = new double[nv][];
 
-        for (int a = 0; a < nv; a++) {
-            nbrs[a] = new int[deg[a]];
-            weights[a] = new double[deg[a]];
-            tmpdeg[a] = 0;
+        for (int i = 0; i < nv; i++) {
+            nbrs[i] = new int[deg[i]];
+            weights[i] = new double[deg[i]];
+            tmpdeg[i] = 0;
         }
 
         volume = 0;
 
-        for (int a = 0; a < len; a++) {
-            if (i[a] > j[a]) {
-                weights[i[a]][tmpdeg[i[a]]] = v[a];
-                weights[j[a]][tmpdeg[j[a]]] = v[a];
-                volume += 2 * v[a];
+        for (int i = 0; i < ne; i++) {
+            if (src[i] > dst[i]) {
+                weights[src[i]][tmpdeg[src[i]]] = weight[i];
+                weights[dst[i]][tmpdeg[dst[i]]] = weight[i];
+                volume += weight[i];
 
-                // backInd[i[a]][tmpdeg[i[a]]] = tmpdeg[j[a]];
-                // backInd[j[a]][tmpdeg[j[a]]] = tmpdeg[i[a]];
+                backInd[src[i]][tmpdeg[src[i]]] = tmpdeg[dst[i]];
+                backInd[dst[i]][tmpdeg[dst[i]]] = tmpdeg[src[i]];
 
-                nbrs[i[a]][tmpdeg[i[a]]++] = j[a];
-                nbrs[j[a]][tmpdeg[j[a]]++] = i[a];
+                nbrs[src[i]][tmpdeg[src[i]]++] = dst[i];
+                nbrs[dst[i]][tmpdeg[dst[i]]++] = src[i];
             }
         }
+
+        volume *= 2; // double count
     }
 
 
     public WeightedGraph() { }
 
     /**
-     * set up the graph so that it can be input through setGraph
+     * set up the graph so that it can be input through fromEdgeList
      * is meant for calls from java: zero indexed, and no clear ordering on i and j
      */
-    public void setGraphJava(int[] i, int[] j, double[] v) {
-        int len = i.length;
-
-        for (int x = 0; x < len; x++) {
-            if (i[x] < j[x]) {
-                int tmp = i[x] + 1;
-                i[x] = j[x] + 1;
-                j[x] = tmp;
-            } else {
-                i[x] = i[x] + 1;
-                j[x] = j[x] + 1;
-            }
+    public void fromMatlab(int[] src, int[] dst, double[] weight) {
+        //-------------------------
+        // downshift i and j by 1
+        //
+        for(int i = 0; i < src.length; i++) {
+            src[i]--;
+            dst[i]--;
         }
-        setGraph(i, j, v);
+
+        fromEdgeList(src, dst, weight);
     }
 
     /*
@@ -373,12 +368,12 @@ public class WeightedGraph {
     }
 
     public void compWtedDeg() {
-        wtedDeg = new double[nv];
+        weightedDeg = new double[nv];
         for (int x = 0; x < nv; x++) {
             double sum = 0;
             for (int i = 0; i < deg[x]; i++)
                 sum += weights[x][i];
-            wtedDeg[x] = sum;
+            weightedDeg[x] = sum;
         }
     }
 
