@@ -20,6 +20,7 @@
 
 package yins;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -43,8 +44,8 @@ public class Tree {
     public int[] order;
 
 
-    public IntQueue aux;
-    public IntQueue aux2;
+    public ArrayDeque<Integer> aux;
+    public ArrayDeque<Integer> aux2;
     public int[] comp;
     public int[] nodeSize;
     WeightedGraph stretchGraph;
@@ -346,8 +347,8 @@ public class Tree {
         int node;     // and, its node
         int numComps = 0;
 
-        aux = new IntQueue(nv);  // will use for traversing
-        aux2 = new IntQueue(nv);  // will use for traversing
+        aux  = new ArrayDeque<Integer>(nv);  // will use for traversing
+        aux2 = new ArrayDeque<Integer>(nv);  // will use for traversing
 
         double totStretch = 0;
 
@@ -438,11 +439,11 @@ public class Tree {
         double stretch = 0;
 
         // now, traverse
-        aux.init(kid);
-        aux2.init();  // the list of those we encounter
+        aux.clear();
+        aux.add(kid);
 
-        while (aux.hasMore()) {
-            int curNode = aux.pull();
+        while (!aux.isEmpty()) {
+            int curNode = aux.poll();
 
             // note: following test is unnecessary
             // except when we are handling the root of the tree
@@ -473,8 +474,8 @@ public class Tree {
         //
         // finally, recomp all the nodes we've seen
 
-        while (aux2.hasMore()) {
-            int curNode = aux2.pull();
+        while (!aux2.isEmpty()) {
+            int curNode = aux2.poll();
             comp[curNode] = curComp;
         }
 
@@ -512,8 +513,8 @@ public class Tree {
         int node;     // and, its node
         int numComps = 0;
 
-        aux = new IntQueue(nv);  // will use for traversing
-        aux2 = new IntQueue(nv);  // will use for traversing
+        aux  = new ArrayDeque<Integer>(nv);  // will use for traversing
+        aux2 = new ArrayDeque<Integer>(nv);  // will use for traversing
 
         double totStretch = 0;
 
@@ -581,11 +582,11 @@ public class Tree {
         double stretch = 0;
 
         // now, traverse
-        aux.init(kid);
-        aux2.init();  // the list of those we encounter
+        aux.clear();
+        aux.add(kid);
 
-        while (aux.hasMore()) {
-            int curNode = aux.pull();
+        while (!aux.isEmpty()) {
+            int curNode = aux.poll();
 
             // note: following test is unnecessary
             // except when we are handling the root of the tree
@@ -618,9 +619,8 @@ public class Tree {
         //--------------------------------------------
         //
         // finally, recomp all the nodes we've seen
-
-        while (aux2.hasMore()) {
-            int curNode = aux2.pull();
+        while (!aux2.isEmpty()) {
+            int curNode = aux2.poll();
             comp[curNode] = curComp;
         }
 
