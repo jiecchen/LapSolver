@@ -1,11 +1,11 @@
 /**
- * @file   IntStack.java
+ * @file IntStack.java
  * @author Dan Spielman <spielman@math.mit.edu>
- * @date   Tue Feb 1 2005
- * 
- * @brief  integer stack of fixed maximum length
- * 
-*/
+ * @date Tue Feb 1 2005
+ *
+ * @brief integer stack of fixed maximum length
+ *
+ */
 
 package yins;
 
@@ -21,73 +21,60 @@ package yins;
  *
  * It is last-in first-out
 */
-public class IntStack
-{
+public class IntStack {
 
     public int[] q;
-    public int qLen;  
+    public int qLen;
 
-    /** 
+    /**
      * initialize with the maximum length
      * Note: Class does no range checking!
-     * 
+     *
      * @param maxLen maximum size of stack
-     * 
      * @return IntStack
      */
-    public IntStack(int maxLen) 
-    {
+    public IntStack(int maxLen) {
         q = new int[maxLen];
     }
 
-
-    /** 
+    /**
      * Initialized the stack, and puts on entry
-     * 
+     *
      * @param entry first item to put on stack
-     */    
-    public void init(int entry) 
-    {
+     */
+    public void init(int entry) {
         q[0] = entry;
-
         qLen = 1;
-        
     }
 
-    /** 
+    /**
      * Initialize the stack empty
-     * 
+     *
      * @param initialize empty
-     */    
-    public void init() 
-    {
+     */
+    public void init() {
         qLen = 0;
     }
 
-    public boolean hasMore()
-    {
+    public boolean hasMore() {
         return (qLen > 0);
     }
-    
-    /** 
+
+    /**
      * Pulls off a stack item in last-in first-out order
-     * 
+     *
      * @return the stack item
      */
-    public int pull() 
-    {
+    public int pull() {
         return q[--qLen];
     }
 
-    /** 
+    /**
      * Puts an item on the stack
-     * 
+     *
      * @param entry entry to put on stack
-     * 
      */
-    public void add(int entry)
-    {
+    public void add(int entry) {
         q[qLen++] = entry;
     }
-        
 }

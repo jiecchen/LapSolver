@@ -1,7 +1,7 @@
 /**
- * @file   WeightedGraph.java
+ * @file WeightedGraph.java
  * @author Daniel Spielman <spielman@cs.yale.edu>
- * @date   Sun Dec 22 2013
+ * @date Sun Dec 22 2013
  *
  * (c) Daniel Spielman, 2013, part of the YINSmat package
  *
@@ -24,14 +24,7 @@
 
 package yins;
 
-import java.lang.*;
-import java.util.*;
-import java.io.*;
-
-
-public class WeightedGraph 
-{
-
+public class WeightedGraph {
     //-----------------------
     //   the number of verts
     //
@@ -58,22 +51,11 @@ public class WeightedGraph
 
     // only computed if call compWtedDeg
     public double[] wtedDeg;
-
     public double volume; // the sum of the weights
 
-    
     //-----------------------------
     //  nbrs[nbrs[x][i],backInd[x][i]] = x
     public int[][] backInd;
-    
-    //--------------------
-    //  a dfs ordering
-    //  not initialized
-    //
-    private int[] dfs;
-
-    private int dfsPtr; // a utility
-
 
     //--------------------
     //  a bfs ordering,
@@ -81,8 +63,15 @@ public class WeightedGraph
     //
     public int[] bfs;
     public int[] depth;
+    public boolean[] seen;
+    public int[] comp;
 
-
+    //--------------------
+    //  a dfs ordering
+    //  not initialized
+    //
+    private int[] dfs;
+    private int dfsPtr; // a utility
     //------------------------
     //  the parent in the dfs tree
     //  initialized by dfs()
@@ -90,56 +79,22 @@ public class WeightedGraph
     private int[] parent;
     private int root;
 
-    public boolean[] seen;
-    public int[] comp;
-
-
-    public WeightedGraph (int[] i, int[] j, double[] v) {
-        this.setGraph(i,j,v);
+    public WeightedGraph(int[] i, int[] j, double[] v) {
+        this.setGraph(i, j, v);
     }
-
-    
-
-    public WeightedGraph () {
-        ;
-    }
-
 
     /**
-     * set up the graph so that it can be input through setGraph
-     * is meant for calls from java: zero indexed, and no clear ordering on i and j
-     *
-     **/
-    public void setGraphJava (int[] i, int[] j, double[] v) {
-	int len = i.length;
-
-	for (int x = 0; x < len; x++) {
-	    if (i[x] < j[x]) {
-		int tmp = i[x]+1;
-		i[x] = j[x]+1;
-		j[x] = tmp;
-	    } else {
-		i[x] = i[x] + 1;
-		j[x] = j[x] + 1;
-	    }
-	}
-	setGraph(i,j,v);
-    }
-
-    
-    /**
-     *  expects input as
-     *  [i,j,v] = find(tril(T)),
-     *  so, each entry of i should be larger than corresp entry of j
+     * expects input as
+     * [i,j,v] = find(tril(T)),
+     * so, each entry of i should be larger than corresp entry of j
      */
-    public void setGraph (int[] i, int[] j, double[] v) {
+    public void setGraph(int[] i, int[] j, double[] v) {
         int len; // the length of i
 
         dfs = null;
         comp = null;
         seen = null;
 
-        
         len = i.length;
         if ((j.length != len) || (v.length != len)) {
             throw new Error("inputs must all have the same length");
@@ -157,10 +112,9 @@ public class WeightedGraph
                 nv = j[a];
         }
 
-
         //-------------------------
         // downshift i and j by 1
-        // 
+        //
         for (int a = 0; a < len; a++) {
             i[a] = i[a] - 1;
             j[a] = j[a] - 1;
@@ -171,10 +125,8 @@ public class WeightedGraph
             }
         }
 
-
         //-----------------------------------------
         //  count how many times each node occurrs
-        
         deg = new int[nv];
         for (int a = 0; a < nv; a++) {
             deg[a] = 0;
@@ -188,10 +140,8 @@ public class WeightedGraph
             }
         }
 
-
         //---------------------------
         // build the graph
-
         int[] tmpdeg = new int[nv];
 
         nbrs = new int[nv][];
@@ -204,20 +154,43 @@ public class WeightedGraph
         }
 
         volume = 0;
-        
+
         for (int a = 0; a < len; a++) {
             if (i[a] > j[a]) {
                 weights[i[a]][tmpdeg[i[a]]] = v[a];
                 weights[j[a]][tmpdeg[j[a]]] = v[a];
-                volume += 2*v[a];
-            
+                volume += 2 * v[a];
+
                 // backInd[i[a]][tmpdeg[i[a]]] = tmpdeg[j[a]];
                 // backInd[j[a]][tmpdeg[j[a]]] = tmpdeg[i[a]];
-            
+
                 nbrs[i[a]][tmpdeg[i[a]]++] = j[a];
                 nbrs[j[a]][tmpdeg[j[a]]++] = i[a];
             }
         }
+    }
+
+
+    public WeightedGraph() { }
+
+    /**
+     * set up the graph so that it can be input through setGraph
+     * is meant for calls from java: zero indexed, and no clear ordering on i and j
+     */
+    public void setGraphJava(int[] i, int[] j, double[] v) {
+        int len = i.length;
+
+        for (int x = 0; x < len; x++) {
+            if (i[x] < j[x]) {
+                int tmp = i[x] + 1;
+                i[x] = j[x] + 1;
+                j[x] = tmp;
+            } else {
+                i[x] = i[x] + 1;
+                j[x] = j[x] + 1;
+            }
+        }
+        setGraph(i, j, v);
     }
 
     /*
@@ -229,7 +202,7 @@ public class WeightedGraph
         backInd = new int[nv][];
 
         int[] count = new int[nv];
-        
+
         for (int a = 0; a < nv; a++) {
             backInd[a] = new int[deg[a]];
             count[a] = 0;
@@ -242,8 +215,8 @@ public class WeightedGraph
             }
         }
     }
-    
-    /** 
+
+    /**
      * walk in BFS order, setting the field bfs
      * assumes connected
      */
@@ -256,11 +229,11 @@ public class WeightedGraph
         for (int i = 0; i < nv; i++) {
             seen[i] = false;
         }
-        
+
         depth[root] = 0;
         bfs[0] = root;
         seen[root] = true;
-        
+
         int bfsPtr = 1;
         int curPtr = 1;
         int curNode = root;
@@ -271,77 +244,61 @@ public class WeightedGraph
                 nbr = nbrs[curNode][i];
                 if (!seen[nbr]) {
                     bfs[bfsPtr++] = nbr;
-                    depth[nbr] = depth[curNode]+1;
+                    depth[nbr] = depth[curNode] + 1;
                     seen[nbr] = true;
                 }
             }
             curNode = bfs[curPtr++];
         }
-
         return bfs;
     }
-
 
     /**
      * Compute dfs by a recursive algorithm
      * could easily break the stack
      */
-    public int[] dfs () {
-
+    public int[] dfs() {
         int c = 0;
-        
+
         seen = new boolean[nv];
         comp = new int[nv];
         for (int i = 0; i < nv; i++) {
             seen[i] = false;
             comp[i] = 0;
         }
-            
+
         dfsPtr = 0;
         dfs = new int[nv];
         parent = new int[nv];
 
         for (int x = 0; x < nv; x++) {
             if (!seen[x]) {
-                dfsSub(x,c);
+                dfsSub(x, c);
                 c = c + 1;
             }
         }
-        
+
         return dfs;
     }
 
-    private void dfsSub(int x, int c) {
-        dfs[dfsPtr++] = x;
-        seen[x] = true;
-        comp[x] = c;
-        for (int i = 0; i < deg[x]; i++) 
-            if (!seen[nbrs[x][i]]) {
-                parent[nbrs[x][i]] = x;
-                dfsSub(nbrs[x][i],c);
-            }
-
+    public int[] getDfs() {
+        return dfs;
     }
-        
-    public int[] getDfs () {return dfs;}
-
 
     /**
      * Compute connected components using a bfs approach.
      * Returns a the characteristic vector of the components,
      * starting to index with 1
      */
-    public int[] components () {
-
+    public int[] components() {
         int[] order = new int[nv];
 
         seen = new boolean[nv];
         comp = new int[nv];
-        
+
         for (int i = 0; i < nv; i++) {
             comp[i] = 0;
         }
-
 
         int c = 0;
         for (int x = 0; x < nv; x++) {
@@ -351,7 +308,7 @@ public class WeightedGraph
                 int ptr = 0;
                 int orderLen = 1;
                 order[ptr] = x;
-                
+
                 while (ptr < orderLen) {
                     int curNode = order[ptr];
                     for (int i = 0; i < deg[curNode]; i++) {
@@ -368,65 +325,52 @@ public class WeightedGraph
         return comp;
     }
 
-    
-    
-    /* if the graph is a tree,
-       this turns it into a parent array
-    */
-
     public int[] treeToArray() {
-
         dfs();
-        
         int[] pArray = new int[nv];
 
         // set all others to parent
-        for (int i = 0; i < nv; i++)
-            pArray[i] = parent[i];
+        System.arraycopy(parent, 0, pArray, 0, nv);
 
         // set root to itself
         pArray[dfs[0]] = dfs[0];
 
         return pArray;
-        
     }
+    
+    /* if the graph is a tree,
+       this turns it into a parent array
+    */
 
     /* if the graph is a tree,
        this turns it into a Tree class object
     */
     public Tree treeToTree() {
-	int[] pArray = treeToArray();
+        int[] pArray = treeToArray();
 
-	// now, compute all the edge weights
-	double[] wt = new double[nv];
+        // now, compute all the edge weights
+        double[] wt = new double[nv];
 
-	for (int u = 0; u < nv; u++) {
-	    int v = pArray[u];
-	    if (v != u) {
-		for (int j = 0; j < deg[v]; j++)
-		    if (nbrs[v][j] == u)
-			wt[u] = weights[v][j];
-
-	    }
-
-	}
-
-	return new Tree(pArray,wt);
-
-
+        for (int u = 0; u < nv; u++) {
+            int v = pArray[u];
+            if (v != u) {
+                for (int j = 0; j < deg[v]; j++)
+                    if (nbrs[v][j] == u)
+                        wt[u] = weights[v][j];
+            }
+        }
+        return new Tree(pArray, wt);
     }
 
     public void dump() {
-
-        for (int x = 0 ; x < nv; x++) {
-            System.out.print(x +" : ");
-            for (int i = 0; i < deg[x]; i++) 
+        for (int x = 0; x < nv; x++) {
+            System.out.print(x + " : ");
+            for (int i = 0; i < deg[x]; i++)
                 System.out.print(nbrs[x][i] + " ");
             System.out.println();
         }
-        
-    }
 
+    }
 
     public void compWtedDeg() {
         wtedDeg = new double[nv];
@@ -442,7 +386,7 @@ public class WeightedGraph
      * Return a 3-by-m ijv vector.
      * In Matlab, we can turn this into an adjacency matrix by
      * matrix = sparse(i,j,v,n,n); matrix = matrix + matrix';
-     * 
+     *
      * so, this just spits out the lower-triangular part.
      * For the full matrix, use toIJVsym
      */
@@ -452,7 +396,7 @@ public class WeightedGraph
         double[] v = new double[ne];
 
         int ptr = 0;
-        
+
         for (int x = 0; x < nv; x++) {
             for (int y = 0; y < deg[x]; y++) {
                 if (nbrs[x][y] < x) {
@@ -471,28 +415,28 @@ public class WeightedGraph
 
         return ijv;
     }
-    
+
     /*
      * Return a 3-by-m ijv vector.
      * In Matlab, we can turn this into an adjacency matrix by
      * matrix = sparse(ijv(1,:)+1,ijv(2,:)+1,v,n,n);
-     * 
+     *
      * so, this just spits out the lower-triangular part.
      * For the full matrix, use toIJVsym
      */
     public double[][] toIJVsym() {
-        double[] i = new double[2*ne];
-        double[] j = new double[2*ne];
-        double[] v = new double[2*ne];
+        double[] i = new double[2 * ne];
+        double[] j = new double[2 * ne];
+        double[] v = new double[2 * ne];
 
         int ptr = 0;
-        
+
         for (int x = 0; x < nv; x++) {
             for (int y = 0; y < deg[x]; y++) {
-                    i[ptr] = (double) x;
-                    j[ptr] = (double) nbrs[x][y];
-                    v[ptr] = weights[x][y];
-                    ptr++;
+                i[ptr] = (double) x;
+                j[ptr] = (double) nbrs[x][y];
+                v[ptr] = weights[x][y];
+                ptr++;
             }
         }
 
@@ -503,21 +447,18 @@ public class WeightedGraph
 
         return ijv;
     }
-    
 
     /*
      * Produces a copy of this graph
      */
-    public WeightedGraph copy () {
+    public WeightedGraph copy() {
         WeightedGraph G = new WeightedGraph();
 
         G.nv = nv;
         G.ne = ne;
         G.deg = new int[nv];
 
-        for (int a = 0; a < nv; a++) {
-            G.deg[a] = deg[a];
-        }
+        System.arraycopy(deg, 0, G.deg, 0, nv);
 
         G.nbrs = new int[nv][];
         G.weights = new double[nv][];
@@ -532,8 +473,17 @@ public class WeightedGraph
         }
 
         return G;
-        
     }
 
-    
+    private void dfsSub(int x, int c) {
+        dfs[dfsPtr++] = x;
+        seen[x] = true;
+        comp[x] = c;
+        for (int i = 0; i < deg[x]; i++) {
+            if (!seen[nbrs[x][i]]) {
+                parent[nbrs[x][i]] = x;
+                dfsSub(nbrs[x][i], c);
+            }
+        }
+    }
 }

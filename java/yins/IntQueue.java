@@ -1,13 +1,11 @@
 /**
- * @file   IntQueue.java
+ * @file IntQueue.java
  * @author Dan Spielman <spielman@math.mit.edu>
-
-
- * @date   Sun Aug  1 14:49:34 2004
- * 
- * @brief  integer queus of fixed maximum length
- * 
-*/
+ * @date Sun Aug  1 14:49:34 2004
+ *
+ * @brief integer queues of fixed maximum length
+ *
+ */
 
 package yins;
 
@@ -23,78 +21,61 @@ package yins;
  *
  * It is first-in first-out
 */
-public class IntQueue
-{
+public class IntQueue {
 
     public int[] q;
-    public int qLen;  
+    public int qLen;
     public int qPtr;
 
-    /** 
+    /**
      * initialize with the maximum length
      * Note: Class does no range checking!
-     * 
+     *
      * @param maxLen maximum length of queue
-     * 
      * @return IntQueue
      */
-    public IntQueue(int maxLen) 
-    {
+    public IntQueue(int maxLen) {
         q = new int[maxLen];
     }
 
-
-    /** 
+    /**
      * Initialized the queue, and puts on entry
-     * 
+     *
      * @param entry first item to put on queue
-     */    
-    public void init(int entry) 
-    {
+     */
+    public void init(int entry) {
         q[0] = entry;
-
         qLen = 1;
-        
         qPtr = 0;
-
     }
 
-    /** 
+    /**
      * Initialize the queue empty
-     * 
-     * @param initialize empty
-     */    
-    public void init() 
-    {
+     */
+    public void init() {
         qLen = 0;
         qPtr = 0;
-
     }
 
-    public boolean hasMore()
-    {
+    public boolean hasMore() {
         return (qPtr < qLen);
     }
-    
-    /** 
+
+    /**
      * Pulls off a queue item in first-in first-out order
-     * 
+     *
      * @return the queue item
      */
-    public int pull() 
-    {
+    public int pull() {
         return q[qPtr++];
     }
 
-    /** 
+    /**
      * Puts an item on the queue
-     * 
+     *
      * @param entry entry to put on queue
-     * 
      */
-    public void add(int entry)
-    {
+    public void add(int entry) {
         q[qLen++] = entry;
     }
-        
 }
