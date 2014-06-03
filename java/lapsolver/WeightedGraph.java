@@ -332,13 +332,9 @@ public class WeightedGraph {
 
         return pArray;
     }
-    
-    /* if the graph is a tree,
-       this turns it into a parent array
-    */
 
     /* if the graph is a tree,
-       this turns it into a Tree class object
+       this turns it into a Tree class object via a parent array
     */
     public Tree treeToTree() {
         int[] pArray = treeToArray();

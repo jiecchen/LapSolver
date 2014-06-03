@@ -1,5 +1,6 @@
 package lapsolver.lsst;
 
+import lapsolver.SimulPathTree;
 import lapsolver.Tree;
 import lapsolver.WeightedGraph;
 
@@ -9,6 +10,6 @@ import lapsolver.WeightedGraph;
 public class SimulPathLSST implements LSST {
     @Override
     public Tree solve(WeightedGraph in) {
-        return null;
+        return new SimulPathTree(in).growTree().treeToTree();
     }
 }
