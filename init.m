@@ -11,6 +11,7 @@ addpath([root, 'matlab/generators']);
 addpath([root, 'matlab/util']);
 addpath([root, 'matlab/sparsify']);
 addpath([root, 'matlab/cut']);
+addpath([root, 'matlab/tests']);
 
 javaaddpath build
 import lapsolver.*;
