@@ -55,7 +55,6 @@ public class Tree {
      * Make an empty Tree
      *
      * @param nv number of nodes
-     * @return an empty Tree of nv nodes
      */
     public Tree(int nv) {
         nodes = new TreeNode[nv];
@@ -65,7 +64,6 @@ public class Tree {
      * Make a Tree from parent array
      *
      * @param p the parent array
-     * @return a Tree
      */
     public Tree(int[] p) {
         nodes = new TreeNode[p.length];
@@ -108,7 +106,6 @@ public class Tree {
      *
      * @param p the parent array
      * @param w the weight array
-     * @return a Tree
      */
     public Tree(int[] p, double[] w) {
         nodes = new TreeNode[p.length];
@@ -273,8 +270,9 @@ public class Tree {
             double r = cs * rand.nextFloat();
             // log.write("r: " + r);
 
-            int lev;
-            for (lev = mindepth; cums[lev - mindepth] < r; lev++) ;
+            int lev = mindepth;
+            while(cums[lev - mindepth] < r)
+                lev++;
 
             // log.write("lev: " + lev + " last " + s[lev].last);
 

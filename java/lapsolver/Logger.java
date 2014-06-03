@@ -10,7 +10,7 @@ public class Logger {
     FileWriter fw;
     String name;
 
-    public void Logger() {
+    public Logger() {
         opened = false;
     }
 

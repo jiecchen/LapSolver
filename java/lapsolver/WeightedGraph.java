@@ -79,7 +79,6 @@ public class WeightedGraph {
     //  initialized by dfs()
     //
     private int[] parent;
-    private int root;
 
     public WeightedGraph() { }
     public WeightedGraph(int[] src, int[] dst, double[] weight) {
