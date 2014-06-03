@@ -99,8 +99,8 @@
   
   <property name="compiler.args.lapsolver" value="-encoding UTF-8 -source 1.7 ${compiler.args}"/>
   
-  <property name="lapsolver.output.dir" value="${module.lapsolver.basedir}/../../../home/alex/Development/LapSolver/build/production/LapSolver"/>
-  <property name="lapsolver.testoutput.dir" value="${module.lapsolver.basedir}/../../../home/alex/Development/LapSolver/build/test/LapSolver"/>
+  <property name="lapsolver.output.dir" value="${module.lapsolver.basedir}/build/production/LapSolver"/>
+  <property name="lapsolver.testoutput.dir" value="${module.lapsolver.basedir}/build/test/LapSolver"/>
   
   <path id="lapsolver.module.bootclasspath">
     <!-- Paths to be included in compilation bootclasspath -->
@@ -134,7 +134,7 @@
   </patternset>
   
   <path id="lapsolver.module.sourcepath">
-    <dirset dir="${module.lapsolver.basedir}/../../../home/alex/Development/LapSolver">
+    <dirset dir="${module.lapsolver.basedir}">
       <include name="java"/>
     </dirset>
   </path>
@@ -153,7 +153,7 @@
     </javac>
     
     <copy todir="${lapsolver.output.dir}">
-      <fileset dir="${module.lapsolver.basedir}/../../../home/alex/Development/LapSolver/java">
+      <fileset dir="${module.lapsolver.basedir}/java">
         <patternset refid="compiler.resources"/>
         <type type="file"/>
       </fileset>
@@ -177,7 +177,7 @@
   
   <target name="init.artifacts">
     <property name="artifacts.temp.dir" value="${basedir}/__artifacts_temp"/>
-    <property name="artifact.output.lapsolver:jar" value="${basedir}/../../../home/alex/Development/LapSolver/build"/>
+    <property name="artifact.output.lapsolver:jar" value="${basedir}/build"/>
     <mkdir dir="${artifacts.temp.dir}"/>
     <property name="temp.jar.path.LapSolver.jar" value="${artifacts.temp.dir}/LapSolver.jar"/>
   </target>
