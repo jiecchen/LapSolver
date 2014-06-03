@@ -15,3 +15,5 @@ addpath([root, 'matlab/tests']);
 
 javaaddpath build/LapSolver.jar
 import lapsolver.*;
+import lapsolver.algorithms.*;
+import lapsolver.lsst.*;

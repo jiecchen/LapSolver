@@ -3,6 +3,7 @@ function stretch = testDel3()
 %   Generates a 3D Delaunay graph, uses Dan's SimulPathTree
 %   to generate a low-stretch spanning tree, then computes its mean
 %   stretch.
+    init
     a = del3Graph(10000);
     [ai,aj,av] = find(tril(a));
     g = WeightedGraph();
