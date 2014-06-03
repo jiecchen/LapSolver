@@ -24,7 +24,3 @@ Directories:
     cut : code to cut graphs
     util : various utility routines in matlab
 
-  flow : C++ implementation of flow algorithm (Kelner et al.)
-
-
-
