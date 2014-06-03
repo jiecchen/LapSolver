@@ -15,8 +15,6 @@ Directories:
     It has one subdirectory right now called "yins".
     we should probably change that to something like lapsolve, or the
     name of our project.
-  
-
 
   matlab : for matlab code
     solvers : for solving systems of equations
@@ -26,9 +24,7 @@ Directories:
     cut : code to cut graphs
     util : various utility routines in matlab
 
-
-
-
+  flow : C++ implementation of flow algorithm (Kelner et al.)
 
 
 
