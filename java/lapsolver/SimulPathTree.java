@@ -15,7 +15,8 @@ example usage from Matlab:
 
 a = del3Graph(10000);
 [ai,aj,av] = find(tril(a));
-g = WeightedGraph(ai,aj,av);
+g = WeightedGraph();
+g.fromMatlab(ai, aj, av);
 spt = SimulPathTree(g);
 tr = spt.edgeGrow;
 trt = tr.treeToTree;
@@ -355,12 +356,8 @@ public class SimulPathTree {
 
         }
 
-        WeightedGraph wg = new WeightedGraph();
-        wg.fromMatlab(ijvI, ijvJ, ijvV);
-
         // return wg.treeToTree();
-        return wg;
-
+        return new WeightedGraph(ijvI, ijvJ, ijvV);
     }
 
     public class NodeEvent {

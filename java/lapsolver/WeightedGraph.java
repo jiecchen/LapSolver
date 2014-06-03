@@ -81,6 +81,7 @@ public class WeightedGraph {
     private int[] parent;
     private int root;
 
+    public WeightedGraph() { }
     public WeightedGraph(int[] src, int[] dst, double[] weight) {
         fromEdgeList(src, dst, weight);
     }
@@ -124,6 +125,7 @@ public class WeightedGraph {
             if (dst[i] > nv)
                 nv = dst[i];
         }
+        nv++; // largest 0-based index is nv-1
 
         //-----------------------------------------
         //  count how many times each node occurs
@@ -142,10 +144,12 @@ public class WeightedGraph {
         int[] tmpdeg = new int[nv];
 
         nbrs = new int[nv][];
+        backInd = new int[nv][];
         weights = new double[nv][];
 
         for (int i = 0; i < nv; i++) {
             nbrs[i] = new int[deg[i]];
+            backInd[i] = new int[deg[i]];
             weights[i] = new double[deg[i]];
             tmpdeg[i] = 0;
         }
@@ -168,9 +172,6 @@ public class WeightedGraph {
 
         volume *= 2; // double count
     }
-
-
-    public WeightedGraph() { }
 
     /**
      * set up the graph so that it can be input through fromEdgeList

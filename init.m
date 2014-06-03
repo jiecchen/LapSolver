@@ -12,5 +12,5 @@ addpath([root, 'matlab/util']);
 addpath([root, 'matlab/sparsify']);
 addpath([root, 'matlab/cut']);
 
-javaaddpath java
-import yins.*;
+javaaddpath build
+import lapsolver.*;
