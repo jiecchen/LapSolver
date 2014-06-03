@@ -1,6 +1,8 @@
 # build files
 *.o
 *.class
+*.jar
+build/
 
 # Eclipse
 .classpath
