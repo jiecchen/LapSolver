@@ -24,7 +24,12 @@ trt.compTotalStretch(g)/length(ai)
 
  */
 
-package lapsolver;
+package lapsolver.lsst;
+
+import lapsolver.Logger;
+import lapsolver.Tree;
+import lapsolver.WeightedGraph;
+import lapsolver.algorithms.UnionFind;
 
 import java.util.Comparator;
 import java.util.PriorityQueue;

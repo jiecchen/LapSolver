@@ -1,6 +1,5 @@
 package lapsolver.lsst;
 
-import lapsolver.SimulPathTree;
 import lapsolver.Tree;
 import lapsolver.WeightedGraph;
 

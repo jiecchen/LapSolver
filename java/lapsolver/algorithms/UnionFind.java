@@ -8,7 +8,7 @@
  *
  */
 
-package lapsolver;
+package lapsolver.algorithms;
 
 public class UnionFind {
     //-----------------------
