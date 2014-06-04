@@ -27,13 +27,13 @@ public class UnionFind {
         ptr = new int[n];
 
         for (int i = 0; i < n; i++) {
-            ptr[i] = -1;
+            ptr[i] = i;
         }
     }
 
     // name of component that contains vertex v
     public int find(int v) {
-        if (ptr[v] < 0) {
+        if (ptr[v] == v) {
             // at root of this tree
             return v;
         } else {
