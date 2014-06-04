@@ -4,7 +4,7 @@
  * @date Tue Jun 3 2014
  *
  * An algorithm for computing offline LCA queries in a tree.
- * Complexity: amortized O( q alpha(n) )
+ * Complexity: amortized O( (n + q) alpha(n) )
  * Reference: http://en.wikipedia.org/wiki/Tarjan's_off-line_lowest_common_ancestors_algorithm
  */
 
