@@ -1,3 +1,5 @@
+package lapsolver.generators;
+
 public class Grid2 {
 
     public int[] src;

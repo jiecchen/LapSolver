@@ -2,8 +2,8 @@
 from scipy.sparse import *
 from scipy.spatial import Delaunay
 import numpy as np
-import lapsolver as ls
-
+import lapsolver
+import lapsolver.lsst
 
 def del3_graph(n):
     points = np.random.rand(n, 3)
@@ -34,9 +34,8 @@ def test_del3():
     [ai, aj] = tril(a).nonzero()
     av = np.asarray(a[(ai, aj)])[0, :]
 
-    g = ls.WeightedGraph(ai, aj, av)
-
-    spt = ls.SimulPathLSST(g)
-    return spt.edgeGrow().treeToTree().compTotalStretch(g.toJava()) / len(ai.tolist())
+    g = lapsolver.WeightedGraph(ai, aj, av)
+    spt = lapsolver.lsst.SimulPathLSST(g)
+    return spt.edgeGrow().treeToTree().compTotalStretch(g) / len(ai.tolist())
 
 print test_del3()
