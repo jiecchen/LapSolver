@@ -1,3 +1,16 @@
+/**
+ * @file BindingGenerator.java
+ * @author Alex Reinking <alexander.reinking@yale.edu>
+ * @date Wed Jun 4 2014
+ *
+ * A Python code generator to produce bindings to packages within
+ * jar files. Used to create the bindings for LapSolver.
+ *
+ * Depends on numpy and jpype, both of which are available
+ * in Linux distribution package managers, and via pip.
+ *
+ */
+
 package pybinding;
 
 import java.io.BufferedWriter;
@@ -14,47 +27,50 @@ import java.util.jar.JarFile;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
-/**
- * Created by alex on 6/4/14.
- */
 public class BindingGenerator {
     private Map<String, Class> classNames;
     private List<String> packages;
     private String topLevelPackage;
     private String jarPath;
 
+    /**
+     * Construct a new BindingGenerator
+     * @param jarPath path to the JAR for which to generate python bindings
+     * @param packageName the name of the Java package (in the JAR) to be bound
+     * @throws IOException when the JAR file cannot be opened.
+     */
     public BindingGenerator(String jarPath, String packageName) throws IOException {
         this.topLevelPackage = packageName;
         this.jarPath = jarPath;
 
-        File file = new File(jarPath);
-        JarFile archive = new JarFile(file);
-        URLClassLoader loader = URLClassLoader.newInstance(new URL[]{file.toURI().toURL()});
+        File inputJar = new File(jarPath);
+        JarFile module = new JarFile(inputJar);
+        URLClassLoader jarLoader = URLClassLoader.newInstance(new URL[]{inputJar.toURI().toURL()});
 
         classNames = new HashMap<>();
         packages = new ArrayList<>();
 
-        Enumeration<JarEntry> entries = archive.entries();
+        Enumeration<JarEntry> entries = module.entries();
         while(entries.hasMoreElements()) {
             JarEntry entry = entries.nextElement();
-            String objectName = entry.getName().replace('/', '.');
+            String entryName = entry.getName().replace('/', '.');
 
-            if (objectName.startsWith(packageName)) {
-                if (objectName.endsWith(".class")) {
-                    String className = objectName.substring(0, objectName.length() - ".class".length());
-                    if (className.contains("$")) {
+            if (entryName.startsWith(packageName)) { // if the jar entry is in the package
+                if (entryName.endsWith(".class")) { // if it's a class
+                    String className = entryName.substring(0, entryName.length() - ".class".length());
+                    if (className.contains("$")) { // TODO: support inner classes
                         System.err.println("Warning: skipping inner class `" + className + "`");
                     } else {
-                        try {
-                            classNames.put(className, loader.loadClass(className));
+                        try { // attempt to load the class
+                            classNames.put(className, jarLoader.loadClass(className));
                         } catch (ClassNotFoundException e) {
                             System.err.println("Warning: unable to load class `" + className + "`");
                         }
                     }
-                } else if (objectName.endsWith(".")) {
-                    packages.add(objectName.substring(0, objectName.length() - 1));
+                } else if (entryName.endsWith(".")) { // if it's a package
+                    packages.add(entryName.substring(0, entryName.length() - 1));
                 } else {
-                    System.err.println("Warning: unknown object `" + objectName + "`");
+                    System.err.println("Warning: unknown object `" + entryName + "`");
                 }
             }
         }
@@ -74,6 +90,11 @@ public class BindingGenerator {
         });
     }
 
+    /**
+     * Find the containing package of a class name
+     * @param objectName fully-qualified class name (e.g. "java.lang.System")
+     * @return Name of the package (e.g. "java.lang")
+     */
     private String getContainingPackage(String objectName) {
         int lastIdx = objectName.lastIndexOf('.');
         if(lastIdx == -1)
@@ -81,12 +102,22 @@ public class BindingGenerator {
         return objectName.substring(0,lastIdx);
     }
 
+    /**
+     * Load a template string from resources
+     * @param templateFile the name of the template (e.g. "tlheader")
+     * @return The contents of the template file
+     */
     private String getTemplate(String templateFile) {
         InputStream headerInput = getClass().getResourceAsStream("resources/templates/" + templateFile + ".txt");
         Scanner reader = new Scanner(headerInput).useDelimiter("\\A");
         return reader.hasNext() ? reader.next() : "";
     }
 
+    /**
+     * Create a python-ready reference to a package or class
+     * @param packageName the name of the java package (e.g. "java.lang")
+     * @return The jpype call to load it (e.g. "JPackage(\"java\").lang")
+     */
     private String asJPype(String packageName) {
         String[] components = packageName.split("\\.");
         if(components.length == 0)
@@ -102,19 +133,26 @@ public class BindingGenerator {
         return newName.toString();
     }
 
-    public void generate(String outputDirectory) {
+    /**
+     * Generate the python module.
+     * @param directoryName directory to store the generated module
+     */
+    public void generate(String directoryName) {
         String jarFileName = new File(jarPath).getName();
 
-        String prefix = outputDirectory;
-        if(!prefix.startsWith("/") && !prefix.startsWith("./"))
-            prefix = "./" + prefix;
-        if(!prefix.endsWith("/"))
-            prefix += "/";
+        // Make sure the directory name has consistent separators
+        // and is clearly either absolute or relative
+        String outputDirectory = directoryName;
+        if(!outputDirectory.startsWith("/") && !outputDirectory.startsWith("./"))
+            outputDirectory = "./" + outputDirectory;
+        if(!outputDirectory.endsWith("/"))
+            outputDirectory += "/";
 
-        // Create the package directory
         for (String curPackage : packages) {
-            String dirName = prefix + curPackage.replace('.', '/');
+            String dirName = outputDirectory + curPackage.replace('.', '/');
             File moduleFile = new File(dirName + "/__init__.py");
+
+            // Create the package directory
             if (!moduleFile.getParentFile().mkdirs() && !moduleFile.getParentFile().exists()) {
                 System.err.println("Error: could not create directory `" + dirName + "`");
                 System.exit(0);
@@ -131,14 +169,20 @@ public class BindingGenerator {
             for (Class currentClass : classNames.values()) {
                 String className = currentClass.getName();
                 String parentPackage = getContainingPackage(className);
+
                 if(parentPackage.equals(curPackage)) {
                     if(currentClass.isInterface()) {
                         System.err.println("Warning: skipping interface " + className);
                         continue;
                     }
 
+                    // The name Python will use to refer to the generated class
                     String pyClassName = className.substring(className.lastIndexOf('.') + 1);
+
+                    // Emit the class declaration
                     pythonModule.append("class ").append(pyClassName).append("(_GeneratedObject):\n");
+
+                    // Emit the constructor for the class (if it has one)
                     if(currentClass.getConstructors().length > 0) {
                         String ctor = getTemplate("constructor");
                         ctor = ctor.replaceAll("\\{\\{CLASS\\}\\}", pyClassName);
@@ -148,10 +192,14 @@ public class BindingGenerator {
                     } else {
                         System.err.println("Warning: no constructors found for " + className);
                     }
-                    pythonModule.append("\n\n"); // obey PEP8
+
+                    // TODO: generate code to properly handle fields
+
+                    pythonModule.append("\n\n");
                 }
             }
 
+            // Write the generated module to __init__.py.
             try(BufferedWriter writer = Files.newBufferedWriter(moduleFile.toPath(),
                     Charset.forName("US-ASCII"))) {
                 String contents = pythonModule.toString();
@@ -164,7 +212,7 @@ public class BindingGenerator {
 
         // Copy the jar file to the new directory
         try {
-            File destination = new File(prefix + topLevelPackage + "/_src/" + jarFileName);
+            File destination = new File(outputDirectory + topLevelPackage + "/_src/" + jarFileName);
             destination.mkdirs();
             Files.copy(new File(jarPath).toPath(), destination.toPath(), REPLACE_EXISTING);
         } catch (IOException e) {
