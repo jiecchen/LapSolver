@@ -10,24 +10,30 @@ package lapsolver.algorithms;
 
 import lapsolver.Tree;
 import lapsolver.WeightedGraph;
-import lapsolver.algorithms.TarjanLCA;
+import lapsolver.algorithms.TreePath;
 
 public class Stretch {
     private WeightedGraph graph;
     private Tree spanningTree;
 
-    private double[] depth;
-
     public Stretch (WeightedGraph graph, Tree spanningTree) {
         this.graph = graph;
         this.spanningTree = spanningTree;
-
-        // initialize path depths
-        depth = new double[spanningTree.nv];
     }
 
     public double totalStretch() {
-        return 0.0;
+        double[][] ijv = graph.toIJV();
+        double[] pathlen;
+        double total = 0;
+
+        TreePath tp = new TreePath(spanningTree);
+        pathlen = tp.query(ijv[0], ijv[1]);
+
+        for (int i = 0; i < graph.ne; i++) {
+            total += pathlen[i] / ijv[2][i];
+        }
+
+        return total;
     }
 
     public double meanStretch() {
