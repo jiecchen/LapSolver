@@ -11,7 +11,6 @@
 package lapsolver.algorithms;
 
 import lapsolver.Tree;
-import java.util.ArrayList;
 
 public class TarjanLCA {
     private Tree tree;
@@ -78,7 +77,7 @@ public class TarjanLCA {
     // main DFS procedure (from Wikipedia article)
     private void dfs(int u) {
         ancestor[u] = u;
-        for (int v : tree.nodes[u].kids) {
+        for (int v : tree.nodes[u].children) {
             dfs(v);
             unionFind.union(u, v);
             ancestor[unionFind.find(u)] = u;
