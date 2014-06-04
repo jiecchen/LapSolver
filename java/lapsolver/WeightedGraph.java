@@ -49,7 +49,7 @@ public class WeightedGraph {
     public int[] deg;
 
 
-    // only computed if call compWtedDeg
+    // only computed if call computeWeightedDegrees
     public double[] weightedDeg;
 
     // the sum of all weighted degrees
@@ -193,7 +193,7 @@ public class WeightedGraph {
      * nbrs[nbrs[x][i],backInd[x][i]] = x
      *
      */
-    public void makeBackEdges() {
+    public void buildBackEdges() {
         backInd = new int[nv][];
 
         int[] count = new int[nv];
@@ -285,7 +285,7 @@ public class WeightedGraph {
      * Returns a the characteristic vector of the components,
      * starting to index with 1
      */
-    public int[] components() {
+    public int[] getComponents() {
         int[] order = new int[nv];
 
         seen = new boolean[nv];
@@ -320,7 +320,7 @@ public class WeightedGraph {
         return comp;
     }
 
-    public int[] treeToArray() {
+    public int[] treeToParentArray() {
         dfs();
         int[] pArray = new int[nv];
 
@@ -337,7 +337,7 @@ public class WeightedGraph {
        this turns it into a Tree class object via a parent array
     */
     public Tree treeToTree() {
-        int[] pArray = treeToArray();
+        int[] pArray = treeToParentArray();
 
         // now, compute all the edge weights
         double[] wt = new double[nv];
@@ -363,7 +363,7 @@ public class WeightedGraph {
 
     }
 
-    public void compWtedDeg() {
+    public void computeWeightedDegrees() {
         weightedDeg = new double[nv];
         for (int x = 0; x < nv; x++) {
             double sum = 0;

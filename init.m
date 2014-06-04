@@ -13,6 +13,7 @@ addpath([root, 'matlab/sparsify']);
 addpath([root, 'matlab/cut']);
 addpath([root, 'matlab/tests']);
 
+clear java
 javaaddpath build/LapSolver.jar
 import lapsolver.*;
 import lapsolver.algorithms.*;

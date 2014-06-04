@@ -4,13 +4,10 @@ function stretch = run_lsst(a)
 %   to generate a low-stretch spanning tree, then computes its mean
 %   stretch. Measures time taken by the edgeGrow step.
 %   Sample: time_lsst( del3Graph(10000) )
-    init
-    [ai,aj,av] = find(tril(a));
-    g = WeightedGraph();
-    g.fromMatlab(ai, aj, av);
+    import lapsolver.lsst.SimulPathLSST;
+    g = javagraph(a);
     spt = SimulPathLSST(g);
-    tic; tr = spt.edgeGrow; toc
-    trt = tr.treeToTree;
-    stretch = trt.compTotalStretch(g)/length(ai);
+    tic; tr = spt.solve(g); toc
+    stretch = tr.compTotalStretch(g)/g.ne;
 end
 

@@ -16,9 +16,14 @@ public class Stretch {
     private WeightedGraph graph;
     private Tree spanningTree;
 
+    private double[] depth;
+
     public Stretch (WeightedGraph graph, Tree spanningTree) {
         this.graph = graph;
         this.spanningTree = spanningTree;
+
+        // initialize path depths
+        depth = new double[spanningTree.nv];
     }
 
     public double totalStretch() {
@@ -26,7 +31,7 @@ public class Stretch {
     }
 
     public double meanStretch() {
-        return 0.0;
+        return totalStretch() / graph.ne;
     }
 
     public double edgeStretch(int u, int v) {

@@ -146,8 +146,7 @@ public class SimulPathLSST implements LSST {
             }
         }
 
-        WeightedGraph wg = new WeightedGraph();
-        wg.fromMatlab(ijvI, ijvJ, ijvV);
+        WeightedGraph wg = new WeightedGraph(ijvI, ijvJ, ijvV);
 
         // return wg.treeToTree();
         return wg;
@@ -258,7 +257,7 @@ public class SimulPathLSST implements LSST {
         rates = new double[g.ne];
         EdgeEvent[] events = new EdgeEvent[g.ne];
 
-        g.makeBackEdges();
+        g.buildBackEdges();
         int edgeNum = 0;
         int[][] edgeNums = new int[g.nv][];
         for (int u = 0; u < g.nv; u++) {
