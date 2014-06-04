@@ -11,6 +11,9 @@ addpath([root, 'matlab/generators']);
 addpath([root, 'matlab/util']);
 addpath([root, 'matlab/sparsify']);
 addpath([root, 'matlab/cut']);
+addpath([root, 'matlab/tests']);
 
-javaaddpath build
+javaaddpath build/LapSolver.jar
 import lapsolver.*;
+import lapsolver.algorithms.*;
+import lapsolver.lsst.*;
