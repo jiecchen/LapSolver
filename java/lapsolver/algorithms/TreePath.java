@@ -4,6 +4,14 @@
  * @date Wed Jun 4 2014
  *
  * A data structure for computing tree path lengths. Uses Tarjan's offline LCA.
+ *
+ * Usage:
+ * - query(a, b) takes endpoint arrays, and returns array of path lengths
+ * - public field depth[u] gives length of path to root
+ *
+ * TreePath tp = new TreePath(tree);
+ * lens = tp.query(a, b);
+ *
  */
 
 package lapsolver.algorithms;
@@ -13,7 +21,7 @@ import lapsolver.algorithms.TarjanLCA;
 
 public class TreePath {
     private Tree tree;
-    private double depth[];
+    public double depth[];
 
     // constructor: do precomputations
     public TreePath (Tree tree) {
@@ -38,6 +46,19 @@ public class TreePath {
         }
 
         return answer;
+    }
+
+    // query path lengths with double array (for matlab ijv ease)
+    public double[] query(double[] a, double[] b) {
+        int[] ai = new int[a.length];
+        int[] bi = new int[b.length];
+
+        for (int i = 0; i < a.length; i++) {
+            ai[i] = (int)a[i];
+            bi[i] = (int)b[i];
+        }
+
+        return query(ai, bi);
     }
 
     // populate depth array
