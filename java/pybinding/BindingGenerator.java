@@ -1,3 +1,16 @@
+/**
+ * @file BindingGenerator.java
+ * @author Alex Reinking <alexander.reinking@yale.edu>
+ * @date Wed Jun 4 2014
+ *
+ * A Python code generator to produce bindings to packages within
+ * jar files. Used to create the bindings for LapSolver.
+ *
+ * Depends on numpy and jpype, both of which are available
+ * in Linux distribution package managers, and via pip.
+ *
+ */
+
 package pybinding;
 
 import java.io.BufferedWriter;
@@ -14,11 +27,6 @@ import java.util.jar.JarFile;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
-/**
- * BindingGenerator
- *
- * @author Alex Reinking
- */
 public class BindingGenerator {
     private Map<String, Class> classNames;
     private List<String> packages;
