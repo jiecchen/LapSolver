@@ -3,7 +3,7 @@
  * @author Cyril Zhang <cyril.zhang@yale.edu>
  * @date Wed Jun 4 2014
  *
- * Algorithms that compute stretches of edges and entire trees.
+ * Compute the stretch of a tree, or an individual edge.
  */
 
 package lapsolver.algorithms;
@@ -16,19 +16,23 @@ public class Stretch {
     private WeightedGraph graph;
     private Tree spanningTree;
 
+    // constructor: just initialize pointers
     public Stretch (WeightedGraph graph, Tree spanningTree) {
         this.graph = graph;
         this.spanningTree = spanningTree;
     }
 
+    // do stretch computation for every edge in the tree
     public double totalStretch() {
         double[][] ijv = graph.toIJV();
         double[] pathlen;
         double total = 0;
 
+        // get tree path lengths
         TreePath tp = new TreePath(spanningTree);
         pathlen = tp.query(ijv[0], ijv[1]);
 
+        // divide by edge length for stretch; accumulate
         for (int i = 0; i < graph.ne; i++) {
             total += pathlen[i] / ijv[2][i];
         }
@@ -36,11 +40,8 @@ public class Stretch {
         return total;
     }
 
+    // get mean stretch of edges
     public double meanStretch() {
         return totalStretch() / graph.ne;
-    }
-
-    public double edgeStretch(int u, int v) {
-        return 0.0;
     }
 }
