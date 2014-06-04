@@ -23,23 +23,30 @@ public class TarjanLCA {
 
     // store queries as a subgraph
     private int nq;
-    private int[][] queries;
+    private int[][] queries, queryIndices;
+    private int[] answer;
 
     // initialize state
     public TarjanLCA (Tree tree) {
         this.tree = tree;
+
+        // set up algorithm state
         unionFind = new UnionFind(tree.nv);
         black = new boolean[tree.nv];
         ancestor = new int[tree.nv];
+
+        // set up adjacency lists for queries
         queries = new int[tree.nv][];
+        queryIndices = new int[tree.nv][];
     }
 
-    // do preprocessing on queries
-    public void initQueries (int[] a, int[] b) {
+    // preprocess, solve, return answers
+    public int[] solve (int[] a, int[] b) {
         if (a.length != b.length) {
             throw new Error("LCA query arrays should have same length");
         }
         nq = a.length;
+        answer = new int[nq];
 
         // one pass to compute degrees
         int[] queryDegree = new int[tree.nv];
@@ -51,19 +58,21 @@ public class TarjanLCA {
         // init query array sizes
         for (int i = 0; i < tree.nv; i++) {
             queries[i] = new int[queryDegree[i]];
+            queryIndices[i] = new int[queryDegree[i]];
         }
 
         // populate queries
         for (int i = 0; i < nq; i++) {
             queries[ a[i] ][ --queryDegree[a[i]] ] = b[i];
             queries[ b[i] ][ --queryDegree[b[i]] ] = a[i];
-        }
-    }
 
-    // solve queries
-    public int[] solve() {
+            queryIndices[ a[i] ][ queryDegree[a[i]] ] = i;
+            queryIndices[ b[i] ][ queryDegree[b[i]] ] = i;
+        }
+
         dfs(tree.root);
-        return new int[nq];
+
+        return answer;
     }
 
     // main DFS procedure (from Wikipedia article)
@@ -79,8 +88,7 @@ public class TarjanLCA {
         for (int i = 0; i < queries[u].length; i++) {
             int v = queries[u][i];
             if (black[v]) {
-                int lca = ancestor[unionFind.find(v)];
-                System.out.println("LCA " + u + " " + v + " = " + lca);
+                answer[ queryIndices[u][i] ] = ancestor[unionFind.find(v)];
             }
         }
     }
