@@ -27,8 +27,8 @@ class WeightedGraph(object):
         elif len(args) == 3:
             [ai, aj, av] = args
             self._instance = self._java_class(JArray(JInt, ai.ndim)(ai.tolist()),
-                                            JArray(JInt, aj.ndim)(aj.tolist()),
-                                            JArray(JDouble, av.ndim)(av.tolist()))
+                                              JArray(JInt, aj.ndim)(aj.tolist()),
+                                              JArray(JDouble, av.ndim)(av.tolist()))
         else:
             raise RuntimeError("[ERROR] lapsolver: WeightedGraph: incorrect arguments")
 
