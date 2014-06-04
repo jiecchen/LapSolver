@@ -8,3 +8,4 @@ javaaddpath build/LapSolver.jar
 import lapsolver.*;
 import lapsolver.algorithms.*;
 import lapsolver.lsst.*;
+import lapsolver.util.*;
