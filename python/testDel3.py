@@ -1,9 +1,27 @@
-#!/usr/bin/env python
+# !/usr/bin/env python
 from scipy.sparse import *
 from scipy.spatial import Delaunay
 import numpy as np
+import time
+
 import lapsolver
 import lapsolver.lsst
+
+
+# Timer from StackOverflow question "tic, toc functions analog in Python"
+# -- http://stackoverflow.com/questions/5849800
+class Timer(object):
+    def __init__(self, name=None):
+        self.name = name
+
+    def __enter__(self):
+        self.tstart = time.time()
+
+    def __exit__(self, type, value, traceback):
+        if self.name:
+            print '[%s]' % self.name,
+        print 'Elapsed: %s' % (time.time() - self.tstart)
+
 
 def del3_graph(n):
     points = np.random.rand(n, 3)
@@ -29,13 +47,20 @@ def test_del3():
         mean stretch.
     :return:
     """
-    a = del3_graph(10000)
+    with Timer('generate'):
+        a = del3_graph(10000)
 
     [ai, aj] = tril(a).nonzero()
     av = np.asarray(a[(ai, aj)])[0, :]
 
     g = lapsolver.WeightedGraph(ai, aj, av)
     spt = lapsolver.lsst.SimulPathLSST(g)
-    return spt.edgeGrow().treeToTree().compTotalStretch(g) / len(ai.tolist())
+    with Timer('edgeGrow'):
+        grow = spt.edgeGrow()
+    with Timer('treeToTree'):
+        tree = grow.treeToTree()
+    with Timer('compTotalStretch'):
+        total_stretch = tree.compTotalStretch(g)
+    return total_stretch / len(ai.tolist())
 
 print test_del3()
