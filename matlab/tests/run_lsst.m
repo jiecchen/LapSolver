@@ -1,15 +1,15 @@
-function stretch = testDel3()
-%TESTDEL3 Tests the Java -> MATLAB pipeline.
-%   Generates a 3D Delaunay graph, uses Dan's SimulPathTree
+function stretch = run_lsst(a)
+%TIME_LSST Tests the Java -> MATLAB pipeline.
+%   Takes a graph, uses Dan's SimulPathTree
 %   to generate a low-stretch spanning tree, then computes its mean
-%   stretch.
+%   stretch. Measures time taken by the edgeGrow step.
+%   Sample: time_lsst( del3Graph(10000) )
     init
-    a = del3Graph(10000);
     [ai,aj,av] = find(tril(a));
     g = WeightedGraph();
     g.fromMatlab(ai, aj, av);
     spt = SimulPathLSST(g);
-    tr = spt.edgeGrow;
+    tic; tr = spt.edgeGrow; toc
     trt = tr.treeToTree;
     stretch = trt.compTotalStretch(g)/length(ai);
 end
