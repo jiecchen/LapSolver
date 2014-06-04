@@ -10,7 +10,7 @@ package lapsolver.algorithms;
 
 import lapsolver.Tree;
 import lapsolver.WeightedGraph;
-import lapsolver.algorithms.TarjanLCA;
+import lapsolver.TreePath;
 
 public class Stretch {
     private WeightedGraph graph;
