@@ -9,7 +9,7 @@ public class Grid2 {
         //number of edges, vertices, non-bottom row
         int ne = (2 * width * height) - width - height;
         int nv = width * height;
-        int nbr = width * (height - 1);
+        int nonbot = width * (height - 1);
 
         //i -> from, j->to, v->weight
         int src[] = new int[ne];
@@ -29,7 +29,7 @@ public class Grid2 {
             }
 
             //vertical edges
-            if (i <= nbr) {
+            if (i <= nonbot) {
                 src[e] = i + width;
                 dst[e] = i;
                 weight[e] = clmweight;
