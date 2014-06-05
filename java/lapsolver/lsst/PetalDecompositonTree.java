@@ -12,7 +12,7 @@ package lapsolver.lsst;
 import lapsolver.Tree;
 import lapsolver.WeightedGraph;
 
-public class PetalDecompositonLSST implements LSST {
+public class PetalDecompositonTree implements SpanningTreeStrategy {
     @Override
     public Tree solve(WeightedGraph in) {
         return null;

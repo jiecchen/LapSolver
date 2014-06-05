@@ -1,5 +1,5 @@
 /**
- * @file PrimsLSST.java
+ * @file KruskalTree.java
  * @author Alex Reinking <alexander.reinking@yale.edu>
  * @date Tue Jun 3 2014
  *
@@ -14,7 +14,7 @@ package lapsolver.lsst;
 import lapsolver.Tree;
 import lapsolver.WeightedGraph;
 
-public class PrimsLSST implements LSST {
+public class KruskalTree implements SpanningTreeStrategy {
     @Override
     public Tree solve(WeightedGraph in) {
         return null;

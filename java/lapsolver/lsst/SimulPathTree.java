@@ -1,12 +1,12 @@
 /**
- * @file SimulPathLSST.java
+ * @file SimulPathTree.java
  * @author Daniel Spielman <spielman@cs.yale.edu>
  * @date Fri May 30 2014
  *
  * An attempt at a low-stretch spanning tree, formed by
  * growing shortest path trees at different rates.
  *
- *  javac -classpath ~/rep/YINSmat/java/:. SimulPathLSST.java
+ *  javac -classpath ~/rep/YINSmat/java/:. SimulPathTree.java
  *
 
 the only good routine in here right now is edgeGrow
@@ -17,7 +17,7 @@ a = del3Graph(10000);
 [ai,aj,av] = find(tril(a));
 g = WeightedGraph();
 g.fromMatlab(ai, aj, av);
-spt = SimulPathLSST(g);
+spt = SimulPathTree(g);
 tr = spt.edgeGrow;
 trt = tr.treeToTree;
 trt.compTotalStretch(g)/length(ai)
@@ -35,7 +35,7 @@ import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.Random;
 
-public class SimulPathLSST implements LSST {
+public class SimulPathTree implements SpanningTreeStrategy {
 
     public Tree tree;
 
@@ -48,14 +48,14 @@ public class SimulPathLSST implements LSST {
     public int[] ijvJ;
     public double[] ijvV;
 
-    public SimulPathLSST() {}
-    public SimulPathLSST(WeightedGraph g) {
+    public SimulPathTree() {}
+    public SimulPathTree(WeightedGraph g) {
         this.g = g;
     }
 
     public WeightedGraph growTree() {
         Logger logger = new Logger();
-        //	logger.start("SimulPathLSST.log");
+        //	logger.start("SimulPathTree.log");
 
         ijvI = new int[g.nv - 1];
         ijvJ = new int[g.nv - 1];
@@ -154,7 +154,7 @@ public class SimulPathLSST implements LSST {
 
     public WeightedGraph growTree3() {
         Logger logger = new Logger();
-        logger.start("SimulPathLSST.log");
+        logger.start("SimulPathTree.log");
 
         ijvI = new int[g.nv - 1];
         ijvJ = new int[g.nv - 1];
@@ -244,7 +244,7 @@ public class SimulPathLSST implements LSST {
 
     public WeightedGraph edgeGrow() {
         Logger logger = new Logger();
-        logger.start("SimulPathLSST.log");
+        logger.start("SimulPathTree.log");
 
         ijvI = new int[g.nv - 1];
         ijvJ = new int[g.nv - 1];
