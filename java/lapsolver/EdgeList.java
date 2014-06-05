@@ -64,12 +64,11 @@ public class EdgeList {
         int vertexCount = graph.nv;
         for (int i = 0; i < vertexCount; i++)
             for (int j = 0; j < graph.deg[i]; j++) {
-                int u = i;
                 int v = graph.nbrs[i][j];
                 double w = graph.weights[i][j];
 
-                if (u < v) {
-                    this.firstEntry[index] = u;
+                if (i < v) {
+                    this.firstEntry[index] = i;
                     this.secondEntry[index] = v;
                     this.weight[index] = w;
                     index++;

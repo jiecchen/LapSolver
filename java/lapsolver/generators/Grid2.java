@@ -14,11 +14,11 @@ public class Grid2 implements GraphFactory {
     private Graph graph = null;
 
     /**
-     * Construct an evenly-weighted 2-dimensional grid graph
-     *
-     * @param width  width of graph in vertices
-     * @param height height of graph in vertices
-     */
+    * Construct an evenly-weighted 2-dimensional grid graph
+    *
+    * @param width  width of graph in vertices
+    * @param height height of graph in vertices
+    */
     public Grid2(int height, int width) {
         this.width = width;
         this.height = height;
@@ -61,22 +61,14 @@ public class Grid2 implements GraphFactory {
         int dst[] = new int[ne];
         double weight[] = new double[ne];
 
-//        populate(src, dst, weight);
-        populateC(src, dst, weight, height, width, verticalWeight);
+        populate(src, dst, weight);
+//        populateC(src, dst, weight, height, width, verticalWeight);
 
         graph = new Graph(src, dst, weight);
         return graph;
     }
 
-    /**
-     * Populate the src, dst, and weight arrays with the grid edges
-     *
-     * @param src    the source vertices
-     * @param dst    the corresponding destinations
-     * @param weight the weight of each edge
-     */
     private void populate(int[] src, int[] dst, double[] weight) {
-        // populate edge lists
         int e = 0;
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
@@ -94,6 +86,7 @@ public class Grid2 implements GraphFactory {
             }
         }
     }
+
 
     private native void populateC(int[] src, int[] dst, double[] weight, int height, int width, int verticalWeight);
 

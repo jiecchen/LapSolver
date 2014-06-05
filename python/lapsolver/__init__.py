@@ -61,6 +61,32 @@ class _GeneratedObject(object):
         return self._instance
 
 
+class Graph(_GeneratedObject):
+    def __init__(self, *args, **kwargs):
+        super(Graph, self).__init__(*args, **kwargs)
+        try:
+            self._java_class = JPackage("lapsolver").Graph
+            if "fromJVM" in kwargs and kwargs["fromJVM"]:
+                self._instance = args[0]
+            else:
+                self._instance = self._java_class(*_java_typecast(*args))
+        except:
+            raise RuntimeError("[ERROR] lapsolver: Graph: incorrect arguments")
+
+
+class EdgeList(_GeneratedObject):
+    def __init__(self, *args, **kwargs):
+        super(EdgeList, self).__init__(*args, **kwargs)
+        try:
+            self._java_class = JPackage("lapsolver").EdgeList
+            if "fromJVM" in kwargs and kwargs["fromJVM"]:
+                self._instance = args[0]
+            else:
+                self._instance = self._java_class(*_java_typecast(*args))
+        except:
+            raise RuntimeError("[ERROR] lapsolver: EdgeList: incorrect arguments")
+
+
 class UnweightedGraph(_GeneratedObject):
     def __init__(self, *args, **kwargs):
         super(UnweightedGraph, self).__init__(*args, **kwargs)
@@ -85,18 +111,5 @@ class Tree(_GeneratedObject):
                 self._instance = self._java_class(*_java_typecast(*args))
         except:
             raise RuntimeError("[ERROR] lapsolver: Tree: incorrect arguments")
-
-
-class Graph(_GeneratedObject):
-    def __init__(self, *args, **kwargs):
-        super(Graph, self).__init__(*args, **kwargs)
-        try:
-            self._java_class = JPackage("lapsolver").Graph
-            if "fromJVM" in kwargs and kwargs["fromJVM"]:
-                self._instance = args[0]
-            else:
-                self._instance = self._java_class(*_java_typecast(*args))
-        except:
-            raise RuntimeError("[ERROR] lapsolver: Graph: incorrect arguments")
 
 

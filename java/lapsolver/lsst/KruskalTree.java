@@ -21,8 +21,6 @@ public class KruskalTree implements SpanningTreeStrategy {
     public Tree solve(Graph graph) {
         int vertexCount = graph.nv;
 
-        Tree kruskalTree = new Tree(vertexCount);
-
-        return kruskalTree;
+        return new Tree(vertexCount);
     }
 }

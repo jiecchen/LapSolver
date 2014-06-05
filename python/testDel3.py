@@ -6,13 +6,14 @@ import time
 
 import lapsolver
 import lapsolver.lsst
-
+import lapsolver.algorithms
 
 # Timer from StackOverflow question "tic, toc functions analog in Python"
 # -- http://stackoverflow.com/questions/5849800
 class Timer(object):
     def __init__(self, name=None):
         self.name = name
+        self.tstart = None
 
     def __enter__(self):
         self.tstart = time.time()
@@ -55,10 +56,11 @@ def test_del3():
 
     g = lapsolver.Graph(ai, aj, av)
     spt = lapsolver.lsst.SimulPathTree()
-    with Timer('solve'):
+    with Timer('generate the tree'):
         tree = spt.solve(g)
-    with Timer('compTotalStretch'):
-        total_stretch = tree.compTotalStretch(g)
+    with Timer('compute stretch'):
+        stretchAlg = lapsolver.algorithms.Stretch(g, tree)
+        total_stretch = stretchAlg.totalStretch()
     return total_stretch / len(ai.tolist())
 
 print test_del3()
