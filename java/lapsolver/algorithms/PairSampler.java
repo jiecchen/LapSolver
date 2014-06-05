@@ -24,7 +24,7 @@ public class PairSampler {
 
     public int last; // the last place we stored an item
 
-    Random rand;
+    final Random rand;
 
     public PairSampler(int initsize, long seed) {
         rand = new Random(seed);

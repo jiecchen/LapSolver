@@ -30,8 +30,8 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 public class BindingGenerator {
     private Map<String, Class> classNames;
     private List<String> packages;
-    private String topLevelPackage;
-    private String jarPath;
+    private final String topLevelPackage;
+    private final String jarPath;
 
     /**
      * Construct a new BindingGenerator

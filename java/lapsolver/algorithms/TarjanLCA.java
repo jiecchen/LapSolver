@@ -14,14 +14,15 @@ import lapsolver.Tree;
 import lapsolver.util.TreeUtils;
 
 public class TarjanLCA {
-    private Tree tree;
+    private final Tree tree;
 
     // state variables for algorithm
-    private UnionFind unionFind;
-    private boolean[] black;
-    private int[] ancestor;
+    private final UnionFind unionFind;
+    private final boolean[] black;
+    private final int[] ancestor;
 
-    private int[][] queries, queryIndices;
+    private final int[][] queries;
+    private final int[][] queryIndices;
 
     // initialize state
     public TarjanLCA (Tree tree) {

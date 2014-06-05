@@ -636,14 +636,14 @@ public class Tree {
      */
     public class TreeNode {
         private int parent;
-        private int id;
+        private final int id;
         private double length;
 
         public ArrayList<Integer> getChildren() {
             return children;
         }
 
-        private ArrayList<Integer> children;
+        private final ArrayList<Integer> children;
 
         /**
          * Create a node by specifying its parent

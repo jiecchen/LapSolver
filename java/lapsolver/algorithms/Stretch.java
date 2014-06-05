@@ -12,8 +12,8 @@ import lapsolver.Tree;
 import lapsolver.Graph;
 
 public class Stretch {
-    private Graph graph;
-    private Tree spanningTree;
+    private final Graph graph;
+    private final Tree spanningTree;
 
     // constructor: just initialize pointers
     public Stretch (Graph graph, Tree spanningTree) {
