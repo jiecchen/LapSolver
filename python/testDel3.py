@@ -53,12 +53,10 @@ def test_del3():
     [ai, aj] = tril(a).nonzero()
     av = np.asarray(a[(ai, aj)])[0, :]
 
-    g = lapsolver.WeightedGraph(ai, aj, av)
-    spt = lapsolver.lsst.SimulPathLSST(g)
-    with Timer('edgeGrow'):
-        grow = spt.edgeGrow()
-    with Timer('treeToTree'):
-        tree = grow.treeToTree()
+    g = lapsolver.Graph(ai, aj, av)
+    spt = lapsolver.lsst.SimulPathTree()
+    with Timer('solve'):
+        tree = spt.solve(g)
     with Timer('compTotalStretch'):
         total_stretch = tree.compTotalStretch(g)
     return total_stretch / len(ai.tolist())

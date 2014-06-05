@@ -2,42 +2,42 @@ from jpype import *
 from lapsolver import _GeneratedObject, _java_typecast
 
 
-class PetalDecompositonLSST(_GeneratedObject):
+class PetalDecompositonTree(_GeneratedObject):
     def __init__(self, *args, **kwargs):
-        super(PetalDecompositonLSST, self).__init__(*args, **kwargs)
+        super(PetalDecompositonTree, self).__init__(*args, **kwargs)
         try:
-            self._java_class = JPackage("lapsolver").lsst.PetalDecompositonLSST
+            self._java_class = JPackage("lapsolver").lsst.PetalDecompositonTree
             if "fromJVM" in kwargs and kwargs["fromJVM"]:
                 self._instance = args[0]
             else:
                 self._instance = self._java_class(*_java_typecast(*args))
         except:
-            raise RuntimeError("[ERROR] lapsolver.lsst: PetalDecompositonLSST: incorrect arguments")
+            raise RuntimeError("[ERROR] lapsolver.lsst: PetalDecompositonTree: incorrect arguments")
 
 
-class PrimsLSST(_GeneratedObject):
+class SimulPathTree(_GeneratedObject):
     def __init__(self, *args, **kwargs):
-        super(PrimsLSST, self).__init__(*args, **kwargs)
+        super(SimulPathTree, self).__init__(*args, **kwargs)
         try:
-            self._java_class = JPackage("lapsolver").lsst.PrimsLSST
+            self._java_class = JPackage("lapsolver").lsst.SimulPathTree
             if "fromJVM" in kwargs and kwargs["fromJVM"]:
                 self._instance = args[0]
             else:
                 self._instance = self._java_class(*_java_typecast(*args))
         except:
-            raise RuntimeError("[ERROR] lapsolver.lsst: PrimsLSST: incorrect arguments")
+            raise RuntimeError("[ERROR] lapsolver.lsst: SimulPathTree: incorrect arguments")
 
 
-class SimulPathLSST(_GeneratedObject):
+class KruskalTree(_GeneratedObject):
     def __init__(self, *args, **kwargs):
-        super(SimulPathLSST, self).__init__(*args, **kwargs)
+        super(KruskalTree, self).__init__(*args, **kwargs)
         try:
-            self._java_class = JPackage("lapsolver").lsst.SimulPathLSST
+            self._java_class = JPackage("lapsolver").lsst.KruskalTree
             if "fromJVM" in kwargs and kwargs["fromJVM"]:
                 self._instance = args[0]
             else:
                 self._instance = self._java_class(*_java_typecast(*args))
         except:
-            raise RuntimeError("[ERROR] lapsolver.lsst: SimulPathLSST: incorrect arguments")
+            raise RuntimeError("[ERROR] lapsolver.lsst: KruskalTree: incorrect arguments")
 
 

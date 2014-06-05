@@ -10,8 +10,8 @@
 package lapsolver.lsst;
 
 import lapsolver.Tree;
-import lapsolver.WeightedGraph;
+import lapsolver.Graph;
 
 public interface SpanningTreeStrategy {
-    public Tree solve(WeightedGraph in);
+    public Tree solve(Graph in);
 }

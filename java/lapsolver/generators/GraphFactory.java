@@ -1,7 +1,7 @@
 package lapsolver.generators;
 
-import lapsolver.WeightedGraph;
+import lapsolver.Graph;
 
 public interface GraphFactory {
-    public WeightedGraph generateGraph();
+    public Graph generateGraph();
 }

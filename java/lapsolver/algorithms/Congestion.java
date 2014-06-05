@@ -11,20 +11,20 @@ package lapsolver.algorithms;
 
 
 import lapsolver.Tree;
-import lapsolver.WeightedGraph;
+import lapsolver.Graph;
 import lapsolver.util.TreeUtils;
 
 public class Congestion {
 
     // Variables needed for the algorithm
     private Tree spanningTree;
-    private WeightedGraph graph;
+    private Graph graph;
     private int vertexCount;
     private int edgeCount;
     private double[] vertexWeights;
     public Tree congestionTree;
 
-    public Congestion (WeightedGraph G, Tree T) {
+    public Congestion (Graph G, Tree T) {
         this.graph = G;
         this.spanningTree = T;
 

@@ -50,8 +50,8 @@ public class Tree {
     public ArrayDeque<Integer> aux2;
     public int[] comp;
     public int[] nodeSize;
-    WeightedGraph stretchGraph;
-    private WeightedGraph E;
+    Graph stretchGraph;
+    private Graph E;
 
     /**
      * Make an empty Tree
@@ -152,12 +152,12 @@ public class Tree {
 
     /**
      * @param root from which we grow the tree
-     * @param G    a Graph
+     * @param G    a UnweightedGraph
      * @return the Tree
      * <p/>
      * based on Anup Rao's idea for a random tree
      */
-    public static Tree growRandTree(Graph G, int root) {
+    public static Tree growRandTree(UnweightedGraph G, int root) {
         if (trace) System.out.println("growRandTree");
 
         boolean[] visited;
@@ -223,13 +223,13 @@ public class Tree {
 
     /**
      * @param root from which we grow the tree
-     * @param G    a Graph
+     * @param G    a UnweightedGraph
      * @return the parent array of the tree
      * <p/>
      * based on Anup Rao's idea for a random tree,
      * with Dan's mod of 2^(-d) sampling
      */
-    public static int[] growRandTreeD(Graph G, int root) {
+    public static int[] growRandTreeD(UnweightedGraph G, int root) {
         if (trace) System.out.println("growRandTreeD");
 
         Random rand = new Random();
@@ -330,7 +330,7 @@ public class Tree {
      * @param Ein graph of edges to stretch
      * @return the sum of the stretches
      */
-    public double compTotalStretch(WeightedGraph Ein) {
+    public double compTotalStretch(Graph Ein) {
         E = Ein;
 
         this.bfsOrderAndDepth();
@@ -487,7 +487,7 @@ public class Tree {
      * @param Ein graph of edges to stretch
      * @return a weighted graph where the weight is the stretch of every edge
      */
-    public WeightedGraph compStretches(WeightedGraph Ein) {
+    public Graph compStretches(Graph Ein) {
         stretchGraph = Ein.copy();
 
         // make all stretches zero, just to find errors
