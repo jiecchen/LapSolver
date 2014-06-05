@@ -78,7 +78,7 @@ public class TarjanLCA {
         int[] order = TreeUtils.dfsOrder(tree);
         int[] childrenVisited = new int[tree.nv];
 
-        for (int i = 0; i < tree.nv; i++) {
+        for (int i = tree.nv-1; i >= 0; i--) {
             int v = order[i];
             if (v != tree.root) {
                 childrenVisited[tree.nodes[v].parent]++;
