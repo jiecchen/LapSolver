@@ -21,10 +21,7 @@ public class TarjanLCA {
     private boolean[] black;
     private int[] ancestor;
 
-    // store queries as a subgraph
-    private int nq;
     private int[][] queries, queryIndices;
-    private int[] answer;
 
     // initialize state
     public TarjanLCA (Tree tree) {
@@ -45,8 +42,8 @@ public class TarjanLCA {
         if (a.length != b.length) {
             throw new Error("LCA query arrays should have same length");
         }
-        nq = a.length;
-        answer = new int[nq];
+        int nq = a.length;
+        int[] answer = new int[nq];
 
         // one pass to compute degrees
         int[] queryDegree = new int[tree.nv];
@@ -80,11 +77,14 @@ public class TarjanLCA {
 
         for (int i = tree.nv-1; i >= 0; i--) {
             int v = order[i];
-            if (v != tree.root) {
-                childrenVisited[tree.nodes[v].parent]++;
+            Tree.TreeNode curNode = tree.getNode(v);
+            Tree.TreeNode parent = curNode.getParent();
+
+            if (v != tree.getRoot()) {
+                childrenVisited[parent.getId()]++;
             }
 
-            if (childrenVisited[v] == tree.nodes[v].getNumberOfChildren()) {
+            if (childrenVisited[v] == curNode.getNumberOfChildren()) {
                 black[v] = true;
 
                 for (int j = 0; j < queries[v].length; j++) {
@@ -94,9 +94,8 @@ public class TarjanLCA {
                     }
                 }
 
-                int parent = tree.nodes[v].parent;
-                unionFind.union(parent, v);
-                ancestor[unionFind.find(parent)] = parent;
+                unionFind.union(parent.getId(), v);
+                ancestor[unionFind.find(parent.getId())] = parent.getId();
             }
         }
 

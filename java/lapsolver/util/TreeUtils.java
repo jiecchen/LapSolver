@@ -16,15 +16,15 @@ public class TreeUtils {
         int[] order = new int[tree.nv];
 
         // start at root
-        order[0] = tree.root;
+        order[0] = tree.getRoot();
         int orderPtr = 1;
         int curPtr = 1;
-        int curNode = tree.root;
+        int curNode = tree.getRoot();
 
         // at each step, expand to children of curNode, then advance curNode
         while (curPtr < tree.nv) {
-            for (int i = 0; i < tree.nodes[curNode].getNumberOfChildren(); i++)
-                order[orderPtr++] = tree.nodes[curNode].getChild(i);
+            for (int i = 0; i < tree.getNode(curNode).getNumberOfChildren(); i++)
+                order[orderPtr++] = tree.getNode(curNode).getChild(i);
             curNode = order[curPtr++];
         }
 
@@ -37,7 +37,7 @@ public class TreeUtils {
         int[] stack = new int[tree.nv];
 
         // start at root
-        stack[0] = tree.root;
+        stack[0] = tree.getRoot();
         int stack_pos = 1, order_pos = 0;
 
         // do DFS
@@ -46,7 +46,7 @@ public class TreeUtils {
             order[order_pos++] = v;
 
             // push children
-            for(int ch : tree.nodes[v].children) {
+            for(int ch : tree.getNode(v).getChildren()) {
                 stack[stack_pos++] = ch;
             }
         }
@@ -59,9 +59,10 @@ public class TreeUtils {
         double[] depth = new double[tree.nv];
 
         // at any point, we have order[i]'s parent's depth
-        depth[tree.root] = 0;
+        depth[tree.getRoot()] = 0;
         for (int i = 1; i < tree.nv; i++) {
-            depth[ order[i] ] = depth[ tree.nodes[order[i]].parent ] + tree.nodes[order[i]].length;
+            depth[ order[i] ] = depth[tree.getNode(order[i]).getParent().getId()]
+                              + tree.getNode(order[i]).getLength();
         }
 
         return depth;
@@ -74,11 +75,10 @@ public class TreeUtils {
 
     // dumps the tree to sout in a BFS ordering
     public static void dumpBFSTree(Tree tree) {
-        int[] treeOrder = bfsOrder(tree);
-        for (int i = 0; i < tree.nv; i++) {
+        for (int i : bfsOrder(tree)) {
             System.out.println("Vertex " + i + " with parent " +
-                                tree.nodes[i].parent + " with cost " +
-                                tree.nodes[i].length + " on the edge to the parent");
+                    tree.getNode(i).getParent().getId() + " with cost " +
+                    tree.getNode(i).getLength() + " on the edge to the parent");
         }
     }
 }

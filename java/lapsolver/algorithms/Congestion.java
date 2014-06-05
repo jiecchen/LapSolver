@@ -70,21 +70,21 @@ public class Congestion {
         int Index = 0;
 
         for (int i = 0; i < vertexCount; i++) {
-            for (int j = 0; j < graph.nbrs[i].length; j++)
+            for (int j = 0; j < graph.nbrs[i].length; j++) {
                 if (i < graph.nbrs[i][j]) { // Do only for ordered pairs
                     // A (u,v) edge with LCA and Cost
 
-                    int u = i;
                     int v = graph.nbrs[i][j];
                     int LCA = lcaEdgeValues[Index];
                     double Cost = graph.weights[i][j];
 
-                    vertexWeights[u] += Cost;
+                    vertexWeights[i] += Cost;
                     vertexWeights[v] += Cost;
                     vertexWeights[LCA] -= 2 * Cost;
 
                     Index++;
                 }
+            }
         }
 
         return vertexWeights;
@@ -99,10 +99,10 @@ public class Congestion {
         for (int i = vertexCount - 1; i > 0; i--) {
 
             int child = bfsOrdering[i];
-            int parent = spanningTree.nodes[child].parent;
+            int parent = spanningTree.getNode(child).getParent().getId();
 
-            double congestionCost = vertexWeights[child] / spanningTree.nodes[child].length;
-            answer.nodes[child].length = congestionCost;
+            // congestion cost
+            answer.getNode(child).setLength(vertexWeights[child] / spanningTree.getNode(child).getLength());
 
             vertexWeights[parent] += vertexWeights[child];
         }

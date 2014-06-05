@@ -143,10 +143,8 @@ public class SimulPathTree implements SpanningTreeStrategy {
             }
         }
 
-        Graph wg = new Graph(ijvI, ijvJ, ijvV);
-
         // return wg.treeToTree();
-        return wg;
+        return new Graph(ijvI, ijvJ, ijvV);
     }
 
     public Graph growTree3() {
@@ -174,7 +172,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
 
         int ijvInd = 0;
 
-        PriorityQueue<NodeEvent> pq = new PriorityQueue<NodeEvent>(graph.nv, new Comparator<NodeEvent>() {
+        PriorityQueue<NodeEvent> pq = new PriorityQueue<>(graph.nv, new Comparator<NodeEvent>() {
             public int compare(NodeEvent X, NodeEvent Y) {
                 return (X.time > Y.time ? 1 : -1);
             }
@@ -273,7 +271,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
                 logger.write("(" + u + ", " + graph.nbrs[u][i] + "), " + edgeNums[u][i]);
 
 
-        PriorityQueue<EdgeEvent> pq = new PriorityQueue<EdgeEvent>(graph.ne, new Comparator<EdgeEvent>() {
+        PriorityQueue<EdgeEvent> pq = new PriorityQueue<>(graph.ne, new Comparator<EdgeEvent>() {
             public int compare(EdgeEvent X, EdgeEvent Y) {
                 return (X.time > Y.time ? 1 : -1);
             }
