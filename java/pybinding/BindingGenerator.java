@@ -35,7 +35,8 @@ public class BindingGenerator {
 
     /**
      * Construct a new BindingGenerator
-     * @param jarPath path to the JAR for which to generate python bindings
+     *
+     * @param jarPath     path to the JAR for which to generate python bindings
      * @param packageName the name of the Java package (in the JAR) to be bound
      * @throws IOException when the JAR file cannot be opened.
      */
@@ -51,7 +52,7 @@ public class BindingGenerator {
         packages = new ArrayList<>();
 
         Enumeration<JarEntry> entries = module.entries();
-        while(entries.hasMoreElements()) {
+        while (entries.hasMoreElements()) {
             JarEntry entry = entries.nextElement();
             String entryName = entry.getName().replace('/', '.');
 
@@ -92,18 +93,20 @@ public class BindingGenerator {
 
     /**
      * Find the containing package of a class name
+     *
      * @param objectName fully-qualified class name (e.g. "java.lang.System")
      * @return Name of the package (e.g. "java.lang")
      */
     private String getContainingPackage(String objectName) {
         int lastIdx = objectName.lastIndexOf('.');
-        if(lastIdx == -1)
+        if (lastIdx == -1)
             return "";
-        return objectName.substring(0,lastIdx);
+        return objectName.substring(0, lastIdx);
     }
 
     /**
      * Load a template string from resources
+     *
      * @param templateFile the name of the template (e.g. "tlheader")
      * @return The contents of the template file
      */
@@ -115,12 +118,13 @@ public class BindingGenerator {
 
     /**
      * Create a python-ready reference to a package or class
+     *
      * @param packageName the name of the java package (e.g. "java.lang")
      * @return The jpype call to load it (e.g. "JPackage(\"java\").lang")
      */
     private String asJPype(String packageName) {
         String[] components = packageName.split("\\.");
-        if(components.length == 0)
+        if (components.length == 0)
             return "";
         StringBuilder newName = new StringBuilder();
         newName.append("JPackage(\"");
@@ -135,6 +139,7 @@ public class BindingGenerator {
 
     /**
      * Generate the python module.
+     *
      * @param directoryName directory to store the generated module
      */
     public void generate(String directoryName) {
@@ -143,9 +148,9 @@ public class BindingGenerator {
         // Make sure the directory name has consistent separators
         // and is clearly either absolute or relative
         String outputDirectory = directoryName;
-        if(!outputDirectory.startsWith("/") && !outputDirectory.startsWith("./"))
+        if (!outputDirectory.startsWith("/") && !outputDirectory.startsWith("./"))
             outputDirectory = "./" + outputDirectory;
-        if(!outputDirectory.endsWith("/"))
+        if (!outputDirectory.endsWith("/"))
             outputDirectory += "/";
 
         for (String curPackage : packages) {
@@ -170,8 +175,8 @@ public class BindingGenerator {
                 String className = currentClass.getName();
                 String parentPackage = getContainingPackage(className);
 
-                if(parentPackage.equals(curPackage)) {
-                    if(currentClass.isInterface()) {
+                if (parentPackage.equals(curPackage)) {
+                    if (currentClass.isInterface()) {
                         System.err.println("Warning: skipping interface " + className);
                         continue;
                     }
@@ -183,7 +188,7 @@ public class BindingGenerator {
                     pythonModule.append("class ").append(pyClassName).append("(_GeneratedObject):\n");
 
                     // Emit the constructor for the class (if it has one)
-                    if(currentClass.getConstructors().length > 0) {
+                    if (currentClass.getConstructors().length > 0) {
                         String ctor = getTemplate("constructor");
                         ctor = ctor.replaceAll("\\{\\{CLASS\\}\\}", pyClassName);
                         ctor = ctor.replaceAll("\\{\\{JAVA_PACKAGE\\}\\}", curPackage);
@@ -200,7 +205,7 @@ public class BindingGenerator {
             }
 
             // Write the generated module to __init__.py.
-            try(BufferedWriter writer = Files.newBufferedWriter(moduleFile.toPath(),
+            try (BufferedWriter writer = Files.newBufferedWriter(moduleFile.toPath(),
                     Charset.forName("US-ASCII"))) {
                 String contents = pythonModule.toString();
                 writer.write(contents, 0, contents.length());
@@ -224,7 +229,7 @@ public class BindingGenerator {
     public static void main(String[] args) {
         try {
             BindingGenerator bindingGenerator = new BindingGenerator(args[0], args[1]);
-            bindingGenerator.generate("python");
+            bindingGenerator.generate(args[2]);
         } catch (IOException e) {
             e.printStackTrace();
         }
