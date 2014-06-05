@@ -3,7 +3,7 @@
  * @author Alex Reinking <alexander.reinking@yale.edu>
  * @date Tue Jun 3 2014
  *
- * An LSST solver based on Prim's algorithm. This will not produce
+ * A dummy low-stretch spanning tree strategy, which just uses Kruskal's algorithm. This will not produce
  * good low stretch spanning trees.
  *
  * Still a stub.
