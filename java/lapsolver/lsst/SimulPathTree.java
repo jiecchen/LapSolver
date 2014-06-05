@@ -49,9 +49,6 @@ public class SimulPathTree implements SpanningTreeStrategy {
     public double[] ijvV;
 
     public SimulPathTree() {}
-    public SimulPathTree(WeightedGraph g) {
-        this.g = g;
-    }
 
     public WeightedGraph growTree() {
         Logger logger = new Logger();
