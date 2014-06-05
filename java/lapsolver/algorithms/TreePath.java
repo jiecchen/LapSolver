@@ -17,11 +17,10 @@
 package lapsolver.algorithms;
 
 import lapsolver.Tree;
-import lapsolver.algorithms.TarjanLCA;
 import lapsolver.util.TreeUtils;
 
 public class TreePath {
-    private Tree tree;
+    private final Tree tree;
     public double depth[];
 
     // constructor: do precomputations

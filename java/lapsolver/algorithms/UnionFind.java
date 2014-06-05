@@ -13,15 +13,15 @@ public class UnionFind {
     //-----------------------
     // the number of vertices
     //
-    public int nv;
+    public final int nv;
 
     //-----------------------
     // a pointer to its parent vertex, or -1 if none
     //
-    private int[] ptr;
+    private final int[] ptr;
 
     // internal state variables for find
-    private int[] find_stack;
+    private final int[] find_stack;
 
     // Call with number of items in the sets
     public UnionFind(int n) {
