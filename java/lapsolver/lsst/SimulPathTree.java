@@ -37,7 +37,6 @@ import java.util.PriorityQueue;
 import java.util.Random;
 
 public class SimulPathTree implements SpanningTreeStrategy {
-
     public Tree tree;
     public Graph graph;
 
