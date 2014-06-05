@@ -28,6 +28,19 @@ class Congestion(_GeneratedObject):
             raise RuntimeError("[ERROR] lapsolver.algorithms: Congestion: incorrect arguments")
 
 
+class PairSampler(_GeneratedObject):
+    def __init__(self, *args, **kwargs):
+        super(PairSampler, self).__init__(*args, **kwargs)
+        try:
+            self._java_class = JPackage("lapsolver").algorithms.PairSampler
+            if "fromJVM" in kwargs and kwargs["fromJVM"]:
+                self._instance = args[0]
+            else:
+                self._instance = self._java_class(*_java_typecast(*args))
+        except:
+            raise RuntimeError("[ERROR] lapsolver.algorithms: PairSampler: incorrect arguments")
+
+
 class TarjanLCA(_GeneratedObject):
     def __init__(self, *args, **kwargs):
         super(TarjanLCA, self).__init__(*args, **kwargs)
@@ -41,19 +54,6 @@ class TarjanLCA(_GeneratedObject):
             raise RuntimeError("[ERROR] lapsolver.algorithms: TarjanLCA: incorrect arguments")
 
 
-class UnionFind(_GeneratedObject):
-    def __init__(self, *args, **kwargs):
-        super(UnionFind, self).__init__(*args, **kwargs)
-        try:
-            self._java_class = JPackage("lapsolver").algorithms.UnionFind
-            if "fromJVM" in kwargs and kwargs["fromJVM"]:
-                self._instance = args[0]
-            else:
-                self._instance = self._java_class(*_java_typecast(*args))
-        except:
-            raise RuntimeError("[ERROR] lapsolver.algorithms: UnionFind: incorrect arguments")
-
-
 class Stretch(_GeneratedObject):
     def __init__(self, *args, **kwargs):
         super(Stretch, self).__init__(*args, **kwargs)
@@ -65,5 +65,18 @@ class Stretch(_GeneratedObject):
                 self._instance = self._java_class(*_java_typecast(*args))
         except:
             raise RuntimeError("[ERROR] lapsolver.algorithms: Stretch: incorrect arguments")
+
+
+class UnionFind(_GeneratedObject):
+    def __init__(self, *args, **kwargs):
+        super(UnionFind, self).__init__(*args, **kwargs)
+        try:
+            self._java_class = JPackage("lapsolver").algorithms.UnionFind
+            if "fromJVM" in kwargs and kwargs["fromJVM"]:
+                self._instance = args[0]
+            else:
+                self._instance = self._java_class(*_java_typecast(*args))
+        except:
+            raise RuntimeError("[ERROR] lapsolver.algorithms: UnionFind: incorrect arguments")
 
 

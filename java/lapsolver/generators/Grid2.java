@@ -1,6 +1,6 @@
 package lapsolver.generators;
 
-import lapsolver.WeightedGraph;
+import lapsolver.Graph;
 
 public class Grid2 implements GraphFactory {
     static {
@@ -11,7 +11,7 @@ public class Grid2 implements GraphFactory {
     private final int height;
     private final int verticalWeight;
 
-    private WeightedGraph graph = null;
+    private Graph graph = null;
 
     /**
      * Construct an evenly-weighted 2-dimensional grid graph
@@ -46,10 +46,10 @@ public class Grid2 implements GraphFactory {
     /**
      * Actually generate the graph
      *
-     * @return a WeightedGraph representing a 2D grid
+     * @return a Graph representing a 2D grid
      */
     @Override
-    public WeightedGraph generateGraph() {
+    public Graph generateGraph() {
         if (graph != null)
             return graph;
 
@@ -61,16 +61,15 @@ public class Grid2 implements GraphFactory {
         int dst[] = new int[ne];
         double weight[] = new double[ne];
 
-//        populate(src, dst, weight); // 3 seconds faster??
+//        populate(src, dst, weight);
         populateC(src, dst, weight, height, width, verticalWeight);
 
-        graph = new WeightedGraph(src, dst, weight);
+        graph = new Graph(src, dst, weight);
         return graph;
     }
 
     /**
      * Populate the src, dst, and weight arrays with the grid edges
-     * TODO: translate to C, and call via JNI
      *
      * @param src    the source vertices
      * @param dst    the corresponding destinations
@@ -101,8 +100,7 @@ public class Grid2 implements GraphFactory {
     // benchmark
     public static void main(String[] args) {
         long startTime = System.currentTimeMillis();
-        for (int i = 0; i < 1000; i++)
-            new Grid2(400, 400).generateGraph();
+        new Grid2(2000, 2000).generateGraph();
         long endTime = System.currentTimeMillis();
         System.out.println("Total execution time = " + ((endTime - startTime) / 1000.0) + "s");
     }

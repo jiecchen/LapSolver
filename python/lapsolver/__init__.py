@@ -61,30 +61,17 @@ class _GeneratedObject(object):
         return self._instance
 
 
-class Logger(_GeneratedObject):
+class UnweightedGraph(_GeneratedObject):
     def __init__(self, *args, **kwargs):
-        super(Logger, self).__init__(*args, **kwargs)
+        super(UnweightedGraph, self).__init__(*args, **kwargs)
         try:
-            self._java_class = JPackage("lapsolver").Logger
+            self._java_class = JPackage("lapsolver").UnweightedGraph
             if "fromJVM" in kwargs and kwargs["fromJVM"]:
                 self._instance = args[0]
             else:
                 self._instance = self._java_class(*_java_typecast(*args))
         except:
-            raise RuntimeError("[ERROR] lapsolver: Logger: incorrect arguments")
-
-
-class WeightedGraph(_GeneratedObject):
-    def __init__(self, *args, **kwargs):
-        super(WeightedGraph, self).__init__(*args, **kwargs)
-        try:
-            self._java_class = JPackage("lapsolver").WeightedGraph
-            if "fromJVM" in kwargs and kwargs["fromJVM"]:
-                self._instance = args[0]
-            else:
-                self._instance = self._java_class(*_java_typecast(*args))
-        except:
-            raise RuntimeError("[ERROR] lapsolver: WeightedGraph: incorrect arguments")
+            raise RuntimeError("[ERROR] lapsolver: UnweightedGraph: incorrect arguments")
 
 
 class Tree(_GeneratedObject):
@@ -111,18 +98,5 @@ class Graph(_GeneratedObject):
                 self._instance = self._java_class(*_java_typecast(*args))
         except:
             raise RuntimeError("[ERROR] lapsolver: Graph: incorrect arguments")
-
-
-class Sampler2(_GeneratedObject):
-    def __init__(self, *args, **kwargs):
-        super(Sampler2, self).__init__(*args, **kwargs)
-        try:
-            self._java_class = JPackage("lapsolver").Sampler2
-            if "fromJVM" in kwargs and kwargs["fromJVM"]:
-                self._instance = args[0]
-            else:
-                self._instance = self._java_class(*_java_typecast(*args))
-        except:
-            raise RuntimeError("[ERROR] lapsolver: Sampler2: incorrect arguments")
 
 

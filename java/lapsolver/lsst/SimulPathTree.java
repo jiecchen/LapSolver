@@ -15,7 +15,7 @@ example usage from Matlab:
 
 a = del3Graph(10000);
 [ai,aj,av] = find(tril(a));
-graph = WeightedGraph();
+graph = Graph();
 graph.fromMatlab(ai, aj, av);
 spt = SimulPathTree(graph);
 tr = spt.edgeGrow;
@@ -26,9 +26,9 @@ trt.compTotalStretch(graph)/length(ai)
 
 package lapsolver.lsst;
 
+import lapsolver.Graph;
 import lapsolver.util.Logger;
 import lapsolver.Tree;
-import lapsolver.WeightedGraph;
 import lapsolver.algorithms.UnionFind;
 
 import java.util.Comparator;
@@ -38,7 +38,7 @@ import java.util.Random;
 public class SimulPathTree implements SpanningTreeStrategy {
 
     public Tree tree;
-    public WeightedGraph graph;
+    public Graph graph;
 
     // times[node] is time at which node should fire
     public double[] times;
@@ -50,7 +50,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
 
     public SimulPathTree() {}
 
-    public WeightedGraph growTree() {
+    public Graph growTree() {
         Logger logger = new Logger();
         //	logger.start("SimulPathTree.log");
 
@@ -143,13 +143,13 @@ public class SimulPathTree implements SpanningTreeStrategy {
             }
         }
 
-        WeightedGraph wg = new WeightedGraph(ijvI, ijvJ, ijvV);
+        Graph wg = new Graph(ijvI, ijvJ, ijvV);
 
         // return wg.treeToTree();
         return wg;
     }
 
-    public WeightedGraph growTree3() {
+    public Graph growTree3() {
         Logger logger = new Logger();
         logger.start("SimulPathTree.log");
 
@@ -232,14 +232,14 @@ public class SimulPathTree implements SpanningTreeStrategy {
             }
         }
 
-        WeightedGraph wg = new WeightedGraph();
+        Graph wg = new Graph();
         wg.fromMatlab(ijvI, ijvJ, ijvV);
 
         // return wg.treeToTree();
         return wg;
     }
 
-    public WeightedGraph edgeGrow() {
+    public Graph edgeGrow() {
         Logger logger = new Logger();
         logger.start("SimulPathTree.log");
 
@@ -359,11 +359,11 @@ public class SimulPathTree implements SpanningTreeStrategy {
         }
 
         // return wg.treeToTree();
-        return new WeightedGraph(ijvI, ijvJ, ijvV);
+        return new Graph(ijvI, ijvJ, ijvV);
     }
 
     @Override
-    public Tree solve(WeightedGraph in) {
+    public Tree solve(Graph in) {
         this.graph = in;
         return growTree().treeToTree();
     }
@@ -389,7 +389,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
      * so far, much worse on random regular graphs
      */
     /*
-    public WeightedGraph growTree2() {
+    public Graph growTree2() {
 
 	ijvI = new int[graph.nv-1];
 	ijvJ = new int[graph.nv-1];
@@ -462,7 +462,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
 	    }
 	}
 	
-	WeightedGraph wg = new WeightedGraph();
+	Graph wg = new Graph();
 	wg.fromMatlab(ijvI,ijvJ,ijvV);
 
 	// return wg.treeToTree();

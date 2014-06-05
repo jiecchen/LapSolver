@@ -9,15 +9,14 @@
 package lapsolver.algorithms;
 
 import lapsolver.Tree;
-import lapsolver.WeightedGraph;
-import lapsolver.algorithms.TreePath;
+import lapsolver.Graph;
 
 public class Stretch {
-    private WeightedGraph graph;
+    private Graph graph;
     private Tree spanningTree;
 
     // constructor: just initialize pointers
-    public Stretch (WeightedGraph graph, Tree spanningTree) {
+    public Stretch (Graph graph, Tree spanningTree) {
         this.graph = graph;
         this.spanningTree = spanningTree;
     }
