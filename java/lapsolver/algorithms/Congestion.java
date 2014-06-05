@@ -39,7 +39,7 @@ public class Congestion {
     private int[] LcaResult() {
         TarjanLCA LcaSolver = new TarjanLCA(spanningTree);
 
-        int Index = 0;
+        int index = 0;
         int[] LeftNeighbors = new int[edgeCount];
         int[] RightNeighbors = new int[edgeCount];
 
@@ -48,9 +48,9 @@ public class Congestion {
 
             for (int j = 0; j < NeighborCount; j++)
                 if (i < graph.nbrs[i][j]) { // Check only for ordered edges
-                    LeftNeighbors[Index] = i;
-                    RightNeighbors[Index] = graph.nbrs[i][j];
-                    Index++;
+                    LeftNeighbors[index] = i;
+                    RightNeighbors[index] = graph.nbrs[i][j];
+                    index++;
                 }
         }
 
@@ -67,7 +67,7 @@ public class Congestion {
         int[] lcaEdgeValues = LcaResult();
         double[] vertexWeights = new double[vertexCount];
 
-        int Index = 0;
+        int index = 0;
 
         for (int i = 0; i < vertexCount; i++) {
             for (int j = 0; j < graph.nbrs[i].length; j++) {
@@ -75,14 +75,14 @@ public class Congestion {
                     // A (u,v) edge with LCA and Cost
 
                     int v = graph.nbrs[i][j];
-                    int LCA = lcaEdgeValues[Index];
+                    int LCA = lcaEdgeValues[index];
                     double Cost = graph.weights[i][j];
 
                     vertexWeights[i] += Cost;
                     vertexWeights[v] += Cost;
                     vertexWeights[LCA] -= 2 * Cost;
 
-                    Index++;
+                    index++;
                 }
             }
         }
