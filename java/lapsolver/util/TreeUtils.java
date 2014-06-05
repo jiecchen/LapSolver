@@ -31,6 +31,31 @@ public class TreeUtils {
         return order;
     }
 
+    // return a permutation of the vertices in DFS order
+    public static int[] dfsOrder(Tree tree) {
+        int[] order = new int[tree.nv];
+        int[] stack = new int[tree.nv];
+
+        // start at root
+        stack[0] = tree.root;
+        int stack_pos = 1, order_pos = 0;
+
+        // do DFS
+        while(stack_pos > 0) {
+            int v = stack[--stack_pos]; // pop
+            order[order_pos++] = v;
+
+            System.out.println("visiting " + v);
+
+            // push children
+            for(int ch : tree.nodes[v].children) {
+                stack[stack_pos++] = ch;
+            }
+        }
+
+        return order;
+    }
+
     // return depths, given a valid BFS order
     public static double[] depthFromBfsOrder(Tree tree, int[] order) {
         double[] depth = new double[tree.nv];
