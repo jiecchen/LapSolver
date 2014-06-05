@@ -43,4 +43,9 @@ public class TreeUtils {
 
         return depth;
     }
+
+    // return depths, given a tree (does the BFS too)
+    public static double[] getDepths(Tree tree) {
+        return depthFromBfsOrder( tree, bfsOrder(tree) );
+    }
 }

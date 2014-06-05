@@ -18,6 +18,7 @@ package lapsolver.algorithms;
 
 import lapsolver.Tree;
 import lapsolver.algorithms.TarjanLCA;
+import lapsolver.util.TreeUtils;
 
 public class TreePath {
     private Tree tree;
@@ -29,8 +30,7 @@ public class TreePath {
         depth = new double[tree.nv];
 
         // compute depths
-        depth[tree.root] = 0;
-        dfs(tree.root);
+        depth = TreeUtils.getDepths(tree);
     }
 
     // query path lengths
@@ -59,16 +59,5 @@ public class TreePath {
         }
 
         return query(ai, bi);
-    }
-
-    // populate depth array
-    public void dfs(int u) {
-        if (u != tree.root) {
-            depth[u] = depth[tree.nodes[u].parent] + tree.nodes[u].length;
-        }
-
-        for (int v : tree.nodes[u].children) {
-            dfs(v);
-        }
     }
 }
