@@ -17,9 +17,11 @@ JNIEXPORT void JNICALL Java_lapsolver_generators_Grid2_populateC(
     double *weight = (*env)->GetDoubleArrayElements(env, jWeight, 0);
 
     int e = 0;
+    const int shortHeight = height-1;
+    const int shortWidth = width-1;
     // populate the majority of edges
-    for(int i = 0; i < height - 1; i++) {
-        for(int j = 0; j < width - 1; j++) {
+    for(int i = 0; i < shortHeight; i++) {
+        for(int j = 0; j < shortWidth; j++) {
             // vertical
             src[e] = getIdx(i, j);
             dst[e] = getIdx(i+1, j);

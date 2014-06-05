@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-O3 -fivopts -ftree-parallelize-loops=12 -march=native -std=c99 -fPIC
+CFLAGS=-O3 -ftree-vectorizer-verbose=2 -march=native -std=c99 -fPIC
 INCLUDES=-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux
 TARGET=../../build
 
