@@ -427,7 +427,7 @@ public class Tree {
     /*
      * the subroutine for compStretch
      *
-     * first, account for all edges betwen this subtree
+     * first, account for all edges between this subtree
      *  and those in comp curComp
      *
      * then, make the component of all these curComp

@@ -26,7 +26,7 @@ package lapsolver;
 
 public class WeightedGraph {
     //-----------------------
-    //   the number of verts
+    //   the number of vertices
     //
     public int nv;
 

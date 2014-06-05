@@ -71,4 +71,14 @@ public class TreeUtils {
     public static double[] getDepths(Tree tree) {
         return depthFromBfsOrder( tree, bfsOrder(tree) );
     }
+
+    // dumps the tree to sout in a BFS ordering
+    public static void dumpBFSTree(Tree tree) {
+        int[] treeOrder = bfsOrder(tree);
+        for (int i = 0; i < tree.nv; i++) {
+            System.out.println("Vertex " + i + " with parent " +
+                                tree.nodes[i].parent + " with cost " +
+                                tree.nodes[i].length + " on the edge to the parent");
+        }
+    }
 }
