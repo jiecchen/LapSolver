@@ -31,12 +31,12 @@ public class Congestion {
         this.vertexCount = graph.nv;
         this.edgeCount = graph.ne;
 
-        this.vertexWeights = getVertexWeights();
-        this.congestionTree = getCongestionTree();
+        this.vertexWeights = GetVertexWeights();
+        this.congestionTree = GetCongestionTree();
     }
 
     // For a graph and its tree, gets the lca values for every edge of the graph
-    private int[] lcaResult() {
+    private int[] LcaResult() {
         TarjanLCA LcaSolver = new TarjanLCA(spanningTree);
 
         int Index = 0;
@@ -63,8 +63,8 @@ public class Congestion {
     // This will help us have a complexity of O(M) on this segment of the code.
 
     // Assigns values to vertexWeights
-    private double[] getVertexWeights() {
-        int[] lcaEdgeValues = lcaResult();
+    private double[] GetVertexWeights() {
+        int[] lcaEdgeValues = LcaResult();
         double[] vertexWeights = new double[vertexCount];
 
         int Index = 0;
@@ -91,7 +91,7 @@ public class Congestion {
     }
 
     // Gets the congestionTree
-    private Tree getCongestionTree() {
+    private Tree GetCongestionTree() {
         Tree answer = spanningTree;
 
         int[] bfsOrdering = TreeUtils.bfsOrder(spanningTree);   // Get the BFS ordering
