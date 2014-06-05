@@ -13,12 +13,12 @@ import lapsolver.Tree;
 
 public class GraphUtils {
     // given a graph structure that represents a tree, turn it into a tree
-    public Tree toTree(Graph g) {
+    public static Tree toTree(Graph g) {
         return g.treeToTree();
     }
 
     // prints the contents of g to stdout, as an adjacency list
-    public void dump(Graph g) {
+    public static void dump(Graph g) {
         for (int x = 0; x < g.nv; x++) {
             System.out.print(x + " : ");
             for (int i = 0; i < g.deg[x]; i++)

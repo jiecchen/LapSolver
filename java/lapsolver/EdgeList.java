@@ -11,6 +11,8 @@
 
 package lapsolver;
 
+import lapsolver.util.GraphUtils;
+
 public class EdgeList {
     public int edgeCount;
     public int[] firstEntry;
@@ -81,22 +83,7 @@ public class EdgeList {
     }
     
     public Tree toTree() {
-        return toTree(0);
-    }
-
-    public Tree toTree(int root) {
-        int nV = 0;
-        for (int i : firstEntry) if (i > nV) nV = i;
-        for (int i : secondEntry) if (i > nV) nV = i;
-
-        if (nV != edgeCount)
-            throw new RuntimeException("Error: edge list does not represent a tree.");
-
-        int [] parentList = new int[nV];
-        for (int i = 0; i < edgeCount; i++) {
-
-        }
-        return new Tree(parentList);
+        return GraphUtils.toTree(toGraph());
     }
         
 }
