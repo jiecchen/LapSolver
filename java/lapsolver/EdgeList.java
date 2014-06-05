@@ -17,7 +17,6 @@ public class EdgeList {
     public int[] secondEntry;
     public double[] weight;
 
-
     // A null EdgeList
     public EdgeList() {}
 
@@ -37,7 +36,7 @@ public class EdgeList {
         this.weight = W;
     }
 
-    // EdgeList from a tree
+    // return an EdgeList from a tree
     public EdgeList (Tree tree) {
         this.edgeCount = tree.nv;
         this.firstEntry = new int[edgeCount - 1];
@@ -60,7 +59,7 @@ public class EdgeList {
         this.firstEntry = new int[edgeCount];
         this.secondEntry = new int[edgeCount];
         this.weight = new double[edgeCount];
-
+        
         int index = 0;
         int vertexCount = graph.nv;
         for (int i = 0; i < vertexCount; i++)
@@ -77,4 +76,28 @@ public class EdgeList {
                 }
             }
     }
+
+    public Graph toGraph() {
+        return new Graph(firstEntry, secondEntry, weight);
+    }
+    
+    public Tree toTree() {
+        return toTree(0);
+    }
+
+    public Tree toTree(int root) {
+        int nV = 0;
+        for (int i : firstEntry) if (i > nV) nV = i;
+        for (int i : secondEntry) if (i > nV) nV = i;
+
+        if (nV != edgeCount)
+            throw new RuntimeException("Error: edge list does not represent a tree.");
+
+        int [] parentList = new int[nV];
+        for (int i = 0; i < edgeCount; i++) {
+
+        }
+        return new Tree(parentList);
+    }
+        
 }
