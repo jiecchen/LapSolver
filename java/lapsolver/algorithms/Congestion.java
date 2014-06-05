@@ -99,10 +99,10 @@ public class Congestion {
         for (int i = vertexCount - 1; i > 0; i--) {
 
             int child = bfsOrdering[i];
-            int parent = spanningTree.nodes[child].parent;
+            int parent = spanningTree.getNode(child).getParent().getId();
 
             // congestion cost
-            answer.nodes[child].length = vertexWeights[child] / spanningTree.nodes[child].length;
+            answer.getNode(child).setLength(vertexWeights[child] / spanningTree.getNode(child).getLength());
 
             vertexWeights[parent] += vertexWeights[child];
         }

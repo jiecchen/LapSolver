@@ -36,21 +36,16 @@ public class Tree {
     static final boolean trace = false;
 
     public int nv;  // number of verts
-
-    public TreeNode[] nodes;
-
-    public int root;
-
     public double[] depth;
     public double[] compDepth;
     public int[] order;
-
-
     public ArrayDeque<Integer> aux;
     public ArrayDeque<Integer> aux2;
     public int[] comp;
     public int[] nodeSize;
     Graph stretchGraph;
+    private TreeNode[] nodes;
+    private int root;
     private Graph E;
 
     /**
@@ -72,31 +67,8 @@ public class Tree {
         this.fromParentArray(p);
     }
 
-    /**
-     * Make a Tree from parent array and weights on edges
-     *
-     * @param p the parent array
-     * @param w the weight array
-     */
-    public Tree(int[] p, double[] w) {
-        nodes = new TreeNode[p.length];
-        this.fromParentLengthArray(p, w);
-    }
-
-    /**
-     * Outputs a parent pointer array for the tree
-     * The root points to itself
-     *
-     * @return a parent pointer array
-     */
-    public int[] getParentArray() {
-        int[] p = new int[nv];
-
-        for (int i = 0; i < nv; i++) {
-            p[i] = nodes[i].parent;
-        }
-
-        return p;
+    public TreeNode getNode(int n) {
+        return nodes[n];
     }
 
     /**
@@ -105,34 +77,13 @@ public class Tree {
      *
      * @param p pointers to parents
      */
-    public void fromParentArray(int[] p) {
+    private void fromParentArray(int[] p) {
         nv = p.length;
 
         nodes = new TreeNode[nv];
 
         for (int i = 0; i < nv; i++) {
-            nodes[i] = new TreeNode(p[i]);
-            if (p[i] == i)
-                root = i;
-        }
-
-        buildChildrenFromParents();
-    }
-
-    /**
-     * Builds tree from parent pointers.
-     * the root should have a self-loop.
-     *
-     * @param p pointers to parents
-     * @param w weights on edges (which now turn to 1/length)
-     */
-    public void fromParentLengthArray(int[] p, double[] w) {
-        nv = p.length;
-
-        nodes = new TreeNode[nv];
-
-        for (int i = 0; i < nv; i++) {
-            nodes[i] = new TreeNode(p[i], 1 / w[i]);
+            nodes[i] = new TreeNode(p[i], i);
             if (p[i] == i)
                 root = i;
         }
@@ -148,6 +99,38 @@ public class Tree {
         for (int i = 0; i < nv; i++)
             if (i != root)
                 nodes[nodes[i].parent].addChild(i);
+    }
+
+    /**
+     * Make a Tree from parent array and weights on edges
+     *
+     * @param p the parent array
+     * @param w the weight array
+     */
+    public Tree(int[] p, double[] w) {
+        nodes = new TreeNode[p.length];
+        this.fromParentLengthArray(p, w);
+    }
+
+    /**
+     * Builds tree from parent pointers.
+     * the root should have a self-loop.
+     *
+     * @param p pointers to parents
+     * @param w weights on edges (which now turn to 1/length)
+     */
+    public void fromParentLengthArray(int[] p, double[] w) {
+        nv = p.length;
+
+        nodes = new TreeNode[nv];
+
+        for (int i = 0; i < nv; i++) {
+            nodes[i] = new TreeNode(p[i], i, 1 / w[i]);
+            if (p[i] == i)
+                root = i;
+        }
+
+        buildChildrenFromParents();
     }
 
     /**
@@ -288,7 +271,7 @@ public class Tree {
             // log.write("r: " + r);
 
             int lev = mindepth;
-            while(cums[lev - mindepth] < r)
+            while (cums[lev - mindepth] < r)
                 lev++;
 
             // log.write("lev: " + lev + " last " + s[lev].last);
@@ -324,6 +307,26 @@ public class Tree {
         return pArray;
     }
 
+    public int getRoot() {
+        return root;
+    }
+
+    /**
+     * Outputs a parent pointer array for the tree
+     * The root points to itself
+     *
+     * @return a parent pointer array
+     */
+    public int[] getParentArray() {
+        int[] p = new int[nv];
+
+        for (int i = 0; i < nv; i++) {
+            p[i] = nodes[i].parent;
+        }
+
+        return p;
+    }
+
     /**
      * Computes the total stretch
      *
@@ -346,7 +349,7 @@ public class Tree {
         int node;     // and, its node
         int numComps = 0;
 
-        aux  = new ArrayDeque<>(nv);  // will use for traversing
+        aux = new ArrayDeque<>(nv);  // will use for traversing
         aux2 = new ArrayDeque<>(nv);  // will use for traversing
 
         double totStretch = 0;
@@ -512,7 +515,7 @@ public class Tree {
         int node;     // and, its node
         int numComps = 0;
 
-        aux  = new ArrayDeque<>(nv);  // will use for traversing
+        aux = new ArrayDeque<>(nv);  // will use for traversing
         aux2 = new ArrayDeque<>(nv);  // will use for traversing
 
         double totStretch = 0;
@@ -632,29 +635,49 @@ public class Tree {
      * length is length of edge to the parent
      */
     public class TreeNode {
-        public int parent;
-        public double length;
-        public ArrayList<Integer> children;
+        private int parent;
+        private int id;
+        private double length;
+
+        public ArrayList<Integer> getChildren() {
+            return children;
+        }
+
+        private ArrayList<Integer> children;
 
         /**
          * Create a node by specifying its parent
          *
          * @param p parent
          */
-        public TreeNode(int p) {
+        public TreeNode(int p, int self) {
             parent = p;
+            id = self;
             length = 1;
             children = new ArrayList<>();
         }
 
-        public TreeNode(int p, double length) {
+        public TreeNode(int p, int self, double edgeLength) {
             parent = p;
-            this.length = length;
+            id = self;
+            length = edgeLength;
             children = new ArrayList<>();
         }
 
-        public void setParent(int p) {
-            parent = p;
+        public TreeNode getParent() {
+            return nodes[parent];
+        }
+
+        public void setParent(TreeNode p) {
+            parent = p.getId();
+        }
+
+        public double getLength() {
+            return length;
+        }
+
+        public void setLength(double length) {
+            this.length = length;
         }
 
         public void addChild(int k) {
@@ -667,6 +690,10 @@ public class Tree {
 
         public int getChild(int i) {
             return children.get(i);
+        }
+
+        public int getId() {
+            return id;
         }
     }
 }
