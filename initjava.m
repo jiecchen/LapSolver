@@ -10,3 +10,5 @@ import lapsolver.algorithms.*;
 import lapsolver.lsst.*;
 import lapsolver.generators.*;
 import lapsolver.util.*;
+import lapsolver.solvers.*;
+import lapsolver.solvers.kelner.*;
