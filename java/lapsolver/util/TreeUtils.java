@@ -30,4 +30,17 @@ public class TreeUtils {
 
         return order;
     }
+
+    // return depths, given a valid BFS order
+    public static double[] depthFromBfsOrder(Tree tree, int[] order) {
+        double[] depth = new double[tree.nv];
+
+        // at any point, we have order[i]'s parent's depth
+        depth[tree.root] = 0;
+        for (int i = 1; i < tree.nv; i++) {
+            depth[ order[i] ] = depth[ tree.nodes[order[i]].parent ] + tree.nodes[order[i]].length;
+        }
+
+        return depth;
+    }
 }
