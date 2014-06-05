@@ -17,8 +17,8 @@ import lapsolver.util.TreeUtils;
 public class Congestion {
 
     // Variables needed for the algorithm
-    private final Tree spanningTree;
-    private final Graph graph;
+    public final Tree spanningTree;
+    public final Graph graph;
     private final int vertexCount;
     private final int edgeCount;
     private final double[] vertexWeights;
