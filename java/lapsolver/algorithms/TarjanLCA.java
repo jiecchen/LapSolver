@@ -21,10 +21,7 @@ public class TarjanLCA {
     private boolean[] black;
     private int[] ancestor;
 
-    // store queries as a subgraph
-    private int nq;
     private int[][] queries, queryIndices;
-    private int[] answer;
 
     // initialize state
     public TarjanLCA (Tree tree) {
@@ -45,8 +42,8 @@ public class TarjanLCA {
         if (a.length != b.length) {
             throw new Error("LCA query arrays should have same length");
         }
-        nq = a.length;
-        answer = new int[nq];
+        int nq = a.length;
+        int[] answer = new int[nq];
 
         // one pass to compute degrees
         int[] queryDegree = new int[tree.nv];

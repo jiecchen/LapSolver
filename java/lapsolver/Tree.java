@@ -346,8 +346,8 @@ public class Tree {
         int node;     // and, its node
         int numComps = 0;
 
-        aux  = new ArrayDeque<Integer>(nv);  // will use for traversing
-        aux2 = new ArrayDeque<Integer>(nv);  // will use for traversing
+        aux  = new ArrayDeque<>(nv);  // will use for traversing
+        aux2 = new ArrayDeque<>(nv);  // will use for traversing
 
         double totStretch = 0;
 
@@ -512,8 +512,8 @@ public class Tree {
         int node;     // and, its node
         int numComps = 0;
 
-        aux  = new ArrayDeque<Integer>(nv);  // will use for traversing
-        aux2 = new ArrayDeque<Integer>(nv);  // will use for traversing
+        aux  = new ArrayDeque<>(nv);  // will use for traversing
+        aux2 = new ArrayDeque<>(nv);  // will use for traversing
 
         double totStretch = 0;
 
@@ -644,13 +644,13 @@ public class Tree {
         public TreeNode(int p) {
             parent = p;
             length = 1;
-            children = new ArrayList<Integer>();
+            children = new ArrayList<>();
         }
 
         public TreeNode(int p, double length) {
             parent = p;
             this.length = length;
-            children = new ArrayList<Integer>();
+            children = new ArrayList<>();
         }
 
         public void setParent(int p) {

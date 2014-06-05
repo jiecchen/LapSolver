@@ -22,7 +22,6 @@ public class UnionFind {
 
     // internal state variables for find
     private int[] find_stack;
-    private int find_stack_pos;
 
     // Call with number of items in the sets
     public UnionFind(int n) {
@@ -38,7 +37,7 @@ public class UnionFind {
 
     // name of component that contains vertex v
     public int find(int v) {
-        find_stack_pos = 0;
+        int find_stack_pos = 0;
 
         // follow pointers until self-loop
         while(ptr[v] != v) {
