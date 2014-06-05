@@ -1,4 +1,4 @@
-package lapsolver;
+package lapsolver.util;
 
 import java.io.FileWriter;
 import java.io.IOException;

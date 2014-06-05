@@ -20,6 +20,8 @@
 
 package lapsolver;
 
+import lapsolver.algorithms.PairSampler;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Random;
@@ -161,7 +163,7 @@ public class Tree {
         boolean[] visited;
         int[] pArray;
 
-        Sampler2 s;
+        PairSampler s;
 
         // Logger log = new Logger();
         // log.start("logx");
@@ -174,7 +176,7 @@ public class Tree {
         for (int x = 0; x < G.nv; x++)
             ne += G.deg[x];
 
-        s = new Sampler2(ne, java.lang.System.currentTimeMillis());
+        s = new PairSampler(ne, java.lang.System.currentTimeMillis());
 
         for (int x = 0; x < G.nv; x++)
             visited[x] = false;
@@ -235,13 +237,13 @@ public class Tree {
         int[] pArray = new int[G.nv];
         int[] depth = new int[G.nv];
         int maxdepth, mindepth;
-        Sampler2[] s = new Sampler2[G.nv];
+        PairSampler[] s = new PairSampler[G.nv];
         int edgesInQueue = 0;
 
         depth[root] = 0;
 
         for (int i = 0; i < G.nv; i++)
-            s[i] = new Sampler2(4, i + java.lang.System.currentTimeMillis());
+            s[i] = new PairSampler(4, i + java.lang.System.currentTimeMillis());
 
         int ne = 0;  // number edges
         for (int x = 0; x < G.nv; x++)
