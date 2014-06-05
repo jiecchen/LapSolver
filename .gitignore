@@ -2,6 +2,9 @@
 *.o
 *.class
 *.jar
+*.so
+*.dylib
+*.dll
 build/
 
 # Eclipse

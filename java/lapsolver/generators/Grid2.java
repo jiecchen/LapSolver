@@ -2,9 +2,11 @@ package lapsolver.generators;
 
 import lapsolver.WeightedGraph;
 
-import java.util.Arrays;
-
 public class Grid2 implements GraphFactory {
+    static {
+        System.loadLibrary("lapsolver");
+    }
+
     private final int width;
     private final int height;
     private final int verticalWeight;
@@ -37,7 +39,7 @@ public class Grid2 implements GraphFactory {
         this.verticalWeight = verticalWeight;
     }
 
-    private int getIdx(int i, int j) {
+    private int getIdx(final int i, final int j) {
         return width * i + j;
     }
 
@@ -58,8 +60,23 @@ public class Grid2 implements GraphFactory {
         int src[] = new int[ne];
         int dst[] = new int[ne];
         double weight[] = new double[ne];
-        Arrays.fill(weight, 1);
 
+//        populate(src, dst, weight); // 3 seconds faster??
+        populateC(src, dst, weight, height, width, verticalWeight);
+
+        graph = new WeightedGraph(src, dst, weight);
+        return graph;
+    }
+
+    /**
+     * Populate the src, dst, and weight arrays with the grid edges
+     * TODO: translate to C, and call via JNI
+     *
+     * @param src    the source vertices
+     * @param dst    the corresponding destinations
+     * @param weight the weight of each edge
+     */
+    private void populate(int[] src, int[] dst, double[] weight) {
         // populate edge lists
         int e = 0;
         for (int i = 0; i < height; i++) {
@@ -77,21 +94,16 @@ public class Grid2 implements GraphFactory {
                 }
             }
         }
-
-        graph = new WeightedGraph(src, dst, weight);
-        return graph;
     }
 
+    private native void populateC(int[] src, int[] dst, double[] weight, int height, int width, int verticalWeight);
+
     // benchmark
-//    public static void main(String[] args) {
-//        System.out.print("Before: ");
-//        System.out.println((double) Runtime.getRuntime().totalMemory() / 1024.0 / 1024.0);
-//
-//        GraphFactory gf = new Grid2(400,400);
-//        double[][] ijv = gf.generateGraph().toIJV();
-//
-//        System.out.print("After: ");
-//        System.out.println((double) Runtime.getRuntime().totalMemory() / 1024.0 / 1024.0);
-//        System.out.println("Done (" + ijv[1][1] + ")");
-//    }
+    public static void main(String[] args) {
+        long startTime = System.currentTimeMillis();
+        for (int i = 0; i < 1000; i++)
+            new Grid2(400, 400).generateGraph();
+        long endTime = System.currentTimeMillis();
+        System.out.println("Total execution time = " + ((endTime - startTime) / 1000.0) + "s");
+    }
 }
