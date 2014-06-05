@@ -15,12 +15,12 @@ example usage from Matlab:
 
 a = del3Graph(10000);
 [ai,aj,av] = find(tril(a));
-g = WeightedGraph();
-g.fromMatlab(ai, aj, av);
-spt = SimulPathTree(g);
+graph = WeightedGraph();
+graph.fromMatlab(ai, aj, av);
+spt = SimulPathTree(graph);
 tr = spt.edgeGrow;
 trt = tr.treeToTree;
-trt.compTotalStretch(g)/length(ai)
+trt.compTotalStretch(graph)/length(ai)
 
  */
 
@@ -38,8 +38,8 @@ import java.util.Random;
 public class SimulPathTree implements SpanningTreeStrategy {
 
     public Tree tree;
+    public WeightedGraph graph;
 
-    public WeightedGraph g;
     // times[node] is time at which node should fire
     public double[] times;
     public double[] rates;
@@ -54,18 +54,18 @@ public class SimulPathTree implements SpanningTreeStrategy {
         Logger logger = new Logger();
         //	logger.start("SimulPathTree.log");
 
-        ijvI = new int[g.nv - 1];
-        ijvJ = new int[g.nv - 1];
-        ijvV = new double[g.nv - 1];
+        ijvI = new int[graph.nv - 1];
+        ijvJ = new int[graph.nv - 1];
+        ijvV = new double[graph.nv - 1];
 
         Random rand;
         rand = new Random();
 
-        times = new double[g.nv];
-        rates = new double[g.nv];
-        NodeEvent[] events = new NodeEvent[g.nv];
+        times = new double[graph.nv];
+        rates = new double[graph.nv];
+        NodeEvent[] events = new NodeEvent[graph.nv];
 
-        for (int i = 0; i < g.nv; i++) {
+        for (int i = 0; i < graph.nv; i++) {
             rates[i] = rand.nextDouble();
             times[i] = Double.POSITIVE_INFINITY;
             events[i] = null;
@@ -73,17 +73,17 @@ public class SimulPathTree implements SpanningTreeStrategy {
 
         int ijvInd = 0;
 
-        PriorityQueue<NodeEvent> pq = new PriorityQueue<>(g.nv, new Comparator<NodeEvent>() {
+        PriorityQueue<NodeEvent> pq = new PriorityQueue<>(graph.nv, new Comparator<NodeEvent>() {
             public int compare(NodeEvent X, NodeEvent Y) {
                 return (X.time > Y.time ? 1 : -1);
             }
         });
 
         // load up the pq with events for every vertex
-        for (int u = 0; u < g.nv; u++) {
-            for (int i = 0; i < g.deg[u]; i++) {
-                int v = g.nbrs[u][i];
-                double wt = g.weights[u][i];
+        for (int u = 0; u < graph.nv; u++) {
+            for (int i = 0; i < graph.deg[u]; i++) {
+                int v = graph.nbrs[u][i];
+                double wt = graph.weights[u][i];
                 double t = rates[u] / wt;
 
                 if (t < times[v]) {
@@ -100,9 +100,9 @@ public class SimulPathTree implements SpanningTreeStrategy {
             }
         }
 
-        UnionFind uf = new UnionFind(g.nv);
+        UnionFind uf = new UnionFind(graph.nv);
 
-        while (ijvInd < g.nv - 1) {
+        while (ijvInd < graph.nv - 1) {
             NodeEvent ev = pq.poll();
             int u = ev.node;
             int v = ev.from;
@@ -122,10 +122,10 @@ public class SimulPathTree implements SpanningTreeStrategy {
             }
 
             // for each nbr of u, try to place it
-            for (int i = 0; i < g.deg[u]; i++) {
-                v = g.nbrs[u][i];
+            for (int i = 0; i < graph.deg[u]; i++) {
+                v = graph.nbrs[u][i];
                 if (uf.find(v) != uf.find(u)) {
-                    double wt = g.weights[u][i];
+                    double wt = graph.weights[u][i];
 
                     double t = ev.time + ev.rate / wt;
                     if (t < times[v]) {
@@ -153,19 +153,19 @@ public class SimulPathTree implements SpanningTreeStrategy {
         Logger logger = new Logger();
         logger.start("SimulPathTree.log");
 
-        ijvI = new int[g.nv - 1];
-        ijvJ = new int[g.nv - 1];
-        ijvV = new double[g.nv - 1];
+        ijvI = new int[graph.nv - 1];
+        ijvJ = new int[graph.nv - 1];
+        ijvV = new double[graph.nv - 1];
 
         Random rand;
         rand = new Random();
 
-        double[] leastRate = new double[g.nv];
-        times = new double[g.nv];
-        rates = new double[g.nv];
-        NodeEvent[] events = new NodeEvent[g.nv];
+        double[] leastRate = new double[graph.nv];
+        times = new double[graph.nv];
+        rates = new double[graph.nv];
+        NodeEvent[] events = new NodeEvent[graph.nv];
 
-        for (int i = 0; i < g.nv; i++) {
+        for (int i = 0; i < graph.nv; i++) {
             rates[i] = rand.nextDouble();
             times[i] = Double.POSITIVE_INFINITY;
             leastRate[i] = Double.POSITIVE_INFINITY;
@@ -174,7 +174,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
 
         int ijvInd = 0;
 
-        PriorityQueue<NodeEvent> pq = new PriorityQueue<NodeEvent>(g.nv, new Comparator<NodeEvent>() {
+        PriorityQueue<NodeEvent> pq = new PriorityQueue<NodeEvent>(graph.nv, new Comparator<NodeEvent>() {
             public int compare(NodeEvent X, NodeEvent Y) {
                 return (X.time > Y.time ? 1 : -1);
             }
@@ -182,10 +182,10 @@ public class SimulPathTree implements SpanningTreeStrategy {
 
 
         // load up the pq with events for every vertex
-        for (int u = 0; u < g.nv; u++) {
-            for (int i = 0; i < g.deg[u]; i++) {
-                int v = g.nbrs[u][i];
-                double wt = g.weights[u][i];
+        for (int u = 0; u < graph.nv; u++) {
+            for (int i = 0; i < graph.deg[u]; i++) {
+                int v = graph.nbrs[u][i];
+                double wt = graph.weights[u][i];
                 double t = rates[u] / wt;
 
                 if (rates[u] < leastRate[v]) {
@@ -197,9 +197,9 @@ public class SimulPathTree implements SpanningTreeStrategy {
             }
         }
 
-        UnionFind uf = new UnionFind(g.nv);
+        UnionFind uf = new UnionFind(graph.nv);
 
-        while (ijvInd < g.nv - 1) {
+        while (ijvInd < graph.nv - 1) {
             NodeEvent ev = pq.poll();
             int u = ev.node;
             int v = ev.from;
@@ -219,9 +219,9 @@ public class SimulPathTree implements SpanningTreeStrategy {
             }
 
             // for each nbr of u, try to place it
-            for (int i = 0; i < g.deg[u]; i++) {
-                v = g.nbrs[u][i];
-                double wt = g.weights[u][i];
+            for (int i = 0; i < graph.deg[u]; i++) {
+                v = graph.nbrs[u][i];
+                double wt = graph.weights[u][i];
                 double t = ev.time + ev.rate / wt;
 
                 if (ev.rate < leastRate[v]) {
@@ -243,51 +243,51 @@ public class SimulPathTree implements SpanningTreeStrategy {
         Logger logger = new Logger();
         logger.start("SimulPathTree.log");
 
-        ijvI = new int[g.nv - 1];
-        ijvJ = new int[g.nv - 1];
-        ijvV = new double[g.nv - 1];
+        ijvI = new int[graph.nv - 1];
+        ijvJ = new int[graph.nv - 1];
+        ijvV = new double[graph.nv - 1];
 
         Random rand;
         rand = new Random();
 
-        times = new double[g.ne];
-        rates = new double[g.ne];
-        EdgeEvent[] events = new EdgeEvent[g.ne];
+        times = new double[graph.ne];
+        rates = new double[graph.ne];
+        EdgeEvent[] events = new EdgeEvent[graph.ne];
 
-        g.buildBackEdges();
+        graph.buildBackEdges();
         int edgeNum = 0;
-        int[][] edgeNums = new int[g.nv][];
-        for (int u = 0; u < g.nv; u++) {
-            edgeNums[u] = new int[g.deg[u]];
-            for (int i = 0; i < g.deg[u]; i++) {
-                int v = g.nbrs[u][i];
+        int[][] edgeNums = new int[graph.nv][];
+        for (int u = 0; u < graph.nv; u++) {
+            edgeNums[u] = new int[graph.deg[u]];
+            for (int i = 0; i < graph.deg[u]; i++) {
+                int v = graph.nbrs[u][i];
                 if (u < v)
                     edgeNums[u][i] = edgeNum++;
                 else
-                    edgeNums[u][i] = edgeNums[v][g.backInd[u][i]];
+                    edgeNums[u][i] = edgeNums[v][graph.backInd[u][i]];
             }
         }
 
-        for (int u = 0; u < g.nv; u++)
-            for (int i = 0; i < g.deg[u]; i++)
-                logger.write("(" + u + ", " + g.nbrs[u][i] + "), " + edgeNums[u][i]);
+        for (int u = 0; u < graph.nv; u++)
+            for (int i = 0; i < graph.deg[u]; i++)
+                logger.write("(" + u + ", " + graph.nbrs[u][i] + "), " + edgeNums[u][i]);
 
 
-        PriorityQueue<EdgeEvent> pq = new PriorityQueue<EdgeEvent>(g.ne, new Comparator<EdgeEvent>() {
+        PriorityQueue<EdgeEvent> pq = new PriorityQueue<EdgeEvent>(graph.ne, new Comparator<EdgeEvent>() {
             public int compare(EdgeEvent X, EdgeEvent Y) {
                 return (X.time > Y.time ? 1 : -1);
             }
         });
 
 
-        for (int u = 0; u < g.nv; u++)
-            for (int i = 0; i < g.deg[u]; i++) {
-                int v = g.nbrs[u][i];
+        for (int u = 0; u < graph.nv; u++)
+            for (int i = 0; i < graph.deg[u]; i++) {
+                int v = graph.nbrs[u][i];
                 // so, we include each edge just once
                 if (u < v) {
                     double rate = rand.nextDouble();
                     int e = edgeNums[u][i];
-                    double wt = g.weights[u][i];
+                    double wt = graph.weights[u][i];
                     times[e] = rate / wt;
 
                     EdgeEvent ev = new EdgeEvent(u, v, rate / wt, rate, wt);
@@ -298,9 +298,9 @@ public class SimulPathTree implements SpanningTreeStrategy {
 
         int ijvInd = 0;
 
-        UnionFind uf = new UnionFind(g.nv);
+        UnionFind uf = new UnionFind(graph.nv);
 
-        while (ijvInd < g.nv - 1) {
+        while (ijvInd < graph.nv - 1) {
             EdgeEvent ev = pq.poll();
 
             int u = ev.u;
@@ -321,9 +321,9 @@ public class SimulPathTree implements SpanningTreeStrategy {
             }
 
             // for each edge attached to u, see if gives a lower time
-            for (int i = 0; i < g.deg[u]; i++) {
+            for (int i = 0; i < graph.deg[u]; i++) {
                 int e = edgeNums[u][i];
-                double wt = g.weights[u][i];
+                double wt = graph.weights[u][i];
                 double t = ev.time + ev.rate / wt;
                 if (t < times[e]) {
                     times[e] = t;
@@ -332,16 +332,16 @@ public class SimulPathTree implements SpanningTreeStrategy {
                     if (events[e] != null)
                         pq.remove(events[e]);
 
-                    EdgeEvent ev2 = new EdgeEvent(u, g.nbrs[u][i], t, ev.rate, wt);
+                    EdgeEvent ev2 = new EdgeEvent(u, graph.nbrs[u][i], t, ev.rate, wt);
                     pq.add(ev2);
                     events[e] = ev2;
                 }
             }
 
             // for each edge attached to v, see if gives a lower time
-            for (int i = 0; i < g.deg[v]; i++) {
+            for (int i = 0; i < graph.deg[v]; i++) {
                 int e = edgeNums[v][i];
-                double wt = g.weights[v][i];
+                double wt = graph.weights[v][i];
                 double t = ev.time + ev.rate / wt;
                 if (t < times[e]) {
                     times[e] = t;
@@ -350,7 +350,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
                     if (events[e] != null)
                         pq.remove(events[e]);
 
-                    EdgeEvent ev2 = new EdgeEvent(v, g.nbrs[v][i], t, ev.rate, wt);
+                    EdgeEvent ev2 = new EdgeEvent(v, graph.nbrs[v][i], t, ev.rate, wt);
                     pq.add(ev2);
                     events[e] = ev2;
                 }
@@ -364,7 +364,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
 
     @Override
     public Tree solve(WeightedGraph in) {
-        this.g = in;
+        this.graph = in;
         return growTree().treeToTree();
     }
 
@@ -391,34 +391,34 @@ public class SimulPathTree implements SpanningTreeStrategy {
     /*
     public WeightedGraph growTree2() {
 
-	ijvI = new int[g.nv-1];
-	ijvJ = new int[g.nv-1];
-	ijvV = new double[g.nv-1];
+	ijvI = new int[graph.nv-1];
+	ijvJ = new int[graph.nv-1];
+	ijvV = new double[graph.nv-1];
 	
 	Random rand;
 	rand = new Random();
 
-	double[] leastRate = new double[g.nv];
-	rates = new double[g.nv];
+	double[] leastRate = new double[graph.nv];
+	rates = new double[graph.nv];
 
-	for (int i = 0; i < g.nv; i++) {
+	for (int i = 0; i < graph.nv; i++) {
 	    rates[i] = rand.nextDouble();
 	    leastRate[i] = Double.POSITIVE_INFINITY;
 	}
 
 	int ijvInd = 0;
 	
-	PriorityQueue<NodeEvent> pq = new PriorityQueue<NodeEvent>(g.nv, new Comparator<NodeEvent>() {
+	PriorityQueue<NodeEvent> pq = new PriorityQueue<NodeEvent>(graph.nv, new Comparator<NodeEvent>() {
 		public int compare(NodeEvent X, NodeEvent Y) {
 		    return (X.time > Y.time ? 1 : -1 );
 		} });
 
 	
 	// load up the pq with events for every vertex
-	for (int u = 0; u < g.nv; u++) {
-	    for (int i = 0; i < g.deg[u]; i++) {
-		int v = g.nbrs[u][i];
-		double t = rates[u] * g.weights[u][i];
+	for (int u = 0; u < graph.nv; u++) {
+	    for (int i = 0; i < graph.deg[u]; i++) {
+		int v = graph.nbrs[u][i];
+		double t = rates[u] * graph.weights[u][i];
 
 		if (rates[u] < leastRate[v]) {
 		    leastRate[v] = rates[u];
@@ -430,16 +430,16 @@ public class SimulPathTree implements SpanningTreeStrategy {
 	}
 
 	
-	UnionFind uf = new UnionFind(g.nv);
+	UnionFind uf = new UnionFind(graph.nv);
 
-	while (ijvInd < g.nv-1) {
+	while (ijvInd < graph.nv-1) {
 	    NodeEvent ev = pq.poll();
 	    int u = ev.node;
 
 	    // for each nbr of u, try to place it
-	    for (int i = 0; i < g.deg[u]; i++) {
-		int v = g.nbrs[u][i];
-		double wt = g.weights[u][i];
+	    for (int i = 0; i < graph.deg[u]; i++) {
+		int v = graph.nbrs[u][i];
+		double wt = graph.weights[u][i];
 
 		// if in different comps, add that edge
 		if (uf.find(u) != uf.find(v)) {
