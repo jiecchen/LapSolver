@@ -1,5 +1,5 @@
 /**
- * @file Sampler2.java
+ * @file PairSampler.java
  * @author Dan Spielman <spielman@math.mit.edu>
  * @date Thurs Feb 1 2012
  *
@@ -7,7 +7,7 @@
  *
  *
  */
-package lapsolver;
+package lapsolver.algorithms;
 
 import java.util.Random;
 
@@ -17,7 +17,7 @@ import java.util.Random;
  * <p/>
  * is now modified so that it can grow.
  */
-public class Sampler2 {
+public class PairSampler {
 
     public int[] array1;  // the data
     public int[] array2;  // the data
@@ -26,14 +26,14 @@ public class Sampler2 {
 
     Random rand;
 
-    public Sampler2(int initsize, long seed) {
+    public PairSampler(int initsize, long seed) {
         rand = new Random(seed);
         this.array1 = new int[initsize];
         this.array2 = new int[initsize];
         this.last = -1;
     }
 
-    public Sampler2(int initsize) {
+    public PairSampler(int initsize) {
         rand = new Random(0);
         this.array1 = new int[initsize];
         this.array2 = new int[initsize];
