@@ -45,8 +45,6 @@ public class TreeUtils {
             int v = stack[--stack_pos]; // pop
             order[order_pos++] = v;
 
-            System.out.println("visiting " + v);
-
             // push children
             for(int ch : tree.nodes[v].children) {
                 stack[stack_pos++] = ch;

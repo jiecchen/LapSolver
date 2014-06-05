@@ -11,6 +11,7 @@
 package lapsolver.algorithms;
 
 import lapsolver.Tree;
+import lapsolver.util.TreeUtils;
 
 public class TarjanLCA {
     private Tree tree;
@@ -69,27 +70,37 @@ public class TarjanLCA {
             queryIndices[ b[i] ][ queryDegree[b[i]] ] = i;
         }
 
-        dfs(tree.root);
-
-        return answer;
-    }
-
-    // main DFS procedure (from Wikipedia article)
-    private void dfs(int u) {
-        ancestor[u] = u;
-        for (int v : tree.nodes[u].children) {
-            dfs(v);
-            unionFind.union(u, v);
-            ancestor[unionFind.find(u)] = u;
+        // do DFS
+        for (int i = 0; i < tree.nv; i++) {
+            ancestor[i] = i;
         }
-        black[u] = true;
 
-        for (int i = 0; i < queries[u].length; i++) {
-            int v = queries[u][i];
-            if (black[v]) {
-                answer[ queryIndices[u][i] ] = ancestor[unionFind.find(v)];
+        int[] order = TreeUtils.dfsOrder(tree);
+        int[] childrenVisited = new int[tree.nv];
+
+        for (int i = 0; i < tree.nv; i++) {
+            int v = order[i];
+            if (v != tree.root) {
+                childrenVisited[tree.nodes[v].parent]++;
+            }
+
+            if (childrenVisited[v] == tree.nodes[v].getNumberOfChildren()) {
+                black[v] = true;
+
+                for (int j = 0; j < queries[v].length; j++) {
+                    int child = queries[v][j];
+                    if (black[child]) {
+                        answer[ queryIndices[v][j] ] = ancestor[unionFind.find(child)];
+                    }
+                }
+
+                int parent = tree.nodes[v].parent;
+                unionFind.union(parent, v);
+                ancestor[unionFind.find(parent)] = parent;
             }
         }
+
+        return answer;
     }
 
 }
