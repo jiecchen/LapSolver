@@ -354,16 +354,6 @@ public class Graph {
         return new Tree(pArray, wt);
     }
 
-    public void dump() {
-        for (int x = 0; x < nv; x++) {
-            System.out.print(x + " : ");
-            for (int i = 0; i < deg[x]; i++)
-                System.out.print(nbrs[x][i] + " ");
-            System.out.println();
-        }
-
-    }
-
     public void computeWeightedDegrees() {
         weightedDeg = new double[nv];
         for (int x = 0; x < nv; x++) {

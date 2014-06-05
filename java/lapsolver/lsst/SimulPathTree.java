@@ -27,6 +27,7 @@ trt.compTotalStretch(graph)/length(ai)
 package lapsolver.lsst;
 
 import lapsolver.Graph;
+import lapsolver.util.GraphUtils;
 import lapsolver.util.Logger;
 import lapsolver.Tree;
 import lapsolver.algorithms.UnionFind;
@@ -143,7 +144,6 @@ public class SimulPathTree implements SpanningTreeStrategy {
             }
         }
 
-        // return wg.treeToTree();
         return new Graph(ijvI, ijvJ, ijvV);
     }
 
@@ -233,7 +233,6 @@ public class SimulPathTree implements SpanningTreeStrategy {
         Graph wg = new Graph();
         wg.fromMatlab(ijvI, ijvJ, ijvV);
 
-        // return wg.treeToTree();
         return wg;
     }
 
@@ -356,14 +355,13 @@ public class SimulPathTree implements SpanningTreeStrategy {
 
         }
 
-        // return wg.treeToTree();
         return new Graph(ijvI, ijvJ, ijvV);
     }
 
     @Override
     public Tree solve(Graph in) {
         this.graph = in;
-        return growTree().treeToTree();
+        return GraphUtils.toTree(growTree());
     }
 
     public class NodeEvent {
@@ -463,7 +461,6 @@ public class SimulPathTree implements SpanningTreeStrategy {
 	Graph wg = new Graph();
 	wg.fromMatlab(ijvI,ijvJ,ijvV);
 
-	// return wg.treeToTree();
 	return wg;
 
     }
