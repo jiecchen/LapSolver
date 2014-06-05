@@ -67,7 +67,34 @@ public class Tree {
      */
     public Tree(int[] p) {
         nodes = new TreeNode[p.length];
-        this.setFromArray(p);
+        this.fromParentArray(p);
+    }
+
+    /**
+     * Make a Tree from parent array and weights on edges
+     *
+     * @param p the parent array
+     * @param w the weight array
+     */
+    public Tree(int[] p, double[] w) {
+        nodes = new TreeNode[p.length];
+        this.fromParentLengthArray(p, w);
+    }
+
+    /**
+     * Outputs a parent pointer array for the tree
+     * The root points to itself
+     *
+     * @return a parent pointer array
+     */
+    public int[] getParentArray() {
+        int[] p = new int[nv];
+
+        for (int i = 0; i < nv; i++) {
+            p[i] = nodes[i].parent;
+        }
+
+        return p;
     }
 
     /**
@@ -76,7 +103,7 @@ public class Tree {
      *
      * @param p pointers to parents
      */
-    public void setFromArray(int[] p) {
+    public void fromParentArray(int[] p) {
         nv = p.length;
 
         nodes = new TreeNode[nv];
@@ -87,29 +114,7 @@ public class Tree {
                 root = i;
         }
 
-        setKidsFromParents();
-    }
-
-    /**
-     * Assuming just parents are set,
-     * fills in all the kids.
-     */
-    public void setKidsFromParents() {
-        for (int i = 0; i < nv; i++)
-            if (i != root)
-                nodes[nodes[i].parent].addKid(i);
-    }
-
-
-    /**
-     * Make a Tree from parent array and weights on edges
-     *
-     * @param p the parent array
-     * @param w the weight array
-     */
-    public Tree(int[] p, double[] w) {
-        nodes = new TreeNode[p.length];
-        this.setFromArray(p, w);
+        buildChildrenFromParents();
     }
 
     /**
@@ -119,7 +124,7 @@ public class Tree {
      * @param p pointers to parents
      * @param w weights on edges (which now turn to 1/length)
      */
-    public void setFromArray(int[] p, double[] w) {
+    public void fromParentLengthArray(int[] p, double[] w) {
         nv = p.length;
 
         nodes = new TreeNode[nv];
@@ -130,7 +135,17 @@ public class Tree {
                 root = i;
         }
 
-        setKidsFromParents();
+        buildChildrenFromParents();
+    }
+
+    /**
+     * Assuming just parents are set,
+     * fills in all the children.
+     */
+    public void buildChildrenFromParents() {
+        for (int i = 0; i < nv; i++)
+            if (i != root)
+                nodes[nodes[i].parent].addChild(i);
     }
 
     /**
@@ -308,22 +323,6 @@ public class Tree {
     }
 
     /**
-     * Outputs a parent pointer array for the tree
-     * The root points to itself
-     *
-     * @return a parent pointer array
-     */
-    public int[] parentArray() {
-        int[] p = new int[nv];
-
-        for (int i = 0; i < nv; i++) {
-            p[i] = nodes[i].parent;
-        }
-
-        return p;
-    }
-
-    /**
      * Computes the total stretch
      *
      * @param Ein graph of edges to stretch
@@ -337,7 +336,7 @@ public class Tree {
         comp = new int[nv];   // the component of a node
 
         // the algorithm will create a new component
-        // each time it encounters a node with no kids
+        // each time it encounters a node with no children
 
         nodeSize = new int[nv];  // how much is below a node
 
@@ -353,7 +352,7 @@ public class Tree {
         for (orderPtr = nv - 1; orderPtr >= 0; orderPtr--) {
             node = order[orderPtr];
 
-            if (nodes[node].numKids() == 0) {
+            if (nodes[node].getNumberOfChildren() == 0) {
                 comp[node] = ++numComps;
                 nodeSize[node] = E.deg[node];
                 // nothing to merge
@@ -364,8 +363,8 @@ public class Tree {
                 int maxKid = -1;
                 int maxKidSize = -1;
 
-                for (int i = 0; i < nodes[node].numKids(); i++) {
-                    int kid = nodes[node].getKid(i);
+                for (int i = 0; i < nodes[node].getNumberOfChildren(); i++) {
+                    int kid = nodes[node].getChild(i);
                     int kidSize = nodeSize[kid];
 
                     nodeSize[node] += kidSize;
@@ -378,12 +377,12 @@ public class Tree {
 
                 int curComp = comp[maxKid];
 
-                // go through other kids,
+                // go through other children,
                 // re-componentizing,
                 // and checking edges for new merge (if other end is this comp)
 
-                for (int i = 0; i < nodes[node].numKids(); i++) {
-                    int kid = nodes[node].getKid(i);
+                for (int i = 0; i < nodes[node].getNumberOfChildren(); i++) {
+                    int kid = nodes[node].getChild(i);
                     if (kid != maxKid)
                         totStretch += totStretchTraverse(kid, node, curComp);
                 }
@@ -416,8 +415,8 @@ public class Tree {
         int curNode = root;
 
         while (curPtr < nv) {
-            for (int i = 0; i < nodes[curNode].numKids(); i++)
-                order[orderPtr++] = nodes[curNode].getKid(i);
+            for (int i = 0; i < nodes[curNode].getNumberOfChildren(); i++)
+                order[orderPtr++] = nodes[curNode].getChild(i);
 
             curNode = order[curPtr++];
 
@@ -447,8 +446,8 @@ public class Tree {
             // except when we are handling the root of the tree
 
             if (comp[curNode] != curComp) {
-                for (int i = 0; i < nodes[curNode].numKids(); i++)
-                    aux.add(nodes[curNode].getKid(i));
+                for (int i = 0; i < nodes[curNode].getNumberOfChildren(); i++)
+                    aux.add(nodes[curNode].getChild(i));
 
                 // put node on list to change comp
                 aux2.add(curNode);
@@ -503,7 +502,7 @@ public class Tree {
         comp = new int[nv];   // the component of a node
         //
         // the algorithm will create a new component
-        // each time it encounters a node with no kids
+        // each time it encounters a node with no children
 
         nodeSize = new int[nv];  // how much is below a node
 
@@ -519,7 +518,7 @@ public class Tree {
         for (orderPtr = nv - 1; orderPtr >= 0; orderPtr--) {
             node = order[orderPtr];
 
-            if (nodes[node].numKids() == 0) {
+            if (nodes[node].getNumberOfChildren() == 0) {
                 comp[node] = ++numComps;
                 nodeSize[node] = E.deg[node];
                 // nothing to merge
@@ -531,8 +530,8 @@ public class Tree {
                 int maxKid = -1;
                 int maxKidSize = -1;
 
-                for (int i = 0; i < nodes[node].numKids(); i++) {
-                    int kid = nodes[node].getKid(i);
+                for (int i = 0; i < nodes[node].getNumberOfChildren(); i++) {
+                    int kid = nodes[node].getChild(i);
                     int kidSize = nodeSize[kid];
 
                     nodeSize[node] += kidSize;
@@ -545,12 +544,12 @@ public class Tree {
 
                 int curComp = comp[maxKid];
 
-                // go through other kids,
+                // go through other children,
                 // re-componentizing,
                 // and checking edges for new merge (if other end is this comp)
 
-                for (int i = 0; i < nodes[node].numKids(); i++) {
-                    int kid = nodes[node].getKid(i);
+                for (int i = 0; i < nodes[node].getNumberOfChildren(); i++) {
+                    int kid = nodes[node].getChild(i);
                     if (kid != maxKid)
                         totStretch += allStretchTraverse(kid, node, curComp);
                 }
@@ -590,8 +589,8 @@ public class Tree {
             // except when we are handling the root of the tree
 
             if (comp[curNode] != curComp) {
-                for (int i = 0; i < nodes[curNode].numKids(); i++)
-                    aux.add(nodes[curNode].getKid(i));
+                for (int i = 0; i < nodes[curNode].getNumberOfChildren(); i++)
+                    aux.add(nodes[curNode].getChild(i));
 
                 // put node on list to change comp
                 aux2.add(curNode);
@@ -633,7 +632,7 @@ public class Tree {
     public class TreeNode {
         public int parent;
         public double length;
-        public ArrayList<Integer> kids;
+        public ArrayList<Integer> children;
 
         /**
          * Create a node by specifying its parent
@@ -643,29 +642,29 @@ public class Tree {
         public TreeNode(int p) {
             parent = p;
             length = 1;
-            kids = new ArrayList<Integer>();
+            children = new ArrayList<Integer>();
         }
 
         public TreeNode(int p, double length) {
             parent = p;
             this.length = length;
-            kids = new ArrayList<Integer>();
+            children = new ArrayList<Integer>();
         }
 
         public void setParent(int p) {
             parent = p;
         }
 
-        public void addKid(int k) {
-            kids.add(k);
+        public void addChild(int k) {
+            children.add(k);
         }
 
-        public int numKids() {
-            return kids.size();
+        public int getNumberOfChildren() {
+            return children.size();
         }
 
-        public int getKid(int i) {
-            return kids.get(i);
+        public int getChild(int i) {
+            return children.get(i);
         }
     }
 }

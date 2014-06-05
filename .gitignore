@@ -23,3 +23,6 @@ target/
 
 # misc
 *.log
+
+# temp files
+*~

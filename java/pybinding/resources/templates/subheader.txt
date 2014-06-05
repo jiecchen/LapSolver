@@ -1,0 +1,3 @@
+from jpype import *
+from {{PACKAGE}} import _GeneratedObject, _java_typecast
+
