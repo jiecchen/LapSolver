@@ -18,13 +18,18 @@ public class UnionFind {
     //-----------------------
     // a pointer to its parent vertex, or -1 if none
     //
-    public int[] ptr;
+    private int[] ptr;
+
+    // internal state variables for find
+    private int[] find_stack;
+    private int find_stack_pos;
 
     // Call with number of items in the sets
     public UnionFind(int n) {
         this.nv = n;
 
         ptr = new int[n];
+        find_stack = new int[n];
 
         for (int i = 0; i < n; i++) {
             ptr[i] = i;
@@ -33,14 +38,20 @@ public class UnionFind {
 
     // name of component that contains vertex v
     public int find(int v) {
-        if (ptr[v] == v) {
-            // at root of this tree
-            return v;
-        } else {
-            // follow pointer; do path compression
-            ptr[v] = find(ptr[v]);
-            return ptr[v];
+        find_stack_pos = 0;
+
+        // follow pointers until self-loop
+        while(ptr[v] != v) {
+            find_stack[find_stack_pos++] = v;
+            v = ptr[v];
         }
+
+        // path compression
+        while(--find_stack_pos > 0) {
+            find_stack[find_stack_pos] = v;
+        }
+
+        return v;
     }
 
     // merge the components with vertices u and v
