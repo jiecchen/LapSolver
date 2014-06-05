@@ -8,20 +8,6 @@
  *
  *  javac -classpath ~/rep/YINSmat/java/:. SimulPathTree.java
  *
-
-the only good routine in here right now is edgeGrow
-
-example usage from Matlab:
-
-a = del3Graph(10000);
-[ai,aj,av] = find(tril(a));
-graph = Graph();
-graph.fromMatlab(ai, aj, av);
-spt = SimulPathTree(graph);
-tr = spt.edgeGrow;
-trt = tr.treeToTree;
-trt.compTotalStretch(graph)/length(ai)
-
  */
 
 package lapsolver.lsst;

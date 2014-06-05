@@ -3,6 +3,8 @@ function [ g, t ] = bintree( n )
     % given n, produces a pair with 2^n - 1 nodes
     % returns: g = java WeightedGraph for complete graph
     %          t = java Tree for binary tree
+    import lapsolver.util.GraphUtils;
+    
     nv = 2^n - 1;
     ag = ones(nv,nv) - eye(nv);
     
@@ -16,6 +18,6 @@ function [ g, t ] = bintree( n )
     % convert to java objects
     g = javagraph(ag);
     t = javagraph(at);
-    t = t.treeToTree();
+    t = GraphUtils.toTree(t);
 end
 

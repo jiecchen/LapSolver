@@ -248,34 +248,6 @@ public class Graph {
         return bfs;
     }
 
-    /**
-     * Compute dfs by a recursive algorithm
-     * could easily break the stack
-     */
-    public int[] dfs() {
-        int c = 0;
-
-        seen = new boolean[nv];
-        comp = new int[nv];
-        for (int i = 0; i < nv; i++) {
-            seen[i] = false;
-            comp[i] = 0;
-        }
-
-        dfsPtr = 0;
-        dfs = new int[nv];
-        parent = new int[nv];
-
-        for (int x = 0; x < nv; x++) {
-            if (!seen[x]) {
-                dfsSub(x, c);
-                c = c + 1;
-            }
-        }
-
-        return dfs;
-    }
-
     public int[] getDfs() {
         return dfs;
     }
@@ -318,39 +290,6 @@ public class Graph {
             }
         }
         return comp;
-    }
-
-    public int[] treeToParentArray() {
-        dfs();
-        int[] pArray = new int[nv];
-
-        // set all others to parent
-        System.arraycopy(parent, 0, pArray, 0, nv);
-
-        // set root to itself
-        pArray[dfs[0]] = dfs[0];
-
-        return pArray;
-    }
-
-    /* if the graph is a tree,
-       this turns it into a Tree class object via a parent array
-    */
-    public Tree treeToTree() {
-        int[] pArray = treeToParentArray();
-
-        // now, compute all the edge weights
-        double[] wt = new double[nv];
-
-        for (int u = 0; u < nv; u++) {
-            int v = pArray[u];
-            if (v != u) {
-                for (int j = 0; j < deg[v]; j++)
-                    if (nbrs[v][j] == u)
-                        wt[u] = weights[v][j];
-            }
-        }
-        return new Tree(pArray, wt);
     }
 
     public void computeWeightedDegrees() {
@@ -454,17 +393,5 @@ public class Graph {
         }
 
         return G;
-    }
-
-    private void dfsSub(int x, int c) {
-        dfs[dfsPtr++] = x;
-        seen[x] = true;
-        comp[x] = c;
-        for (int i = 0; i < deg[x]; i++) {
-            if (!seen[nbrs[x][i]]) {
-                parent[nbrs[x][i]] = x;
-                dfsSub(nbrs[x][i], c);
-            }
-        }
     }
 }
