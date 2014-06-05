@@ -12,7 +12,7 @@
 package lapsolver;
 
 public class EdgeList {
-    public int elementCount;
+    public int edgeCount;
     public int[] firstEntry;
     public int[] secondEntry;
     public double[] weight;
@@ -23,26 +23,29 @@ public class EdgeList {
 
     // EdgeList from a number of elements
     public EdgeList (int N) {
-        this.elementCount = N;
+        this.edgeCount = N;
         this.firstEntry = new int[N];
         this.secondEntry = new int[N];
         this.weight = new double[N];
     }
 
-    // EdgeList from a number of elements and a list of triplets
+    // EdgeList from a three lists of length N
     public EdgeList (int[] U, int V[], double[] W) {
-        this.elementCount = U.length;
+        this.edgeCount = U.length;
         this.firstEntry = U;
         this.secondEntry = V;
         this.weight = W;
     }
 
-    // return an EdgeList from a tree
+    // EdgeList from a tree
     public EdgeList (Tree tree) {
-        this.elementCount = tree.nv;
+        this.edgeCount = tree.nv;
+        this.firstEntry = new int[edgeCount - 1];
+        this.secondEntry = new int[edgeCount - 1];
+        this.weight = new double[edgeCount - 1];
 
         int index = 0;
-        for (int i = 0; i < elementCount; i++)
+        for (int i = 0; i < edgeCount; i++)
             if (i != tree.getRoot()) {
                 this.firstEntry[index] = i;
                 this.secondEntry[index] = tree.getNode(i).getParent().getId();
@@ -51,5 +54,27 @@ public class EdgeList {
             }
     }
 
+    // EdgeList from a graph
+    public EdgeList (Graph graph) {
+        this.edgeCount = graph.ne;
+        this.firstEntry = new int[edgeCount];
+        this.secondEntry = new int[edgeCount];
+        this.weight = new double[edgeCount];
 
+        int index = 0;
+        int vertexCount = graph.nv;
+        for (int i = 0; i < vertexCount; i++)
+            for (int j = 0; j < graph.deg[i]; j++) {
+                int u = i;
+                int v = graph.nbrs[i][j];
+                double w = graph.weights[i][j];
+
+                if (u < v) {
+                    this.firstEntry[index] = u;
+                    this.secondEntry[index] = v;
+                    this.weight[index] = w;
+                    index++;
+                }
+            }
+    }
 }
