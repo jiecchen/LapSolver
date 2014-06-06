@@ -51,21 +51,6 @@ public class Graph {
     //  nbrs[nbrs[x][i],backInd[x][i]] = x
     public int[][] backInd;
 
-    //--------------------
-    //  a bfs ordering,
-    //  and bfs depth
-    //
-    public int[] bfs;
-    public int[] depth;
-    public boolean[] seen;
-    public int[] comp;
-
-    //--------------------
-    //  a dfs ordering
-    //  not initialized
-    //
-    private int[] dfs;
-
     public Graph() { }
 
     // constructor from edge list
@@ -85,10 +70,6 @@ public class Graph {
      */
     public void buildFromEdgeData(int[] src, int[] dst, double[] weight) {
         ne = src.length; // the length of i
-
-        dfs = null;
-        comp = null;
-        seen = null;
 
         if ((dst.length != ne) || (weight.length != ne)) {
             throw new Error("inputs must all have the same length");
@@ -182,56 +163,13 @@ public class Graph {
     }
 
     /**
-     * walk in BFS order, setting the field bfs
-     * assumes connected
-     */
-    public int[] bfsWalk(int root) {
-
-        bfs = new int[nv];
-        depth = new int[nv];
-        seen = new boolean[nv];
-
-        for (int i = 0; i < nv; i++) {
-            seen[i] = false;
-        }
-
-        depth[root] = 0;
-        bfs[0] = root;
-        seen[root] = true;
-
-        int bfsPtr = 1;
-        int curPtr = 1;
-        int curNode = root;
-
-        while (curPtr < nv) {
-            int nbr;
-            for (int i = 0; i < deg[curNode]; i++) {
-                nbr = nbrs[curNode][i];
-                if (!seen[nbr]) {
-                    bfs[bfsPtr++] = nbr;
-                    depth[nbr] = depth[curNode] + 1;
-                    seen[nbr] = true;
-                }
-            }
-            curNode = bfs[curPtr++];
-        }
-        return bfs;
-    }
-
-    public int[] getDfs() {
-        return dfs;
-    }
-
-    /**
      * Compute connected components using a bfs approach.
      * Returns a the characteristic vector of the components,
      * starting to index with 1
      */
     public int[] getComponents() {
         int[] order = new int[nv];
-
-        seen = new boolean[nv];
-        comp = new int[nv];
+        int[] comp = new int[nv];
 
         for (int i = 0; i < nv; i++) {
             comp[i] = 0;
