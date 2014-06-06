@@ -70,12 +70,12 @@ public class Grid2 implements GraphFactory {
     /**
      * Native C version of populateC below. Not much faster than the JIT version.
      *
-     * @param src
-     * @param dst
-     * @param weight
-     * @param height
-     * @param width
-     * @param verticalWeight
+     * @param src    the source vertices
+     * @param dst    the corresponding destinations
+     * @param weight the weight of each edge
+     * @param height same as the corresponding field in the class
+     * @param width same as the corresponding field in the class
+     * @param verticalWeight same as the corresponding field in the class
      */
     private native void populateC(int[] src, int[] dst, double[] weight,
                                   int height, int width, int verticalWeight);
