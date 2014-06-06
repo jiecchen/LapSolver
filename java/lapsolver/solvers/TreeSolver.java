@@ -30,6 +30,6 @@ public class TreeSolver implements Solver {
 
     // solve for x in Lx = b
     public double[] solve(double[] b) {
-
+        return null;
     }
 }
