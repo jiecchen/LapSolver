@@ -62,9 +62,9 @@ public class TreeUtils {
 
         // at any point, we have order[i]'s parent's depth
         depth[tree.getRoot()] = 0;
-        for (int i = 1; i < tree.nv; i++) {
-            depth[ order[i] ] = depth[tree.getNode(order[i]).getParent().getId()]
-                              + tree.getNode(order[i]).getLength();
+        for (int v : order) {
+            depth[v] = depth[tree.getNode(v).getParent().getId()]
+                              + tree.getNode(v).getLength();
         }
 
         return depth;
