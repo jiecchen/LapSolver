@@ -5,6 +5,7 @@
 *.so
 *.dylib
 *.dll
+*.gcda
 build/
 
 # Eclipse

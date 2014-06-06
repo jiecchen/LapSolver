@@ -1,5 +1,5 @@
 CC=gcc
-PROF_FLAGS=-fprofile-use # -fprofile-generate
+PROF_FLAGS=-fprofile-use# -fprofile-generate
 CFLAGS=-O3 -mtune=native -march=native -std=c99 -fPIC
 INCLUDES=-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux
 TARGET=../../build
