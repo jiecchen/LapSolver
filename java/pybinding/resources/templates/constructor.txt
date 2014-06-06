@@ -1,4 +1,5 @@
     _java_class = {{PYTHON_PACKAGE}}
+
     def __init__(self, *args, **kwargs):
         super({{CLASS}}, self).__init__(*args, **kwargs)
         try:

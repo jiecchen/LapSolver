@@ -4,6 +4,7 @@ from lapsolver import _GeneratedObject, _java_typecast, _from_java
 
 class SimulPathTree(_GeneratedObject):
     _java_class = JPackage("lapsolver").lsst.SimulPathTree
+
     def __init__(self, *args, **kwargs):
         super(SimulPathTree, self).__init__(*args, **kwargs)
         try:
@@ -17,6 +18,7 @@ class SimulPathTree(_GeneratedObject):
 
 class PetalDecompositionTree(_GeneratedObject):
     _java_class = JPackage("lapsolver").lsst.PetalDecompositionTree
+
     def __init__(self, *args, **kwargs):
         super(PetalDecompositionTree, self).__init__(*args, **kwargs)
         try:
@@ -30,6 +32,7 @@ class PetalDecompositionTree(_GeneratedObject):
 
 class KruskalTree(_GeneratedObject):
     _java_class = JPackage("lapsolver").lsst.KruskalTree
+
     def __init__(self, *args, **kwargs):
         super(KruskalTree, self).__init__(*args, **kwargs)
         try:
