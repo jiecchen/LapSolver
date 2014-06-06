@@ -5,8 +5,7 @@ function st = run_stretch(a)
     import lapsolver.algorithms.StretchDan;
     g = a2g(a);
     
-    tic; spt = SimulPathTree(g); toc
-    tic; s = Stretch(g,spt.getTree); toc
-    
-    st = s.getTotal;
+    spt = SimulPathTree();
+    tic; tree = spt.getTree(g); toc
+    tic; st = Stretch.compute(g,tree).total; toc
 end

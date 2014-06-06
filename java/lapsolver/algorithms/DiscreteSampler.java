@@ -63,8 +63,8 @@ public final class DiscreteSampler {
 
         // normalize weights (turn into probabilities)
         double weightSum = 0;
-        for (int i = 0; i < n; i++) {
-            weightSum += weights[i];
+        for (double weight : weights) {
+            weightSum += weight;
         }
         for (int i = 0; i < n; i++) {
             weights[i] /= weightSum;
