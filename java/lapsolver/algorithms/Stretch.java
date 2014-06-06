@@ -13,7 +13,7 @@ import lapsolver.Graph;
 import lapsolver.EdgeList;
 
 public class Stretch {
-    public static StretchResult computeStretch(Graph graph, Tree spanningTree) {
+    public static StretchResult compute(Graph graph, Tree spanningTree) {
         // get tree path lengths
         EdgeList edges = new EdgeList(graph);
         TreePath tp = new TreePath(spanningTree);
