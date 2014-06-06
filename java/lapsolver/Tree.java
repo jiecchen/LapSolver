@@ -93,7 +93,7 @@ public class Tree {
             this.parent = parent;
             this.id = id;
             this.length = length;
-            children = new ArrayList<Integer>();
+            children = new ArrayList<>();
         }
 
         // copy constructor
@@ -101,7 +101,7 @@ public class Tree {
             parent = other.parent;
             id = other.id;
             length = other.length;
-            children = (ArrayList<Integer>) other.children.clone();
+            children = new ArrayList<>(other.children);
         }
 
         public ArrayList<Integer> getChildren() {
