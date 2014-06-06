@@ -74,22 +74,6 @@ public class Tree {
         buildChildrenFromParents();
     }
 
-    /**
-     * Outputs a parent pointer array for the tree
-     * The root points to itself
-     *
-     * @return a parent pointer array
-     */
-    public int[] toParentArray() {
-        int[] p = new int[nv];
-
-        for (int i = 0; i < nv; i++) {
-            p[i] = nodes[i].parent;
-        }
-
-        return p;
-    }
-
     // a vertex in the tree, which contain parent and children pointers
     // length is reciprocal of weight of edge from node to parent
     public class TreeNode {
