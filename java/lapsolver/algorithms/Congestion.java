@@ -10,36 +10,30 @@
 package lapsolver.algorithms;
 
 
-import lapsolver.Tree;
-import lapsolver.Graph;
 import lapsolver.EdgeList;
+import lapsolver.Graph;
+import lapsolver.Tree;
 import lapsolver.util.TreeUtils;
 
 public class Congestion {
 
     // Variables needed for the algorithm
-    public final Tree spanningTree;
-    public final Graph graph;
-    private final int vertexCount;
-    private final int edgeCount;
-    private final double[] vertexWeights;
-    private final Tree congestionTree;
+    public Tree spanningTree;
+    public Graph graph;
+    private int vertexCount;
+    private double[] vertexWeights;
 
     // constructor which performs the computation; retrieve result with computeCongestionTree()
-    public Congestion (Graph G, Tree T) {
-        this.graph = G;
-        this.spanningTree = T;
+    public Congestion () { }
 
-        this.vertexCount = graph.nv;
-        this.edgeCount = graph.ne;
+    public Tree getCongestionTree(Graph graph, Tree spanningTree) {
+        this.graph = graph;
+        this.spanningTree = spanningTree;
 
+        this.vertexCount = this.graph.nv;
         this.vertexWeights = computeVertexWeights();
-        this.congestionTree = computeCongestionTree();
-    }
 
-    // return the result
-    public Tree getCongestionTree () {
-        return congestionTree;
+        return computeCongestionTree();
     }
 
     // For a graph and its tree, gets the lca values for every edge of the graph

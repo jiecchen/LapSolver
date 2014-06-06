@@ -13,21 +13,11 @@ import lapsolver.Graph;
 import lapsolver.EdgeList;
 
 public class Stretch {
-    private final Graph graph;
-    private final Tree spanningTree;
-
-    private final double totalStretch;
-    private final double[] stretches;
-
-    // constructor: just initialize pointers
-    public Stretch (Graph graph, Tree spanningTree) {
-        this.graph = graph;
-        this.spanningTree = spanningTree;
-
+    public static StretchResult computeStretch(Graph graph, Tree spanningTree) {
         // get tree path lengths
         EdgeList edges = new EdgeList(graph);
         TreePath tp = new TreePath(spanningTree);
-        stretches = tp.query(edges.u, edges.v);
+        double [] stretches = tp.query(edges.u, edges.v);
         double total = 0;
 
         // divide by edge length for stretch; accumulate
@@ -36,17 +26,16 @@ public class Stretch {
             total += stretches[i];
         }
 
-        totalStretch = total;
+        return new StretchResult(stretches, total);
     }
 
-    // get list of edge stretches (parallel to edge list)
-    public double[] getAll() {
-        return stretches;
-    }
+    static class StretchResult {
+        StretchResult(double[] allStretches, double total) {
+            this.allStretches = allStretches;
+            this.total = total;
+        }
 
-    // get total stretch of tree
-    public double getTotal() {
-        return totalStretch;
+        public double[] allStretches;
+        public double total;
     }
-
 }
