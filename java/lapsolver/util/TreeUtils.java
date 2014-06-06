@@ -54,8 +54,8 @@ public class TreeUtils {
         return order;
     }
 
-    // return depths, given a valid BFS order
-    public static double[] depthFromBfsOrder(Tree tree, int[] order) {
+    // return depths, given a valid BFS or DFS tree order
+    public static double[] depthFromTreeOrder(Tree tree, int[] order) {
         double[] depth = new double[tree.nv];
 
         // at any point, we have order[i]'s parent's depth
@@ -70,7 +70,7 @@ public class TreeUtils {
 
     // return depths, given a tree (does the BFS too)
     public static double[] getDepths(Tree tree) {
-        return depthFromBfsOrder( tree, bfsOrder(tree) );
+        return depthFromTreeOrder(tree, bfsOrder(tree));
     }
 
     // dumps the tree to sout in a BFS ordering

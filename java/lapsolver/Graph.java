@@ -135,44 +135,6 @@ public class Graph {
         }
     }
 
-    /**
-     * Compute connected components using a bfs approach.
-     * Returns a the characteristic vector of the components,
-     * starting to index with 1
-     */
-    public int[] getComponents() {
-        int[] order = new int[nv];
-        int[] comp = new int[nv];
-
-        for (int i = 0; i < nv; i++) {
-            comp[i] = 0;
-        }
-
-        int c = 0;
-        for (int x = 0; x < nv; x++) {
-            if (comp[x] == 0) {
-                c = c + 1;
-                comp[x] = c;
-                int ptr = 0;
-                int orderLen = 1;
-                order[ptr] = x;
-
-                while (ptr < orderLen) {
-                    int curNode = order[ptr];
-                    for (int i = 0; i < deg[curNode]; i++) {
-                        int nbr = nbrs[curNode][i];
-                        if (comp[nbr] == 0) {
-                            comp[nbr] = c;
-                            order[orderLen++] = nbr;
-                        }
-                    }
-                    ptr++;
-                }
-            }
-        }
-        return comp;
-    }
-
     // returns a clone (deep copy) of this graph
     public Graph copy() {
         Graph G = new Graph();

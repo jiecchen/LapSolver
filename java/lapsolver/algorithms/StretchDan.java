@@ -38,7 +38,7 @@ public class StretchDan {
         aux2 = new ArrayDeque<>(graph.nv);
 
         order = TreeUtils.bfsOrder(spanningTree);
-        depth = TreeUtils.depthFromBfsOrder(spanningTree, order);
+        depth = TreeUtils.depthFromTreeOrder(spanningTree, order);
         comp = new int[graph.nv]; // the component of a node
 
         // the algorithm will create a new component
@@ -171,7 +171,7 @@ public class StretchDan {
         }
 
         order = TreeUtils.bfsOrder(spanningTree);
-        depth = TreeUtils.depthFromBfsOrder(spanningTree, order);
+        depth = TreeUtils.depthFromTreeOrder(spanningTree, order);
         comp = new int[graph.nv];   // the component of a node
         //
         // the algorithm will create a new component

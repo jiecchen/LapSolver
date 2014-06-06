@@ -58,4 +58,42 @@ public class GraphUtils {
             System.out.println();
         }
     }
+
+    /**
+     * Compute connected components using a bfs approach.
+     * Returns a the characteristic vector of the components,
+     * starting to index with 1
+     */
+    public int[] getComponents(Graph g) {
+        int[] order = new int[g.nv];
+        int[] comp = new int[g.nv];
+
+        for (int i = 0; i < g.nv; i++) {
+            comp[i] = 0;
+        }
+
+        int c = 0;
+        for (int x = 0; x < g.nv; x++) {
+            if (comp[x] == 0) {
+                c = c + 1;
+                comp[x] = c;
+                int ptr = 0;
+                int orderLen = 1;
+                order[ptr] = x;
+
+                while (ptr < orderLen) {
+                    int curNode = order[ptr];
+                    for (int i = 0; i < g.deg[curNode]; i++) {
+                        int nbr = g.nbrs[curNode][i];
+                        if (comp[nbr] == 0) {
+                            comp[nbr] = c;
+                            order[orderLen++] = nbr;
+                        }
+                    }
+                    ptr++;
+                }
+            }
+        }
+        return comp;
+    }
 }
