@@ -85,7 +85,7 @@ public class TreeUtils {
     }
 
     // EdgeList from a spanning tree: return off-tree edges
-    public EdgeList offTreeEdges (Graph graph, Tree spanningTree) {
+    public static EdgeList getOffTreeEdges (Graph graph, Tree spanningTree) {
         int ne = graph.ne - graph.nv + 1;
 
         int[] u = new int[ne];
