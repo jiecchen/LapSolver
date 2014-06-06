@@ -173,75 +173,7 @@ public class Graph {
         return comp;
     }
 
-    /*
-     * Return a 3-by-m ijv vector.
-     * In Matlab, we can turn this into an adjacency matrix by
-     * matrix = sparse(i,j,v,n,n); matrix = matrix + matrix';
-     *
-     * so, this just spits out the lower-triangular part.
-     * For the full matrix, use toIJVsym
-     */
-    public double[][] toIJV() {
-        double[] i = new double[ne];
-        double[] j = new double[ne];
-        double[] v = new double[ne];
-
-        int ptr = 0;
-
-        for (int x = 0; x < nv; x++) {
-            for (int y = 0; y < deg[x]; y++) {
-                if (nbrs[x][y] < x) {
-                    i[ptr] = (double) x;
-                    j[ptr] = (double) nbrs[x][y];
-                    v[ptr] = weights[x][y];
-                    ptr++;
-                }
-            }
-        }
-
-        double[][] ijv = new double[3][];
-        ijv[0] = i;
-        ijv[1] = j;
-        ijv[2] = v;
-
-        return ijv;
-    }
-
-    /*
-     * Return a 3-by-m ijv vector.
-     * In Matlab, we can turn this into an adjacency matrix by
-     * matrix = sparse(ijv(1,:)+1,ijv(2,:)+1,v,n,n);
-     *
-     * so, this just spits out the lower-triangular part.
-     * For the full matrix, use toIJVsym
-     */
-    public double[][] toIJVsym() {
-        double[] i = new double[2 * ne];
-        double[] j = new double[2 * ne];
-        double[] v = new double[2 * ne];
-
-        int ptr = 0;
-
-        for (int x = 0; x < nv; x++) {
-            for (int y = 0; y < deg[x]; y++) {
-                i[ptr] = (double) x;
-                j[ptr] = (double) nbrs[x][y];
-                v[ptr] = weights[x][y];
-                ptr++;
-            }
-        }
-
-        double[][] ijv = new double[3][];
-        ijv[0] = i;
-        ijv[1] = j;
-        ijv[2] = v;
-
-        return ijv;
-    }
-
-    /*
-     * Produces a copy of this graph
-     */
+    // returns a clone (deep copy) of this graph
     public Graph copy() {
         Graph G = new Graph();
 
