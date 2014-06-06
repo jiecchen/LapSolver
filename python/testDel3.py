@@ -43,10 +43,10 @@ def del3_graph(n):
 def test_del3():
     """
     Tests the Java -> Python pipeline.
-        Generates a 3D Delaunay graph, uses Dan's SimulPathLSST to
+        Generates a 3D Delaunay graph, uses Dan's SimulPathTree to
         generate a low-stretch spanning tree, it then computes its
         mean stretch.
-    :return:
+    :return: mean stretch of the random Delaunay tree
     """
     with Timer('generate'):
         a = del3_graph(10000)
@@ -59,8 +59,7 @@ def test_del3():
         spt = lapsolver.lsst.SimulPathTree()
         tree = spt.getTree(g)
     with Timer('compute stretch'):
-        alg = lapsolver.algorithms.Stretch
-        total_stretch = alg.compute(g, tree).total
+        total_stretch = lapsolver.algorithms.Stretch.compute(g, tree).total
     return total_stretch / len(ai.tolist())
 
 with Timer('total'):
