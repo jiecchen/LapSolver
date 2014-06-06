@@ -31,7 +31,6 @@ public class Tree {
 
     // tree from parent array
     public Tree(int[] p) {
-        nodes = new TreeNode[p.length];
         nv = p.length;
         nodes = new TreeNode[nv];
 
@@ -42,6 +41,17 @@ public class Tree {
         }
 
         buildChildrenFromParents();
+    }
+
+    // copy constructor
+    public Tree (Tree other) {
+        nv = other.nv;
+        root = other.root;
+        nodes = new TreeNode[nv];
+
+        for (int i = 0; i < nv; i++) {
+
+        }
     }
 
     public TreeNode getNode(int n) {
