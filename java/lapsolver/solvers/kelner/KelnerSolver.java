@@ -26,7 +26,7 @@ public class KelnerSolver implements Solver {
     @Override
     public void init(Graph graph) {
         // compute LSST
-        spanningTree = (new SimulPathTree(graph)).getTree();
+        //spanningTree = (new SimulPathTree(graph)).getTree();
     }
 
     // solve for x in Lx = b
