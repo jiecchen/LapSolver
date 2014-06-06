@@ -24,32 +24,16 @@ void doPopulate(int * restrict src, int * restrict dst, double * restrict weight
     }
 
     // populate bottom edge
+    const int oldE = e;
     for (int j = width*shortHeight+1; j < N; j++, e++) {
         src[e] = j-1;
         dst[e] = j;
+    }
+    e = oldE;
+    for (int j = width*shortHeight+1; j < N; j++, e++) {
         weight[e] = 1.0;
     }
 }
-
-//JNIEXPORT void JNICALL Java_lapsolver_generators_Grid2_populateC(
-//   JNIEnv *env, jobject cls,
-//   jobject jSrc, jobject jDst, jobject jWeight,
-//   jint jHeight, jint jWidth, jint jVerticalWeight)
-//{
-//    // convert to c-types
-//    jint *src = (*env)->GetDirectBufferAddress(env, jSrc);
-//    jint *dst = (*env)->GetDirectBufferAddress(env, jDst);
-//    jdouble *weight = (*env)->GetDirectBufferAddress(env, jWeight);
-//
-//    if(!src || !dst || !weight)
-//        return;
-//
-//    const int height = (int) jHeight;
-//    const int width  = (int) jWidth;
-//    const double verticalWeight = (double) jVerticalWeight;
-//
-//    doPopulate(src, dst, weight, height, width, verticalWeight);
-//}
 
 JNIEXPORT void JNICALL Java_lapsolver_generators_Grid2_populateC
   (JNIEnv *env, jobject cls,

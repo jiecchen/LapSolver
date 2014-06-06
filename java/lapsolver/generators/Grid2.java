@@ -7,8 +7,6 @@ public class Grid2 implements GraphFactory {
         System.loadLibrary("lapsolver");
     }
 
-    private static boolean USE_JNI = false;
-
     private final int width;
     private final int height;
     private final int verticalWeight;
@@ -58,22 +56,20 @@ public class Grid2 implements GraphFactory {
         //number of edges, vertices, non-bottom row
         int ne = (2 * width * height) - width - height;
 
-        int [] srcArr = new int[ne];
-        int [] dstArr = new int[ne];
-        double [] weightArr = new double[ne];
+        int[] src = new int[ne];
+        int[] dst = new int[ne];
+        double[] weight = new double[ne];
 
-        if(USE_JNI) {
-            populateC(srcArr, dstArr, weightArr, height, width, verticalWeight);
-        } else {
-            populate(srcArr, dstArr, weightArr);
-        }
+//        populate(src, dst, weight);
+        populateC(src, dst, weight, height, width, verticalWeight);
 
-        graph = new Graph(srcArr, dstArr, weightArr);
+        graph = new Graph(src, dst, weight);
         return graph;
     }
 
     /**
      * Native C version of populateC below. Not much faster than the JIT version.
+     *
      * @param src
      * @param dst
      * @param weight
@@ -109,30 +105,5 @@ public class Grid2 implements GraphFactory {
                 }
             }
         }
-    }
-
-    // benchmark
-    public static void main(String[] args) {
-        int nBenchmarks = 10;
-        int size = 500;
-
-        for (int i = 0; i < 10; i++) {
-            System.out.print("Without JNI, ");
-            runBenchmark(nBenchmarks, false, size);
-
-            System.out.print("With JNI, ");
-            runBenchmark(nBenchmarks, true, size);
-
-            System.out.println("");
-        }
-    }
-
-    private static void runBenchmark(int nBenchmarks, boolean jni, int size) {
-        USE_JNI = jni;
-        long startTime = System.currentTimeMillis();
-        for (int i = 0; i < nBenchmarks; i++)
-            new Grid2(size, size).generateGraph();
-        long endTime = System.currentTimeMillis();
-        System.out.println("average execution time = " + ((endTime - startTime) / (1000.0 * nBenchmarks)) + "s");
     }
 }

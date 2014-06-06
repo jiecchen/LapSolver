@@ -6,4 +6,3 @@ function [g, t] = stpair( a )
     spt = SimulPathTree();
     t = spt.solve(g);
 end
-
