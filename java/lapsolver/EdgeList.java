@@ -100,7 +100,7 @@ public class EdgeList {
 
                 // skip tree edges
                 if (spanningTree.getNode(i).getParent().getId() == dest ||
-                    spanningTree.getNode(i).getParent().getId() == i) {
+                    spanningTree.getNode(dest).getParent().getId() == i) {
                     continue;
                 }
 
