@@ -24,38 +24,15 @@ public class Tree {
     private TreeNode[] nodes;
     private int root;
 
-    /**
-     * Make an empty Tree
-     *
-     * @param nv number of nodes
-     */
+    // empty tree
     public Tree(int nv) {
         nodes = new TreeNode[nv];
     }
 
-    /**
-     * Make a Tree from parent array
-     *
-     * @param p the parent array
-     */
+    // tree from parent array
     public Tree(int[] p) {
         nodes = new TreeNode[p.length];
-        this.fromParentArray(p);
-    }
-
-    public TreeNode getNode(int n) {
-        return nodes[n];
-    }
-
-    /**
-     * Builds tree from parent pointers.
-     * the root should have a self-loop.
-     *
-     * @param p pointers to parents
-     */
-    private void fromParentArray(int[] p) {
         nv = p.length;
-
         nodes = new TreeNode[nv];
 
         for (int i = 0; i < nv; i++) {
@@ -67,37 +44,25 @@ public class Tree {
         buildChildrenFromParents();
     }
 
-    /**
-     * Assuming just parents are set,
-     * fills in all the children.
-     */
+    public TreeNode getNode(int n) {
+        return nodes[n];
+    }
+    public int getRoot() {
+        return root;
+    }
+
+    // assuming parents are set, build lists of children for each node
     public void buildChildrenFromParents() {
         for (int i = 0; i < nv; i++)
             if (i != root)
                 nodes[nodes[i].parent].addChild(i);
     }
 
-    /**
-     * Make a Tree from parent array and weights on edges
-     *
-     * @param p the parent array
-     * @param w the weight array
-     */
+    // build tree from parent array with weights
+    // sets lengths to reciprocals of weights
     public Tree(int[] p, double[] w) {
         nodes = new TreeNode[p.length];
-        this.fromParentLengthArray(p, w);
-    }
-
-    /**
-     * Builds tree from parent pointers.
-     * the root should have a self-loop.
-     *
-     * @param p pointers to parents
-     * @param w weights on edges (which now turn to 1/length)
-     */
-    public void fromParentLengthArray(int[] p, double[] w) {
         nv = p.length;
-
         nodes = new TreeNode[nv];
 
         for (int i = 0; i < nv; i++) {
@@ -107,10 +72,6 @@ public class Tree {
         }
 
         buildChildrenFromParents();
-    }
-
-    public int getRoot() {
-        return root;
     }
 
     /**
@@ -129,39 +90,38 @@ public class Tree {
         return p;
     }
 
-    /*
-     * A node of the tree
-     * default length is 1
-     * length is length of edge to the parent
-     */
+    // a vertex in the tree, which contain parent and children pointers
+    // length is reciprocal of weight of edge from node to parent
     public class TreeNode {
         private int parent;
         private final int id;
         private double length;
+        private final ArrayList<Integer> children;
+
+        // constructor with weight 1
+        public TreeNode(int parent, int id) {
+            this(parent, id, 1.0);
+        }
+
+        // parent id, self id, edge length (like a directed EdgeList element)
+        // remember length = 1/weight
+        public TreeNode(int parent, int id, double length) {
+            this.parent = parent;
+            this.id = id;
+            this.length = length;
+            children = new ArrayList<Integer>();
+        }
+
+        // copy constructor
+        public TreeNode(TreeNode other) {
+            parent = other.parent;
+            id = other.id;
+            length = other.length;
+            children = (ArrayList<Integer>) other.children.clone();
+        }
 
         public ArrayList<Integer> getChildren() {
             return children;
-        }
-
-        private final ArrayList<Integer> children;
-
-        /**
-         * Create a node by specifying its parent
-         *
-         * @param p parent
-         */
-        public TreeNode(int p, int self) {
-            parent = p;
-            id = self;
-            length = 1;
-            children = new ArrayList<Integer>();
-        }
-
-        public TreeNode(int p, int self, double edgeLength) {
-            parent = p;
-            id = self;
-            length = edgeLength;
-            children = new ArrayList<Integer>();
         }
 
         public TreeNode getParent() {
