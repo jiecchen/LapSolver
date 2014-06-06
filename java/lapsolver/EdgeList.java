@@ -46,7 +46,7 @@ public class EdgeList {
         weight = new double[ne];
 
         int index = 0;
-        for (int i = 0; i < ne; i++) {
+        for (int i = 0; i < tree.nv; i++) {
             // get all parents except root
             if (i != tree.getRoot()) {
                 u[index] = i;

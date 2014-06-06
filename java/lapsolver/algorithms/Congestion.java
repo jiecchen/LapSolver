@@ -12,6 +12,7 @@ package lapsolver.algorithms;
 
 import lapsolver.Tree;
 import lapsolver.Graph;
+import lapsolver.EdgeList;
 import lapsolver.util.TreeUtils;
 
 public class Congestion {
@@ -31,30 +32,16 @@ public class Congestion {
         this.vertexCount = graph.nv;
         this.edgeCount = graph.ne;
 
-        this.vertexWeights = GetVertexWeights();
-        this.congestionTree = GetCongestionTree();
+        this.vertexWeights = getVertexWeights();
+        this.congestionTree = getCongestionTree();
     }
 
     // For a graph and its tree, gets the lca values for every edge of the graph
-    private int[] LcaResult() {
-        TarjanLCA LcaSolver = new TarjanLCA(spanningTree);
+    private int[] lcaResult() {
+        TarjanLCA lcaSolver = new TarjanLCA(spanningTree);
+        EdgeList edges = new EdgeList(graph);
 
-        int index = 0;
-        int[] LeftNeighbors = new int[edgeCount];
-        int[] RightNeighbors = new int[edgeCount];
-
-        for (int i = 0; i < vertexCount; i++) {
-            int NeighborCount = graph.nbrs[i].length;
-
-            for (int j = 0; j < NeighborCount; j++)
-                if (i < graph.nbrs[i][j]) { // Check only for ordered edges
-                    LeftNeighbors[index] = i;
-                    RightNeighbors[index] = graph.nbrs[i][j];
-                    index++;
-                }
-        }
-
-        return LcaSolver.solve(LeftNeighbors, RightNeighbors);
+        return lcaSolver.solve(edges.u, edges.v);
     }
 
     // Instead of incrementing each vertex of the tree by the value of the path (a,b) in the original graph,
@@ -63,8 +50,8 @@ public class Congestion {
     // This will help us have a complexity of O(M) on this segment of the code.
 
     // Assigns values to vertexWeights
-    private double[] GetVertexWeights() {
-        int[] lcaEdgeValues = LcaResult();
+    private double[] getVertexWeights() {
+        int[] lcaEdgeValues = lcaResult();
         double[] vertexWeights = new double[vertexCount];
 
         int index = 0;
@@ -90,14 +77,13 @@ public class Congestion {
         return vertexWeights;
     }
 
-    // Gets the congestionTree
-    private Tree GetCongestionTree() {
+    // Gets the congestion tree
+    private Tree getCongestionTree() {
         Tree answer = spanningTree;
 
         int[] bfsOrdering = TreeUtils.bfsOrder(spanningTree);   // Get the BFS ordering
 
         for (int i = vertexCount - 1; i > 0; i--) {
-
             int child = bfsOrdering[i];
             int parent = spanningTree.getNode(child).getParent().getId();
 
