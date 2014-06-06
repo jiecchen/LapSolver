@@ -6,7 +6,5 @@ function st = run_stretch(a)
     g = a2g(a);
     
     tic; spt = SimulPathTree(g); toc
-    tic; s = Stretch(g,spt.getTree); toc
-    
-    st = s.getTotal;
+    tic; st = Stretch.compute(g,spt.getTree).total; toc
 end

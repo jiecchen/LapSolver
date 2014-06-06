@@ -9,19 +9,24 @@
 package lapsolver.solvers.kelner;
 
 import lapsolver.solvers.Solver;
-import lapsolver.lsst.SpanningTreeStrategy;
+import lapsolver.lsst.SimulPathTree;
 import lapsolver.Graph;
 import lapsolver.Tree;
+import lapsolver.EdgeList;
 
 public class KelnerSolver implements Solver {
-    private SpanningTreeStrategy spanningTreeStrategy;
     private Tree spanningTree;
     private PathUpdateTree pathTree;
 
+    private EdgeList offEdges;
+    private int[] offLca;
+    private double[] offStretch;
+
     // initialize solver on a particular graph, and perform preprocessing
     @Override
-    public void init(Graph g) {
-
+    public void init(Graph graph) {
+        // compute LSST
+        spanningTree = (new SimulPathTree(graph)).getTree();
     }
 
     // solve for x in Lx = b
@@ -29,4 +34,6 @@ public class KelnerSolver implements Solver {
     public double[] solve(double[] b) {
         return null;
     }
+
+
 }
