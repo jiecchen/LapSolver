@@ -34,7 +34,7 @@ public class Stretch {
         return compute(graph, spanningTree, new EdgeList(graph));
     }
 
-    static class StretchResult {
+    public static class StretchResult {
         StretchResult(double[] allStretches, double total) {
             this.allStretches = allStretches;
             this.total = total;
