@@ -24,9 +24,6 @@ import java.util.PriorityQueue;
 import java.util.Random;
 
 public class SimulPathTree implements SpanningTreeStrategy {
-    public final Tree tree;
-    public final Graph graph;
-
     // times[node] is time at which node should fire
     public double[] times;
     public double[] rates;
@@ -35,19 +32,14 @@ public class SimulPathTree implements SpanningTreeStrategy {
     public int[] ijvJ;
     public double[] ijvV;
 
-    public SimulPathTree(Graph graph) {
-        this.graph = graph;
-        this.tree = GraphUtils.toTree(growTree());
-    }
-
     @Override
-    public Tree getTree() {
-        return this.tree;
+    public Tree getTree(Graph graph) {
+        return GraphUtils.toTree(growTree(graph));
     }
 
-    public Graph growTree() {
+    public Graph growTree(Graph graph) {
         // Logger logger = new Logger();
-        //	logger.start("SimulPathTree.log");
+        // logger.start("SimulPathTree.log");
 
         ijvI = new int[graph.nv - 1];
         ijvJ = new int[graph.nv - 1];
@@ -141,7 +133,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
         return new Graph(new EdgeList(ijvI, ijvJ, ijvV));
     }
 
-    public Graph growTree3() {
+    public Graph growTree3(Graph graph) {
         Logger logger = new Logger();
         logger.start("SimulPathTree.log");
 
@@ -229,7 +221,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
         return wg;
     }
 
-    public Graph edgeGrow() {
+    public Graph edgeGrow(Graph graph) {
         Logger logger = new Logger();
         logger.start("SimulPathTree.log");
 

@@ -13,16 +13,8 @@ import lapsolver.Tree;
 import lapsolver.Graph;
 
 public class PetalDecompositionTree implements SpanningTreeStrategy {
-    public final Tree tree;
-    public final Graph graph;
-
-    public PetalDecompositionTree(Graph graph) {
-        this.graph = graph;
-        this.tree = null;
-    }
-
     @Override
-    public Tree getTree() {
-        return tree;
+    public Tree getTree(Graph graph) {
+        return null;
     }
 }

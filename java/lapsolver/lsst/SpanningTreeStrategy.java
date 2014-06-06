@@ -13,5 +13,5 @@ import lapsolver.Tree;
 import lapsolver.Graph;
 
 public interface SpanningTreeStrategy {
-    public Tree getTree();
+    public Tree getTree(Graph graph);
 }
