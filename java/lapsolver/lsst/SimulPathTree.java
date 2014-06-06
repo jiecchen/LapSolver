@@ -46,7 +46,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
     }
 
     public Graph growTree() {
-        Logger logger = new Logger();
+        // Logger logger = new Logger();
         //	logger.start("SimulPathTree.log");
 
         ijvI = new int[graph.nv - 1];
@@ -102,7 +102,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
             int u = ev.node;
             int v = ev.from;
 
-            logger.write(ev.time + ", (" + u + ", " + v + "), " + ev.rate);
+            // logger.write(ev.time + ", (" + u + ", " + v + "), " + ev.rate);
 
             // if in different comps, add that edge
             if (uf.find(u) != uf.find(v)) {
@@ -113,7 +113,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
                 ijvV[ijvInd] = ev.wt;
                 ijvInd++;
 
-                logger.write("(" + u + ", " + v + ", " + ev.wt + ")");
+                // logger.write("(" + u + ", " + v + ", " + ev.wt + ")");
             }
 
             // for each nbr of u, try to place it
