@@ -63,6 +63,7 @@ class _GeneratedObject(object):
 
 class Graph(_GeneratedObject):
     _java_class = JPackage("lapsolver").Graph
+
     def __init__(self, *args, **kwargs):
         super(Graph, self).__init__(*args, **kwargs)
         try:
@@ -76,6 +77,7 @@ class Graph(_GeneratedObject):
 
 class EdgeList(_GeneratedObject):
     _java_class = JPackage("lapsolver").EdgeList
+
     def __init__(self, *args, **kwargs):
         super(EdgeList, self).__init__(*args, **kwargs)
         try:
@@ -89,6 +91,7 @@ class EdgeList(_GeneratedObject):
 
 class UnweightedGraph(_GeneratedObject):
     _java_class = JPackage("lapsolver").UnweightedGraph
+
     def __init__(self, *args, **kwargs):
         super(UnweightedGraph, self).__init__(*args, **kwargs)
         try:
@@ -102,6 +105,7 @@ class UnweightedGraph(_GeneratedObject):
 
 class Tree(_GeneratedObject):
     _java_class = JPackage("lapsolver").Tree
+
     def __init__(self, *args, **kwargs):
         super(Tree, self).__init__(*args, **kwargs)
         try:

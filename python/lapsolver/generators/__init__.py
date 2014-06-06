@@ -4,6 +4,7 @@ from lapsolver import _GeneratedObject, _java_typecast, _from_java
 
 class Grid2(_GeneratedObject):
     _java_class = JPackage("lapsolver").generators.Grid2
+
     def __init__(self, *args, **kwargs):
         super(Grid2, self).__init__(*args, **kwargs)
         try:

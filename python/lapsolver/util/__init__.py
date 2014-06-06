@@ -4,6 +4,7 @@ from lapsolver import _GeneratedObject, _java_typecast, _from_java
 
 class TreeUtils(_GeneratedObject):
     _java_class = JPackage("lapsolver").util.TreeUtils
+
     def __init__(self, *args, **kwargs):
         super(TreeUtils, self).__init__(*args, **kwargs)
         try:
@@ -41,6 +42,7 @@ class TreeUtils(_GeneratedObject):
 
 class Logger(_GeneratedObject):
     _java_class = JPackage("lapsolver").util.Logger
+
     def __init__(self, *args, **kwargs):
         super(Logger, self).__init__(*args, **kwargs)
         try:
@@ -54,6 +56,7 @@ class Logger(_GeneratedObject):
 
 class GraphUtils(_GeneratedObject):
     _java_class = JPackage("lapsolver").util.GraphUtils
+
     def __init__(self, *args, **kwargs):
         super(GraphUtils, self).__init__(*args, **kwargs)
         try:

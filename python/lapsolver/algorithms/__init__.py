@@ -4,6 +4,7 @@ from lapsolver import _GeneratedObject, _java_typecast, _from_java
 
 class GrowRandomTree(_GeneratedObject):
     _java_class = JPackage("lapsolver").algorithms.GrowRandomTree
+
     def __init__(self, *args, **kwargs):
         super(GrowRandomTree, self).__init__(*args, **kwargs)
         try:
@@ -25,6 +26,7 @@ class GrowRandomTree(_GeneratedObject):
 
 class TreePath(_GeneratedObject):
     _java_class = JPackage("lapsolver").algorithms.TreePath
+
     def __init__(self, *args, **kwargs):
         super(TreePath, self).__init__(*args, **kwargs)
         try:
@@ -38,6 +40,7 @@ class TreePath(_GeneratedObject):
 
 class Congestion(_GeneratedObject):
     _java_class = JPackage("lapsolver").algorithms.Congestion
+
     def __init__(self, *args, **kwargs):
         super(Congestion, self).__init__(*args, **kwargs)
         try:
@@ -55,6 +58,7 @@ class Congestion(_GeneratedObject):
 
 class UnionFind(_GeneratedObject):
     _java_class = JPackage("lapsolver").algorithms.UnionFind
+
     def __init__(self, *args, **kwargs):
         super(UnionFind, self).__init__(*args, **kwargs)
         try:
@@ -68,6 +72,7 @@ class UnionFind(_GeneratedObject):
 
 class Stretch(_GeneratedObject):
     _java_class = JPackage("lapsolver").algorithms.Stretch
+
     def __init__(self, *args, **kwargs):
         super(Stretch, self).__init__(*args, **kwargs)
         try:
@@ -82,9 +87,14 @@ class Stretch(_GeneratedObject):
     def compute(*args):
         return _from_java(Stretch._java_class.compute(*_java_typecast(*args)))
 
+    @staticmethod
+    def compute(*args):
+        return _from_java(Stretch._java_class.compute(*_java_typecast(*args)))
+
 
 class StretchDan(_GeneratedObject):
     _java_class = JPackage("lapsolver").algorithms.StretchDan
+
     def __init__(self, *args, **kwargs):
         super(StretchDan, self).__init__(*args, **kwargs)
         try:
@@ -98,6 +108,7 @@ class StretchDan(_GeneratedObject):
 
 class PairSampler(_GeneratedObject):
     _java_class = JPackage("lapsolver").algorithms.PairSampler
+
     def __init__(self, *args, **kwargs):
         super(PairSampler, self).__init__(*args, **kwargs)
         try:
@@ -111,6 +122,7 @@ class PairSampler(_GeneratedObject):
 
 class DiscreteSampler(_GeneratedObject):
     _java_class = JPackage("lapsolver").algorithms.DiscreteSampler
+
     def __init__(self, *args, **kwargs):
         super(DiscreteSampler, self).__init__(*args, **kwargs)
         try:
@@ -124,6 +136,7 @@ class DiscreteSampler(_GeneratedObject):
 
 class TarjanLCA(_GeneratedObject):
     _java_class = JPackage("lapsolver").algorithms.TarjanLCA
+
     def __init__(self, *args, **kwargs):
         super(TarjanLCA, self).__init__(*args, **kwargs)
         try:
