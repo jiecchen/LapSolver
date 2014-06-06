@@ -14,6 +14,7 @@ import lapsolver.Graph;
 import lapsolver.Tree;
 import lapsolver.solvers.Solver;
 import lapsolver.util.GraphUtils;
+import lapsolver.util.TreeUtils;
 
 public class TreeSolver implements Solver {
     private Tree tree;
@@ -29,7 +30,19 @@ public class TreeSolver implements Solver {
     }
 
     // solve for x in Lx = b
+    // calculate potentials down the tree
     public double[] solve(double[] b) {
+        int[] order = TreeUtils.bfsOrder(tree);
+
+        // result to build up (starts with x[root] = 0)
+        double[] x = new double[tree.nv];
+
+        for (int i = 0; i < tree.nv; i++) {
+            int v = order[i], parent = tree.getNode(v).getParent().getId();
+
+            // at this point we've set x[parent]
+        }
+
         return null;
     }
 }
