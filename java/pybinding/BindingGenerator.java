@@ -17,6 +17,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
@@ -196,6 +198,16 @@ public class BindingGenerator {
                         pythonModule.append(ctor).append("\n");
                     } else {
                         System.err.println("Warning: no constructors found for " + className);
+                    }
+
+                    // Generate wrappers for static methods.
+                    for (Method method : currentClass.getMethods()) {
+                        if(Modifier.isStatic(method.getModifiers())) {
+                            String met = getTemplate("staticmethod");
+                            met = met.replaceAll("\\{\\{CLASS\\}\\}", pyClassName);
+                            met = met.replaceAll("\\{\\{METHOD\\}\\}", method.getName());
+                            pythonModule.append(met).append("\n");
+                        }
                     }
 
                     // TODO: generate code to properly handle fields

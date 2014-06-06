@@ -17,13 +17,9 @@ function [ a, coords ] = grid2J( m, n, vw )
         n = m;
     end
     
-    total = m*n;
-    gen = Grid2(m,n,vw);
-    ijv = gen.generateGraph.toIJV();
-    a = sparse(ijv(1,:)+1, ijv(2,:)+1, ijv(3,:), total, total);
-    a = a + a';
+    gen = Grid2(n,m,vw);
+    a = g2a(gen.generateGraph);
     
-    coords = double([mod(0:m*n-1, n); idivide(int32(0:m*n-1),int32(n))]');
-    coords = coords / max(max(coords));
+    coords = double([mod(0:m*n-1, m); idivide(int32(0:m*n-1),int32(m))]');
 end
 

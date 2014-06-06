@@ -29,7 +29,7 @@ public class Stretch {
         return new StretchResult(stretches, total);
     }
 
-    static class StretchResult {
+    public static class StretchResult {
         StretchResult(double[] allStretches, double total) {
             this.allStretches = allStretches;
             this.total = total;

@@ -55,12 +55,13 @@ def test_del3():
     av = np.asarray(a[(ai, aj)])[0, :]
 
     g = lapsolver.Graph(ai, aj, av)
-    spt = lapsolver.lsst.SimulPathTree()
     with Timer('generate the tree'):
-        tree = spt.solve(g)
+        spt = lapsolver.lsst.SimulPathTree()
+        tree = spt.getTree(g)
     with Timer('compute stretch'):
-        stretchAlg = lapsolver.algorithms.Stretch(g, tree)
-        total_stretch = stretchAlg.totalStretch()
+        alg = lapsolver.algorithms.Stretch
+        total_stretch = alg.compute(g, tree).total
     return total_stretch / len(ai.tolist())
 
-print test_del3()
+with Timer('total'):
+    print test_del3()

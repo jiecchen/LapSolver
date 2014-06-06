@@ -1,10 +1,10 @@
+    _java_class = {{PYTHON_PACKAGE}}
     def __init__(self, *args, **kwargs):
         super({{CLASS}}, self).__init__(*args, **kwargs)
         try:
-            self._java_class = {{PYTHON_PACKAGE}}
             if "fromJVM" in kwargs and kwargs["fromJVM"]:
                 self._instance = args[0]
             else:
-                self._instance = self._java_class(*_java_typecast(*args))
+                self._instance = {{CLASS}}._java_class(*_java_typecast(*args))
         except:
             raise RuntimeError("[ERROR] {{JAVA_PACKAGE}}: {{CLASS}}: incorrect arguments")
