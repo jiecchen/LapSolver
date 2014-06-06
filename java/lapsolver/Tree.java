@@ -50,7 +50,7 @@ public class Tree {
         nodes = new TreeNode[nv];
 
         for (int i = 0; i < nv; i++) {
-
+            nodes[i] = new TreeNode(other.nodes[i]);
         }
     }
 

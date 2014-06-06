@@ -59,7 +59,7 @@ public class Congestion {
 
     // Gets the congestion tree
     private static Tree computeCongestionTree(Tree spanningTree, double[] vertexWeights) {
-        Tree answer = spanningTree; // TODO: add clone method to Tree. This is a bug.
+        Tree answer = new Tree(spanningTree);
 
         int[] bfsOrdering = TreeUtils.bfsOrder(spanningTree);   // Get the BFS ordering
 
