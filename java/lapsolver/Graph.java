@@ -1,6 +1,7 @@
 /**
  * @file Graph.java
  * @author Daniel Spielman <spielman@cs.yale.edu>
+ * @author Cyril Zhang <cyril.zhang@yale.edu>
  * @date Sun Dec 22 2013
  *
  * (c) Daniel Spielman, 2013, part of the YINSmat package
@@ -25,15 +26,8 @@
 package lapsolver;
 
 public class Graph {
-    //-----------------------
-    //   the number of vertices
-    //
-    public int nv;
-
-    //-----------------------
-    //   the number of edges
-    //
-    public int ne;
+    public int nv; // number of vertices
+    public int ne; // number of edges
 
     //---------------------
     //  the main graph data,
@@ -43,11 +37,9 @@ public class Graph {
     //     (note each appears twice)
     //
     //  deg[x] is the degree of node x
-
     public int[][] nbrs;
     public double[][] weights;
     public int[] deg;
-
 
     // only computed if call computeWeightedDegrees
     public double[] weightedDeg;
@@ -73,16 +65,17 @@ public class Graph {
     //  not initialized
     //
     private int[] dfs;
-    private int dfsPtr; // a utility
-    //------------------------
-    //  the parent in the dfs tree
-    //  initialized by dfs()
-    //
-    private int[] parent;
 
     public Graph() { }
+
+    // constructor from edge list
+    public Graph(EdgeList edges) {
+        buildFromEdgeData(edges.u, edges.v, edges.weight);
+    }
+
+    // constructor from edge data
     public Graph(int[] src, int[] dst, double[] weight) {
-        fromEdgeList(src, dst, weight);
+        buildFromEdgeData(src, dst, weight);
     }
 
     /**
@@ -90,7 +83,7 @@ public class Graph {
      * [i,j,v] = find(tril(T)),
      * so, each entry of i should be larger than corresp entry of j
      */
-    public void fromEdgeList(int[] src, int[] dst, double[] weight) {
+    public void buildFromEdgeData(int[] src, int[] dst, double[] weight) {
         ne = src.length; // the length of i
 
         dfs = null;
@@ -173,7 +166,7 @@ public class Graph {
     }
 
     /**
-     * set up the graph so that it can be input through fromEdgeList
+     * set up the graph so that it can be input through buildFromEdgeData
      * is meant for calls from java: zero indexed, and no clear ordering on i and j
      */
     public void fromMatlab(int[] src, int[] dst, double[] weight) {
@@ -185,26 +178,7 @@ public class Graph {
             dst[i]--;
         }
 
-        fromEdgeList(src, dst, weight);
-    }
-
-    // the back-indices satisfy nbrs[nbrs[x][i],backInd[x][i]] = x
-    public void buildBackEdges() {
-        backInd = new int[nv][];
-
-        int[] count = new int[nv];
-
-        for (int a = 0; a < nv; a++) {
-            backInd[a] = new int[deg[a]];
-            count[a] = 0;
-        }
-
-        for (int a = 0; a < nv; a++) {
-            for (int i = 0; i < deg[a]; i++) {
-                int nbr = nbrs[a][i];
-                backInd[nbr][count[nbr]++] = i;
-            }
-        }
+        buildFromEdgeData(src, dst, weight);
     }
 
     /**

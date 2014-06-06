@@ -82,12 +82,4 @@ public class EdgeList {
         }
     }
 
-    public Graph toGraph() {
-        return new Graph(u, v, weight);
-    }
-    
-    public Tree toTree() {
-        return GraphUtils.toTree(toGraph());
-    }
-        
 }

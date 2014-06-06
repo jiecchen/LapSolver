@@ -12,6 +12,7 @@
 
 package lapsolver.lsst;
 
+import lapsolver.EdgeList;
 import lapsolver.Graph;
 import lapsolver.util.GraphUtils;
 import lapsolver.util.Logger;
@@ -129,7 +130,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
             }
         }
 
-        return new Graph(ijvI, ijvJ, ijvV);
+        return new Graph(new EdgeList(ijvI, ijvJ, ijvV));
     }
 
     public Graph growTree3() {
@@ -215,8 +216,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
             }
         }
 
-        Graph wg = new Graph();
-        wg.fromMatlab(ijvI, ijvJ, ijvV);
+        Graph wg = new Graph(new EdgeList(ijvI, ijvJ, ijvV));
 
         return wg;
     }
@@ -236,7 +236,6 @@ public class SimulPathTree implements SpanningTreeStrategy {
         rates = new double[graph.ne];
         EdgeEvent[] events = new EdgeEvent[graph.ne];
 
-        graph.buildBackEdges();
         int edgeNum = 0;
         int[][] edgeNums = new int[graph.nv][];
         for (int u = 0; u < graph.nv; u++) {
@@ -340,7 +339,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
 
         }
 
-        return new Graph(ijvI, ijvJ, ijvV);
+        return new Graph(new EdgeList(ijvI, ijvJ, ijvV));
     }
 
     @Override
