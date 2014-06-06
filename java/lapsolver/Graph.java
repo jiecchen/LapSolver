@@ -188,11 +188,7 @@ public class Graph {
         fromEdgeList(src, dst, weight);
     }
 
-    /*
-     * The back indices satisfy
-     * nbrs[nbrs[x][i],backInd[x][i]] = x
-     *
-     */
+    // the back-indices satisfy nbrs[nbrs[x][i],backInd[x][i]] = x
     public void buildBackEdges() {
         backInd = new int[nv][];
 

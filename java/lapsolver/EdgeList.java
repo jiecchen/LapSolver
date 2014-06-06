@@ -14,72 +14,76 @@ package lapsolver;
 import lapsolver.util.GraphUtils;
 
 public class EdgeList {
-    public int edgeCount;
-    public int[] firstEntry;
-    public int[] secondEntry;
+    public int ne;
+    public int[] u;
+    public int[] v;
     public double[] weight;
 
-    // A null EdgeList
+    // an empty EdgeList
     public EdgeList() {}
 
     // EdgeList from a number of elements
-    public EdgeList (int N) {
-        this.edgeCount = N;
-        this.firstEntry = new int[N];
-        this.secondEntry = new int[N];
-        this.weight = new double[N];
+    public EdgeList (int ne) {
+        this.ne = ne;
+        u = new int[ne];
+        v = new int[ne];
+        weight = new double[ne];
     }
 
     // EdgeList from a three lists of length N
-    public EdgeList (int[] U, int V[], double[] W) {
-        this.edgeCount = U.length;
-        this.firstEntry = U;
-        this.secondEntry = V;
-        this.weight = W;
+    public EdgeList (int[] u, int[] v, double[] weight) {
+        ne = u.length;
+        this.u = u;
+        this.v = v;
+        this.weight = weight;
     }
 
     // return an EdgeList from a tree
     public EdgeList (Tree tree) {
-        this.edgeCount = tree.nv;
-        this.firstEntry = new int[edgeCount - 1];
-        this.secondEntry = new int[edgeCount - 1];
-        this.weight = new double[edgeCount - 1];
+        ne = tree.nv - 1;
+        u = new int[ne];
+        v = new int[ne];
+        weight = new double[ne];
 
         int index = 0;
-        for (int i = 0; i < edgeCount; i++)
+        for (int i = 0; i < ne; i++) {
+            // get all parents except root
             if (i != tree.getRoot()) {
-                this.firstEntry[index] = i;
-                this.secondEntry[index] = tree.getNode(i).getParent().getId();
-                this.weight[index] = tree.getNode(i).getLength();
+                u[index] = i;
+                v[index] = tree.getNode(i).getParent().getId();
+                weight[index] = tree.getNode(i).getLength();
                 index++;
             }
+        }
     }
 
     // EdgeList from a graph
     public EdgeList (Graph graph) {
-        this.edgeCount = graph.ne;
-        this.firstEntry = new int[edgeCount];
-        this.secondEntry = new int[edgeCount];
-        this.weight = new double[edgeCount];
+        ne = graph.ne;
+        u = new int[ne];
+        v = new int[ne];
+        weight = new double[ne];
         
         int index = 0;
         int vertexCount = graph.nv;
-        for (int i = 0; i < vertexCount; i++)
+        for (int i = 0; i < vertexCount; i++) {
             for (int j = 0; j < graph.deg[i]; j++) {
-                int v = graph.nbrs[i][j];
-                double w = graph.weights[i][j];
+                int dest = graph.nbrs[i][j];
+                double wt = graph.weights[i][j];
 
-                if (i < v) {
-                    this.firstEntry[index] = i;
-                    this.secondEntry[index] = v;
-                    this.weight[index] = w;
+                // only count an edge once
+                if (i < dest) {
+                    u[index] = i;
+                    v[index] = dest;
+                    weight[index] = wt;
                     index++;
                 }
             }
+        }
     }
 
     public Graph toGraph() {
-        return new Graph(firstEntry, secondEntry, weight);
+        return new Graph(u, v, weight);
     }
     
     public Tree toTree() {
