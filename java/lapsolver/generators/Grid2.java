@@ -2,10 +2,17 @@ package lapsolver.generators;
 
 import lapsolver.Graph;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.DoubleBuffer;
+import java.nio.IntBuffer;
+
 public class Grid2 implements GraphFactory {
     static {
         System.loadLibrary("lapsolver");
     }
+
+    private static boolean USE_JNI = false;
 
     private final int width;
     private final int height;
@@ -14,11 +21,11 @@ public class Grid2 implements GraphFactory {
     private Graph graph = null;
 
     /**
-    * Construct an evenly-weighted 2-dimensional grid graph
-    *
-    * @param width  width of graph in vertices
-    * @param height height of graph in vertices
-    */
+     * Construct an evenly-weighted 2-dimensional grid graph
+     *
+     * @param width  width of graph in vertices
+     * @param height height of graph in vertices
+     */
     public Grid2(int height, int width) {
         this.width = width;
         this.height = height;
@@ -56,19 +63,42 @@ public class Grid2 implements GraphFactory {
         //number of edges, vertices, non-bottom row
         int ne = (2 * width * height) - width - height;
 
-        //i -> from, j -> to, v -> weight
-        int src[] = new int[ne];
-        int dst[] = new int[ne];
-        double weight[] = new double[ne];
+        int [] srcArr = new int[ne];
+        int [] dstArr = new int[ne];
+        double [] weightArr = new double[ne];
 
-        populate(src, dst, weight);
-//        populateC(src, dst, weight, height, width, verticalWeight);
+        if(USE_JNI) {
+            int capacity = 4 * ne;
+            IntBuffer src = getDirectBuffer(capacity).asIntBuffer();
+            IntBuffer dst = getDirectBuffer(capacity).asIntBuffer();
+            DoubleBuffer weight = getDirectBuffer(2 * capacity).asDoubleBuffer();
 
-        graph = new Graph(src, dst, weight);
+            populateC(src, dst, weight, height, width, verticalWeight);
+
+            src.get(srcArr);
+            dst.get(dstArr);
+            weight.get(weightArr);
+        } else {
+            populate(srcArr, dstArr, weightArr);
+        }
+
+        graph = new Graph(srcArr, dstArr, weightArr);
         return graph;
     }
 
+    private static ByteBuffer getDirectBuffer(int capacity) {
+        return ByteBuffer.allocateDirect(capacity).order(ByteOrder.nativeOrder());
+    }
+
+    /**
+     * Populate the src, dst, and weight arrays with the grid edges
+     *
+     * @param src    the source vertices
+     * @param dst    the corresponding destinations
+     * @param weight the weight of each edge
+     */
     private void populate(int[] src, int[] dst, double[] weight) {
+        // populate edge lists
         int e = 0;
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
@@ -87,14 +117,27 @@ public class Grid2 implements GraphFactory {
         }
     }
 
-
-    private native void populateC(int[] src, int[] dst, double[] weight, int height, int width, int verticalWeight);
+    private native void populateC(IntBuffer src, IntBuffer dst, DoubleBuffer weight,
+                                  int height, int width, int verticalWeight);
 
     // benchmark
     public static void main(String[] args) {
+        int nBenchmarks = 1000;
+
+        System.out.print("With JNI, ");
+        runBenchmark(nBenchmarks, true);
+
+        System.out.print("Without JNI, ");
+        runBenchmark(nBenchmarks, false);
+    }
+
+    private static void runBenchmark(int nBenchmarks, boolean jni) {
+        USE_JNI = jni;
         long startTime = System.currentTimeMillis();
-        new Grid2(2000, 2000).generateGraph();
+        for (int i = 0; i < nBenchmarks; i++) {
+            new Grid2(100, 100).generateGraph();
+        }
         long endTime = System.currentTimeMillis();
-        System.out.println("Total execution time = " + ((endTime - startTime) / 1000.0) + "s");
+        System.out.println("total execution time = " + ((endTime - startTime) / (1000.0 * nBenchmarks)) + "s");
     }
 }
