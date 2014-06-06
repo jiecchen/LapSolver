@@ -7,6 +7,8 @@ public class Grid2 implements GraphFactory {
         System.loadLibrary("lapsolver");
     }
 
+    private static boolean USE_JNI = false;
+
     private final int width;
     private final int height;
     private final int verticalWeight;
@@ -14,11 +16,11 @@ public class Grid2 implements GraphFactory {
     private Graph graph = null;
 
     /**
-    * Construct an evenly-weighted 2-dimensional grid graph
-    *
-    * @param width  width of graph in vertices
-    * @param height height of graph in vertices
-    */
+     * Construct an evenly-weighted 2-dimensional grid graph
+     *
+     * @param width  width of graph in vertices
+     * @param height height of graph in vertices
+     */
     public Grid2(int height, int width) {
         this.width = width;
         this.height = height;
@@ -56,19 +58,41 @@ public class Grid2 implements GraphFactory {
         //number of edges, vertices, non-bottom row
         int ne = (2 * width * height) - width - height;
 
-        //i -> from, j -> to, v -> weight
-        int src[] = new int[ne];
-        int dst[] = new int[ne];
-        double weight[] = new double[ne];
+        int [] srcArr = new int[ne];
+        int [] dstArr = new int[ne];
+        double [] weightArr = new double[ne];
 
-        populate(src, dst, weight);
-//        populateC(src, dst, weight, height, width, verticalWeight);
+        if(USE_JNI) {
+            populateC(srcArr, dstArr, weightArr, height, width, verticalWeight);
+        } else {
+            populate(srcArr, dstArr, weightArr);
+        }
 
-        graph = new Graph(src, dst, weight);
+        graph = new Graph(srcArr, dstArr, weightArr);
         return graph;
     }
 
+    /**
+     * Native C version of populateC below. Not much faster than the JIT version.
+     * @param src
+     * @param dst
+     * @param weight
+     * @param height
+     * @param width
+     * @param verticalWeight
+     */
+    private native void populateC(int[] src, int[] dst, double[] weight,
+                                  int height, int width, int verticalWeight);
+
+    /**
+     * Populate the src, dst, and weight arrays with the grid edges
+     *
+     * @param src    the source vertices
+     * @param dst    the corresponding destinations
+     * @param weight the weight of each edge
+     */
     private void populate(int[] src, int[] dst, double[] weight) {
+        // populate edge lists
         int e = 0;
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
@@ -87,14 +111,28 @@ public class Grid2 implements GraphFactory {
         }
     }
 
-
-    private native void populateC(int[] src, int[] dst, double[] weight, int height, int width, int verticalWeight);
-
     // benchmark
     public static void main(String[] args) {
+        int nBenchmarks = 10;
+        int size = 500;
+
+        for (int i = 0; i < 10; i++) {
+            System.out.print("Without JNI, ");
+            runBenchmark(nBenchmarks, false, size);
+
+            System.out.print("With JNI, ");
+            runBenchmark(nBenchmarks, true, size);
+
+            System.out.println("");
+        }
+    }
+
+    private static void runBenchmark(int nBenchmarks, boolean jni, int size) {
+        USE_JNI = jni;
         long startTime = System.currentTimeMillis();
-        new Grid2(2000, 2000).generateGraph();
+        for (int i = 0; i < nBenchmarks; i++)
+            new Grid2(size, size).generateGraph();
         long endTime = System.currentTimeMillis();
-        System.out.println("Total execution time = " + ((endTime - startTime) / 1000.0) + "s");
+        System.out.println("average execution time = " + ((endTime - startTime) / (1000.0 * nBenchmarks)) + "s");
     }
 }
