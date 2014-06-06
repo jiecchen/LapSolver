@@ -2,11 +2,6 @@ package lapsolver.generators;
 
 import lapsolver.Graph;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.DoubleBuffer;
-import java.nio.IntBuffer;
-
 public class Grid2 implements GraphFactory {
     static {
         System.loadLibrary("lapsolver");
@@ -68,16 +63,7 @@ public class Grid2 implements GraphFactory {
         double [] weightArr = new double[ne];
 
         if(USE_JNI) {
-            int capacity = 4 * ne;
-            IntBuffer src = getDirectBuffer(capacity).asIntBuffer();
-            IntBuffer dst = getDirectBuffer(capacity).asIntBuffer();
-            DoubleBuffer weight = getDirectBuffer(2 * capacity).asDoubleBuffer();
-
-            populateC(src, dst, weight, height, width, verticalWeight);
-
-            src.get(srcArr);
-            dst.get(dstArr);
-            weight.get(weightArr);
+            populateC(srcArr, dstArr, weightArr, height, width, verticalWeight);
         } else {
             populate(srcArr, dstArr, weightArr);
         }
@@ -86,9 +72,17 @@ public class Grid2 implements GraphFactory {
         return graph;
     }
 
-    private static ByteBuffer getDirectBuffer(int capacity) {
-        return ByteBuffer.allocateDirect(capacity).order(ByteOrder.nativeOrder());
-    }
+    /**
+     * Native C version of populateC below. Not much faster than the JIT version.
+     * @param src
+     * @param dst
+     * @param weight
+     * @param height
+     * @param width
+     * @param verticalWeight
+     */
+    private native void populateC(int[] src, int[] dst, double[] weight,
+                                  int height, int width, int verticalWeight);
 
     /**
      * Populate the src, dst, and weight arrays with the grid edges
@@ -117,27 +111,28 @@ public class Grid2 implements GraphFactory {
         }
     }
 
-    private native void populateC(IntBuffer src, IntBuffer dst, DoubleBuffer weight,
-                                  int height, int width, int verticalWeight);
-
     // benchmark
     public static void main(String[] args) {
-        int nBenchmarks = 1000;
+        int nBenchmarks = 10;
+        int size = 500;
 
-        System.out.print("With JNI, ");
-        runBenchmark(nBenchmarks, true);
+        for (int i = 0; i < 10; i++) {
+            System.out.print("Without JNI, ");
+            runBenchmark(nBenchmarks, false, size);
 
-        System.out.print("Without JNI, ");
-        runBenchmark(nBenchmarks, false);
+            System.out.print("With JNI, ");
+            runBenchmark(nBenchmarks, true, size);
+
+            System.out.println("");
+        }
     }
 
-    private static void runBenchmark(int nBenchmarks, boolean jni) {
+    private static void runBenchmark(int nBenchmarks, boolean jni, int size) {
         USE_JNI = jni;
         long startTime = System.currentTimeMillis();
-        for (int i = 0; i < nBenchmarks; i++) {
-            new Grid2(100, 100).generateGraph();
-        }
+        for (int i = 0; i < nBenchmarks; i++)
+            new Grid2(size, size).generateGraph();
         long endTime = System.currentTimeMillis();
-        System.out.println("total execution time = " + ((endTime - startTime) / (1000.0 * nBenchmarks)) + "s");
+        System.out.println("average execution time = " + ((endTime - startTime) / (1000.0 * nBenchmarks)) + "s");
     }
 }

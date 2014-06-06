@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     lapsolver_generators_Grid2
  * Method:    populateC
- * Signature: (Ljava/nio/IntBuffer;Ljava/nio/IntBuffer;Ljava/nio/DoubleBuffer;III)V
+ * Signature: ([I[I[DIII)V
  */
 JNIEXPORT void JNICALL Java_lapsolver_generators_Grid2_populateC
-  (JNIEnv *, jobject, jobject, jobject, jobject, jint, jint, jint);
+  (JNIEnv *, jobject, jintArray, jintArray, jdoubleArray, jint, jint, jint);
 
 #ifdef __cplusplus
 }
