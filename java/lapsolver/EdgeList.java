@@ -30,6 +30,14 @@ public class EdgeList {
         weight = new double[ne];
     }
 
+    // copy constructor
+    public EdgeList (EdgeList other) {
+        ne = other.ne;
+        u = other.u.clone();
+        v = other.v.clone();
+        weight = other.weight.clone();
+    }
+
     // EdgeList from a three lists of length N
     public EdgeList (int[] u, int[] v, double[] weight) {
         ne = u.length;

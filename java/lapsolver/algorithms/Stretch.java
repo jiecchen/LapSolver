@@ -13,9 +13,9 @@ import lapsolver.Graph;
 import lapsolver.EdgeList;
 
 public class Stretch {
-    public static StretchResult compute(Graph graph, Tree spanningTree) {
+    // compute stretches for a list of edges
+    public static StretchResult compute(Graph graph, Tree spanningTree, EdgeList edges) {
         // get tree path lengths
-        EdgeList edges = new EdgeList(graph);
         TreePath tp = new TreePath(spanningTree);
         double [] stretches = tp.query(edges.u, edges.v);
         double total = 0;
@@ -27,6 +27,11 @@ public class Stretch {
         }
 
         return new StretchResult(stretches, total);
+    }
+
+    // shorthand: compute stretches for all edges
+    public static StretchResult compute(Graph graph, Tree spanningTree) {
+        return compute(graph, spanningTree, new EdgeList(graph));
     }
 
     public static class StretchResult {

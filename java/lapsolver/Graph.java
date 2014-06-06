@@ -49,20 +49,11 @@ public class Graph {
 
     // constructor from edge list
     public Graph(EdgeList edges) {
-        buildFromEdgeData(edges.u, edges.v, edges.weight);
+        this(edges.u, edges.v, edges.weight);
     }
 
     // constructor from edge data
     public Graph(int[] src, int[] dst, double[] weight) {
-        buildFromEdgeData(src, dst, weight);
-    }
-
-    /**
-     * expects input as
-     * [i,j,v] = find(tril(T)),
-     * so, each entry of i should be larger than corresp entry of j
-     */
-    public void buildFromEdgeData(int[] src, int[] dst, double[] weight) {
         ne = src.length; // the length of i
 
         if ((dst.length != ne) || (weight.length != ne)) {
@@ -82,9 +73,7 @@ public class Graph {
             }
         }
 
-        //-------------------------
         // compute max node index
-        //
         nv = 0;
         for (int i = 0; i < ne; i++) {
             if (src[i] > nv)
@@ -94,7 +83,6 @@ public class Graph {
         }
         nv++; // largest 0-based index is nv-1
 
-        //-----------------------------------------
         //  count how many times each node occurs
         deg = new int[nv];
         for (int i = 0; i < nv; i++) {
@@ -106,7 +94,6 @@ public class Graph {
             deg[dst[i]]++;
         }
 
-        //---------------------------
         // build the graph
         int[] tmpdeg = new int[nv];
 
@@ -135,28 +122,16 @@ public class Graph {
         }
     }
 
-    // returns a clone (deep copy) of this graph
-    public Graph copy() {
-        Graph G = new Graph();
+    // copy constructor (perform a deep copy)
+    public Graph(Graph other) {
+        nv = other.nv;
+        ne = other.ne;
+        deg = other.deg.clone();
 
-        G.nv = nv;
-        G.ne = ne;
-        G.deg = new int[nv];
-
-        System.arraycopy(deg, 0, G.deg, 0, nv);
-
-        G.nbrs = new int[nv][];
-        G.weights = new double[nv][];
-
-        for (int a = 0; a < nv; a++) {
-            G.nbrs[a] = new int[deg[a]];
-            G.weights[a] = new double[deg[a]];
-            for (int i = 0; i < deg[a]; i++) {
-                G.nbrs[a][i] = nbrs[a][i];
-                G.weights[a][i] = weights[a][i];
-            }
+        for (int i = 0; i < nv; i++) {
+            nbrs[i] = other.nbrs[i].clone();
+            weights[i] = other.weights[i].clone();
+            backInd[i] = other.backInd[i].clone();
         }
-
-        return G;
     }
 }
