@@ -12,9 +12,17 @@ package lapsolver.lsst;
 import lapsolver.Tree;
 import lapsolver.Graph;
 
-public class PetalDecompositonTree implements SpanningTreeStrategy {
+public class PetalDecompositionTree implements SpanningTreeStrategy {
+    public final Tree tree;
+    public final Graph graph;
+
+    public PetalDecompositionTree(Graph graph) {
+        this.graph = graph;
+        this.tree = null;
+    }
+
     @Override
-    public Tree solve(Graph in) {
-        return null;
+    public Tree getTree() {
+        return tree;
     }
 }

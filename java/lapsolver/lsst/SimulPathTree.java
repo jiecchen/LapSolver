@@ -24,8 +24,8 @@ import java.util.PriorityQueue;
 import java.util.Random;
 
 public class SimulPathTree implements SpanningTreeStrategy {
-    public Tree tree;
-    public Graph graph;
+    public final Tree tree;
+    public final Graph graph;
 
     // times[node] is time at which node should fire
     public double[] times;
@@ -35,7 +35,15 @@ public class SimulPathTree implements SpanningTreeStrategy {
     public int[] ijvJ;
     public double[] ijvV;
 
-    public SimulPathTree() {}
+    public SimulPathTree(Graph graph) {
+        this.graph = graph;
+        this.tree = GraphUtils.toTree(growTree());
+    }
+
+    @Override
+    public Tree getTree() {
+        return this.tree;
+    }
 
     public Graph growTree() {
         Logger logger = new Logger();
@@ -340,12 +348,6 @@ public class SimulPathTree implements SpanningTreeStrategy {
         }
 
         return new Graph(new EdgeList(ijvI, ijvJ, ijvV));
-    }
-
-    @Override
-    public Tree solve(Graph in) {
-        this.graph = in;
-        return GraphUtils.toTree(growTree());
     }
 
     public class NodeEvent {

@@ -16,11 +16,16 @@ import lapsolver.Tree;
 import lapsolver.Graph;
 
 public class KruskalTree implements SpanningTreeStrategy {
+    public final Tree tree;
+    public final Graph graph;
+
+    public KruskalTree (Graph graph) {
+        this.graph = graph;
+        this.tree = null;
+    }
+
     @Override
-
-    public Tree solve(Graph graph) {
-        int vertexCount = graph.nv;
-
-        return new Tree(vertexCount);
+    public Tree getTree() {
+        return tree;
     }
 }
