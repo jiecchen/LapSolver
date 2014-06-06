@@ -34,8 +34,8 @@ public class StretchDan {
 
     // compute total stretch of spanningTree in graph
     public double compTotalStretch() {
-        aux = new ArrayDeque<>(graph.nv);
-        aux2 = new ArrayDeque<>(graph.nv);
+        aux = new ArrayDeque<Integer>(graph.nv);
+        aux2 = new ArrayDeque<Integer>(graph.nv);
 
         order = TreeUtils.bfsOrder(spanningTree);
         depth = TreeUtils.depthFromTreeOrder(spanningTree, order);
@@ -183,8 +183,8 @@ public class StretchDan {
         int node;     // and, its node
         int numComps = 0;
 
-        aux = new ArrayDeque<>(graph.nv);  // will use for traversing
-        aux2 = new ArrayDeque<>(graph.nv);  // will use for traversing
+        aux = new ArrayDeque<Integer>(graph.nv);  // will use for traversing
+        aux2 = new ArrayDeque<Integer>(graph.nv);  // will use for traversing
 
         double totStretch = 0;
 
