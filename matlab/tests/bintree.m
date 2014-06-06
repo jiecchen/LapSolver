@@ -16,8 +16,8 @@ function [ g, t ] = bintree( n )
     at = at+at';
     
     % convert to java objects
-    g = javagraph(ag);
-    t = javagraph(at);
+    g = a2g(ag);
+    t = a2g(at);
     t = GraphUtils.toTree(t);
 end
 

@@ -1,5 +1,5 @@
-function g = javagraph( a )
-%JAVAGRAPH Converts an adjacency matrix to a Java graph.
+function g = a2g( a )
+%A2G Converts an adjacency matrix to a Java graph object.
     import lapsolver.Graph;
     import lapsolver.EdgeList;
     [ai,aj,av] = find(tril(a));

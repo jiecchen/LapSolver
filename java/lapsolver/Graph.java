@@ -41,12 +41,6 @@ public class Graph {
     public double[][] weights;
     public int[] deg;
 
-    // only computed if call computeWeightedDegrees
-    public double[] weightedDeg;
-
-    // the sum of all weighted degrees
-    public double volume;
-
     //-----------------------------
     //  nbrs[nbrs[x][i],backInd[x][i]] = x
     public int[][] backInd;
@@ -127,13 +121,10 @@ public class Graph {
             tmpdeg[i] = 0;
         }
 
-        volume = 0;
-
         for (int i = 0; i < ne; i++) {
             if (src[i] > dst[i]) {
                 weights[src[i]][tmpdeg[src[i]]] = weight[i];
                 weights[dst[i]][tmpdeg[dst[i]]] = weight[i];
-                volume += weight[i];
 
                 backInd[src[i]][tmpdeg[src[i]]] = tmpdeg[dst[i]];
                 backInd[dst[i]][tmpdeg[dst[i]]] = tmpdeg[src[i]];
@@ -142,24 +133,6 @@ public class Graph {
                 nbrs[dst[i]][tmpdeg[dst[i]]++] = src[i];
             }
         }
-
-        volume *= 2; // double count
-    }
-
-    /**
-     * set up the graph so that it can be input through buildFromEdgeData
-     * is meant for calls from java: zero indexed, and no clear ordering on i and j
-     */
-    public void fromMatlab(int[] src, int[] dst, double[] weight) {
-        //-------------------------
-        // downshift i and j by 1
-        //
-        for(int i = 0; i < src.length; i++) {
-            src[i]--;
-            dst[i]--;
-        }
-
-        buildFromEdgeData(src, dst, weight);
     }
 
     /**
@@ -198,16 +171,6 @@ public class Graph {
             }
         }
         return comp;
-    }
-
-    public void computeWeightedDegrees() {
-        weightedDeg = new double[nv];
-        for (int x = 0; x < nv; x++) {
-            double sum = 0;
-            for (int i = 0; i < deg[x]; i++)
-                sum += weights[x][i];
-            weightedDeg[x] = sum;
-        }
     }
 
     /*

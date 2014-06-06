@@ -3,7 +3,7 @@ function st = run_stretch(a)
     import lapsolver.lsst.SimulPathTree;
     import lapsolver.algorithms.Stretch;
     import lapsolver.algorithms.StretchDan;
-    g = javagraph(a);
+    g = a2g(a);
     spt = SimulPathTree();
     tic; tr = spt.solve(g); toc
     tic; s = Stretch(g,tr); st = s.totalStretch();
