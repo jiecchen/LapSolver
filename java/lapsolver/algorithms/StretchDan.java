@@ -161,7 +161,7 @@ public class StretchDan {
      * @return a weighted graph where the weight is the stretch of every edge
      */
     public Graph compStretches() {
-        stretchGraph = graph.copy();
+        stretchGraph = new Graph(graph);
 
         // make all stretches zero, just to find errors
         for (int a = 0; a < graph.nv; a++) {

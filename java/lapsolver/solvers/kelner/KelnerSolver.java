@@ -45,8 +45,9 @@ public class KelnerSolver implements Solver {
 
         // get off-tree edges; compute their stretches
         offEdges = TreeUtils.getOffTreeEdges(graph, spanningTree);
-        Stretch.StretchResult res = Stretch.compute(graph, spanningTree, offEdges);
+        offStretch = Stretch.compute(graph, spanningTree, offEdges).allStretches;
 
+        
 
 
     }

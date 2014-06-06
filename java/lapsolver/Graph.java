@@ -57,6 +57,19 @@ public class Graph {
         buildFromEdgeData(src, dst, weight);
     }
 
+    // copy constructor (perform a deep copy)
+    public Graph(Graph other) {
+        nv = other.nv;
+        ne = other.ne;
+        deg = other.deg.clone();
+
+        for (int i = 0; i < nv; i++) {
+            nbrs[i] = other.nbrs[i].clone();
+            weights[i] = other.weights[i].clone();
+            backInd[i] = other.backInd[i].clone();
+        }
+    }
+
     /**
      * expects input as
      * [i,j,v] = find(tril(T)),
@@ -133,30 +146,5 @@ public class Graph {
                 nbrs[dst[i]][tmpdeg[dst[i]]++] = src[i];
             }
         }
-    }
-
-    // returns a clone (deep copy) of this graph
-    public Graph copy() {
-        Graph G = new Graph();
-
-        G.nv = nv;
-        G.ne = ne;
-        G.deg = new int[nv];
-
-        System.arraycopy(deg, 0, G.deg, 0, nv);
-
-        G.nbrs = new int[nv][];
-        G.weights = new double[nv][];
-
-        for (int a = 0; a < nv; a++) {
-            G.nbrs[a] = new int[deg[a]];
-            G.weights[a] = new double[deg[a]];
-            for (int i = 0; i < deg[a]; i++) {
-                G.nbrs[a][i] = nbrs[a][i];
-                G.weights[a][i] = weights[a][i];
-            }
-        }
-
-        return G;
     }
 }
