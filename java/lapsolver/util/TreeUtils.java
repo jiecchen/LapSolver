@@ -81,4 +81,5 @@ public class TreeUtils {
                     tree.getNode(i).getLength() + " on the edge to the parent");
         }
     }
+
 }

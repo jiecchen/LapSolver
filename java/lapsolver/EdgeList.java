@@ -60,6 +60,7 @@ public class EdgeList {
     // EdgeList from a graph
     public EdgeList (Graph graph) {
         ne = graph.ne;
+
         u = new int[ne];
         v = new int[ne];
         weight = new double[ne];
@@ -70,6 +71,38 @@ public class EdgeList {
             for (int j = 0; j < graph.deg[i]; j++) {
                 int dest = graph.nbrs[i][j];
                 double wt = graph.weights[i][j];
+
+                // only count an edge once
+                if (i < dest) {
+                    u[index] = i;
+                    v[index] = dest;
+                    weight[index] = wt;
+                    index++;
+                }
+            }
+        }
+    }
+
+    // EdgeList from a spanning tree: return non-tree edges
+    public EdgeList (Graph graph, Tree spanningTree) {
+        ne = graph.ne - graph.nv + 1;
+
+        u = new int[ne];
+        v = new int[ne];
+        weight = new double[ne];
+
+        int index = 0;
+        int vertexCount = graph.nv;
+        for (int i = 0; i < vertexCount; i++) {
+            for (int j = 0; j < graph.deg[i]; j++) {
+                int dest = graph.nbrs[i][j];
+                double wt = graph.weights[i][j];
+
+                // skip tree edges
+                if (spanningTree.getNode(i).getParent().getId() == dest ||
+                    spanningTree.getNode(i).getParent().getId() == i) {
+                    continue;
+                }
 
                 // only count an edge once
                 if (i < dest) {
