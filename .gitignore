@@ -30,3 +30,6 @@ target/
 
 # temp files
 *~
+
+# Generated bindings
+python/lapsolver
