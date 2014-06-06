@@ -12,7 +12,7 @@ import lapsolver.Graph;
 
 public interface Solver {
     // initialize solver on a particular graph, and perform preprocessing
-    public void init(Graph g);
+    public void init(Graph graph);
 
     // solve for x in Lx = b
     public double[] solve(double[] b);
