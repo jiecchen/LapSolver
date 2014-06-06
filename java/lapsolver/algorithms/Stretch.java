@@ -10,6 +10,7 @@ package lapsolver.algorithms;
 
 import lapsolver.Tree;
 import lapsolver.Graph;
+import lapsolver.EdgeList;
 
 public class Stretch {
     private final Graph graph;
@@ -23,17 +24,17 @@ public class Stretch {
 
     // do stretch computation for every edge in the tree
     public double totalStretch() {
-        double[][] ijv = graph.toIJV();
+        EdgeList edges = new EdgeList(graph);
         double[] pathlen;
         double total = 0;
 
         // get tree path lengths
         TreePath tp = new TreePath(spanningTree);
-        pathlen = tp.query(ijv[0], ijv[1]);
+        pathlen = tp.query(edges.u, edges.v);
 
         // divide by edge length for stretch; accumulate
         for (int i = 0; i < graph.ne; i++) {
-            total += pathlen[i] / ijv[2][i];
+            total += pathlen[i] / edges.weight[i];
         }
 
         return total;

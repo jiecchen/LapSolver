@@ -46,17 +46,4 @@ public class TreePath {
 
         return answer;
     }
-
-    // query path lengths with double array (for matlab ijv ease)
-    public double[] query(double[] a, double[] b) {
-        int[] ai = new int[a.length];
-        int[] bi = new int[b.length];
-
-        for (int i = 0; i < a.length; i++) {
-            ai[i] = (int)a[i];
-            bi[i] = (int)b[i];
-        }
-
-        return query(ai, bi);
-    }
 }
