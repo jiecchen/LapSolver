@@ -49,33 +49,11 @@ public class Graph {
 
     // constructor from edge list
     public Graph(EdgeList edges) {
-        buildFromEdgeData(edges.u, edges.v, edges.weight);
+        this(edges.u, edges.v, edges.weight);
     }
 
     // constructor from edge data
     public Graph(int[] src, int[] dst, double[] weight) {
-        buildFromEdgeData(src, dst, weight);
-    }
-
-    // copy constructor (perform a deep copy)
-    public Graph(Graph other) {
-        nv = other.nv;
-        ne = other.ne;
-        deg = other.deg.clone();
-
-        for (int i = 0; i < nv; i++) {
-            nbrs[i] = other.nbrs[i].clone();
-            weights[i] = other.weights[i].clone();
-            backInd[i] = other.backInd[i].clone();
-        }
-    }
-
-    /**
-     * expects input as
-     * [i,j,v] = find(tril(T)),
-     * so, each entry of i should be larger than corresp entry of j
-     */
-    public void buildFromEdgeData(int[] src, int[] dst, double[] weight) {
         ne = src.length; // the length of i
 
         if ((dst.length != ne) || (weight.length != ne)) {
@@ -95,9 +73,7 @@ public class Graph {
             }
         }
 
-        //-------------------------
         // compute max node index
-        //
         nv = 0;
         for (int i = 0; i < ne; i++) {
             if (src[i] > nv)
@@ -107,7 +83,6 @@ public class Graph {
         }
         nv++; // largest 0-based index is nv-1
 
-        //-----------------------------------------
         //  count how many times each node occurs
         deg = new int[nv];
         for (int i = 0; i < nv; i++) {
@@ -119,7 +94,6 @@ public class Graph {
             deg[dst[i]]++;
         }
 
-        //---------------------------
         // build the graph
         int[] tmpdeg = new int[nv];
 
@@ -145,6 +119,19 @@ public class Graph {
                 nbrs[src[i]][tmpdeg[src[i]]++] = dst[i];
                 nbrs[dst[i]][tmpdeg[dst[i]]++] = src[i];
             }
+        }
+    }
+
+    // copy constructor (perform a deep copy)
+    public Graph(Graph other) {
+        nv = other.nv;
+        ne = other.ne;
+        deg = other.deg.clone();
+
+        for (int i = 0; i < nv; i++) {
+            nbrs[i] = other.nbrs[i].clone();
+            weights[i] = other.weights[i].clone();
+            backInd[i] = other.backInd[i].clone();
         }
     }
 }
