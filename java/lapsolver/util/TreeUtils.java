@@ -8,7 +8,9 @@
 
 package lapsolver.util;
 
+import lapsolver.Graph;
 import lapsolver.Tree;
+import lapsolver.EdgeList;
 
 public class TreeUtils {
     // return a permutation of the vertices in BFS order
@@ -80,6 +82,40 @@ public class TreeUtils {
                     tree.getNode(i).getParent().getId() + " with cost " +
                     tree.getNode(i).getLength() + " on the edge to the parent");
         }
+    }
+
+    // EdgeList from a spanning tree: return off-tree edges
+    public EdgeList offTreeEdges (Graph graph, Tree spanningTree) {
+        int ne = graph.ne - graph.nv + 1;
+
+        int[] u = new int[ne];
+        int[] v = new int[ne];
+        double[] w = new double[ne];
+
+        int index = 0;
+        int vertexCount = graph.nv;
+        for (int i = 0; i < vertexCount; i++) {
+            for (int j = 0; j < graph.deg[i]; j++) {
+                int dest = graph.nbrs[i][j];
+                double wt = graph.weights[i][j];
+
+                // skip tree edges
+                if (spanningTree.getNode(i).getParent().getId() == dest ||
+                        spanningTree.getNode(dest).getParent().getId() == i) {
+                    continue;
+                }
+
+                // only count an edge once
+                if (i < dest) {
+                    u[index] = i;
+                    v[index] = dest;
+                    w[index] = wt;
+                    index++;
+                }
+            }
+        }
+
+        return new EdgeList(u, v, w);
     }
 
 }
