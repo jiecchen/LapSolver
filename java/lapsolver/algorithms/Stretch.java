@@ -16,32 +16,37 @@ public class Stretch {
     private final Graph graph;
     private final Tree spanningTree;
 
+    private final double totalStretch;
+    private final double[] stretches;
+
     // constructor: just initialize pointers
     public Stretch (Graph graph, Tree spanningTree) {
         this.graph = graph;
         this.spanningTree = spanningTree;
-    }
-
-    // do stretch computation for every edge in the tree
-    public double totalStretch() {
-        EdgeList edges = new EdgeList(graph);
-        double[] pathlen;
-        double total = 0;
 
         // get tree path lengths
+        EdgeList edges = new EdgeList(graph);
         TreePath tp = new TreePath(spanningTree);
-        pathlen = tp.query(edges.u, edges.v);
+        stretches = tp.query(edges.u, edges.v);
+        double total = 0;
 
         // divide by edge length for stretch; accumulate
         for (int i = 0; i < graph.ne; i++) {
-            total += pathlen[i] / edges.weight[i];
+            stretches[i] /= edges.weight[i];
+            total += stretches[i];
         }
 
-        return total;
+        totalStretch = total;
     }
 
-    // get mean stretch of edges
-    public double meanStretch() {
-        return totalStretch() / graph.ne;
+    // get list of edge stretches (parallel to edge list)
+    public double[] getAll() {
+        return stretches;
     }
+
+    // get total stretch of tree
+    public double getTotal() {
+        return totalStretch;
+    }
+
 }
