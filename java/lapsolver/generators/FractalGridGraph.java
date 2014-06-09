@@ -3,7 +3,7 @@
  * @author Serban Stan <serban.stan@yale.edu>
  * @date Fri Jun 6 2014
  *
- * A fractal tree generator that hopefully can compete with smarter low stretch spanning tree generators.
+ * A fractal tree generator that whose result should be a target for other spanning tree generators.
  */
 
 package lapsolver.generators;

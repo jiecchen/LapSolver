@@ -117,4 +117,5 @@ public class TreeUtils {
 
         return new EdgeList(u, v, w);
     }
+
 }

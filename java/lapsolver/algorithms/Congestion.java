@@ -5,11 +5,6 @@
  *
  * For an input graph G and tree T, returns the tree with congestion values on each edge (.getCongestionTree())
  * Complexity: O( M log N )
- *
- * Instead of incrementing each vertex of the tree by the value of the path (a,b) in the original graph,
- * will increment vertex a by weight(a,b), increment vertex b by weight(a,b) and decrement vertex lca(a,b)
- * by 2 * weight(a,b). Special cases when lca(a,b) = a or b are treated surprisingly smooth.
- * This will help us have a complexity of O(M) on this segment of the code.
  */
 
 package lapsolver.algorithms;

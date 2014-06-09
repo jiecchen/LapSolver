@@ -21,6 +21,7 @@ public class GraphUtils {
 
         // parent array, to be built
         int[] parent = new int[g.nv];
+        double[] weight = new double[g.nv];
 
         // start at root
         stack[0] = root;
@@ -37,11 +38,12 @@ public class GraphUtils {
                 if (visited[child]) continue;
                 stack[stack_pos++] = child;
                 parent[child] = v;
+                weight[child] = g.weights[v][i];
             }
         }
 
         // build tree from parent array
-        return new Tree(parent);
+        return new Tree(parent, weight);
     }
 
     // build a rooted tree from a graph starting at 0, for convenience
