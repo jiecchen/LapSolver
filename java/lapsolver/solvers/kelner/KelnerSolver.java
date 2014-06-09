@@ -94,7 +94,7 @@ public class KelnerSolver implements Solver {
             double len = spanningTree.getNode(v).getLength();
 
             // V = IR
-            voltages[v] = voltages[parent] - currentFlow[v]/len;
+            voltages[v] = voltages[parent] - currentFlow[v]*len;
         }
 
         // subtract mean voltage
