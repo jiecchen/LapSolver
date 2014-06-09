@@ -23,7 +23,7 @@ public class KelnerSolver implements Solver {
     private Graph graph;
     private Tree spanningTree;
     private SpanningTreeStrategy treeStrategy;
-    private PathUpdateTree pathTree;
+    private FlowTree pathTree;
     private TreeSolver treeSolver;
 
     // edge data to be preprocessed

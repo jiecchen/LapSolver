@@ -1,5 +1,5 @@
 /**
- * @file PathUpdateTree.java
+ * @file FlowTree.java
  * @author Cyril Zhang <cyril.zhang@yale.edu>
  * @date Thu Jun 5 2014
  *
@@ -10,7 +10,7 @@ package lapsolver.solvers.kelner;
 
 import lapsolver.Tree;
 
-public interface PathUpdateTree {
+public interface FlowTree {
     // initialize the data structure
     public void init(Tree t);
 

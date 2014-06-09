@@ -1,5 +1,5 @@
 /**
- * @file KelnerPathUpdateTree.java
+ * @file KelnerFlowTree.java
  * @author Cyril Zhang <cyril.zhang@yale.edu>
  * @date Thu Jun 5 2014
  *
@@ -8,10 +8,9 @@
 
 package lapsolver.solvers.kelner;
 
-import lapsolver.solvers.kelner.PathUpdateTree;
 import lapsolver.Tree;
 
-public class DirectPathUpdateTree {
+public class DirectFlowTree {
     // initialize the data structure
     public void init(Tree t) {
 
