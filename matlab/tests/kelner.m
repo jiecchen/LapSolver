@@ -20,7 +20,7 @@ function errs = kelner( a, b, iters )
     for i = 1:iters
         solver.solve_iter;
         x = solver.solve_return;
-        errs(i) = norm(lap(a)*x - b');
+        errs(i) = norm(lap(a)*x - b);
     end
 end
 

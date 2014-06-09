@@ -12,8 +12,7 @@ function err = treesolve( n )
     solver = TreeSolver;
     solver.init(a2g(a));
     
-    b = rand(n,1);
-    b = b - mean(b)
+    b = randb(n);
     x = solver.solve(b);
     y = pinv(full(l)) * b;
     

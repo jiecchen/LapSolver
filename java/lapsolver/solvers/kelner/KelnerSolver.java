@@ -109,4 +109,28 @@ public class KelnerSolver implements Solver {
 
         return voltages;
     }
+
+    // get the flow energy (diagnostic)
+    public double getEnergy() {
+        double energy = 0;
+
+        double[] currentFlow = flowTree.getTreeFlows();
+        // sum tree energies
+        for (int i = 0; i < currentFlow.length; i++) {
+            if (i == spanningTree.getRoot()) continue;
+
+            double f = currentFlow[i];
+            double r = spanningTree.getNode(i).getLength();
+            energy += f*f*r;
+        }
+
+        // sum off-tree energies
+        for (int i = 0; i < offEdges.ne; i++) {
+            double f = flowTree.offFlow[i];
+            double r = flowTree.offEdges.weight[i];
+            energy += f*f*r;
+        }
+
+        return energy;
+    }
 }
