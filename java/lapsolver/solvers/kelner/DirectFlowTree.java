@@ -8,21 +8,62 @@
 
 package lapsolver.solvers.kelner;
 
+import lapsolver.EdgeList;
 import lapsolver.Tree;
 
-public class DirectFlowTree {
-    // initialize the data structure
-    public void init(Tree t) {
+public class DirectFlowTree extends FlowTree {
+    private double[] treeFlows;
 
+    // base constructor
+    public DirectFlowTree (Tree tree, EdgeList offEdges) {
+        super(tree, offEdges);
     }
 
-    // push `alpha` units of flow along the tree path from u to v
-    public void update(int u, int v, double alpha) {
+    // push `alpha` units of flow along the tree path on edge e
+    public void treeUpdate(int e, double alpha) {
+        int u = super.offEdges.u[e];
+        int v = super.offEdges.v[e];
+        int root = super.tree.getRoot();
 
+        do {
+            treeFlows[u] += alpha;
+            u = super.tree.getNode(u).getParent().getId();
+        } while(u != root);
+
+        do {
+            treeFlows[v] -= alpha;
+            v = super.tree.getNode(v).getParent().getId();
+        } while(v != root);
     }
 
-    // find the total flow along the tree path from u to v
-    public double query(int u, int v) {
-        return 0.0;
+    // find sum of V = IR along the tree path on edge e
+    public double treeQuery(int e) {
+        int u = super.offEdges.u[e];
+        int v = super.offEdges.v[e];
+        int root = super.tree.getRoot();
+
+        double total = 0;
+
+        do {
+            total += treeFlows[u];
+            u = super.tree.getNode(u).getParent().getId();
+        } while(u != root);
+
+        do {
+            total -= treeFlows[v];
+            v = super.tree.getNode(v).getParent().getId();
+        } while(v != root);
+
+        return total;
+    }
+
+    // initialize the structure with some flows
+    public void setTreeFlows(double[] treeFlows) {
+        this.treeFlows = treeFlows.clone();
+    }
+
+    // retrieve the tree flows (off-tree flows are redundant)
+    public double[] getTreeFlows() {
+        return treeFlows;
     }
 }

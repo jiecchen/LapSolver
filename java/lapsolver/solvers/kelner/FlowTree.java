@@ -8,16 +8,43 @@
 
 package lapsolver.solvers.kelner;
 
+import lapsolver.EdgeList;
 import lapsolver.Tree;
 
-public interface FlowTree {
-    // initialize the data structure
-    public void init(Tree t);
+public abstract class FlowTree {
+    // common implementation for off-tree edges
+    public Tree tree;
+    public EdgeList offEdges;
+    public double[] offFlow;
 
-    // push `alpha` units of flow along the tree path from u to v
-    public void update(int u, int v, double alpha);
+    // base constructor
+    public FlowTree(Tree tree, EdgeList offEdges) {
+        this.tree = tree;
+        this.offEdges = offEdges;
+        offFlow = new double[offEdges.ne];
+    }
 
-    // find the total flow along the tree path from u to v
-    public double query(int u, int v);
+    // push `alpha` units of flow along the tree cycle on edge e
+    public void update(int e, double alpha) {
+        treeUpdate(e, alpha);
+        offFlow[e] += alpha;
+    }
+
+    // find sum of V = IR along the tree cycle on edge e
+    public double query(int e) {
+        return treeQuery(e) + offFlow[e] * offEdges.weight[e];
+    }
+
+    // push `alpha` units of flow along the tree path on edge e
+    public abstract void treeUpdate(int e, double alpha);
+
+    // find sum of V = IR along the tree path on edge e
+    public abstract double treeQuery(int e);
+
+    // initialize the structure with some flows
+    public abstract void setTreeFlows(double[] treeFlows);
+
+    // retrieve the tree flows (off-tree flows are redundant)
+    public abstract double[] getTreeFlows();
 }
 

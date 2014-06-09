@@ -19,22 +19,17 @@ import lapsolver.util.TreeUtils;
 import lapsolver.solvers.TreeSolver;
 
 public class KelnerSolver implements Solver {
-    // graph data structures
-    private Graph graph;
-    private Tree spanningTree;
+    public Tree spanningTree;
     private SpanningTreeStrategy treeStrategy;
-    private FlowTree pathTree;
+    private FlowTree flowTree;
     private TreeSolver treeSolver;
 
     // edge data to be preprocessed
     private EdgeList offEdges;
-    private int[] offLca;
     private double[] offStretch;
     private DiscreteSampler edgeSampler;
 
     // algorithm state
-    private double[] currentB;
-    private double[] currentFlow;
     private int[] order;
 
     // initialize solver with a spanning tree strategy
@@ -46,7 +41,6 @@ public class KelnerSolver implements Solver {
     @Override
     public void init(Graph graph) {
         // compute LSST, cache BFS order
-        this.graph = graph;
         spanningTree = treeStrategy.getTree(graph);
         order = TreeUtils.bfsOrder(spanningTree);
 
@@ -58,6 +52,9 @@ public class KelnerSolver implements Solver {
         // initialize feasible flow finder for spanning tree
         treeSolver = new TreeSolver();
         treeSolver.init(spanningTree);
+
+        // initialize the cycle query data structure
+        flowTree = new DirectFlowTree(spanningTree, offEdges);
     }
 
     // solve for x in Lx = b, with default parameters
@@ -73,17 +70,21 @@ public class KelnerSolver implements Solver {
     // find feasible flow on LSST
     // after calling this once, you can call solve_iteration() many times
     public void solve_init(double[] b) {
-        currentB = b;
-        currentFlow = treeSolver.solveFlow(b);
+        flowTree.setTreeFlows(treeSolver.solveFlow(b));
     }
 
     // improve the current flow on a cycle induced by an off-tree edge
     public void solve_iter() {
         int e = edgeSampler.next();
+        double drop = flowTree.query(e);
+        double resistance = offStretch[e] / offEdges.weight[e];
+
+        flowTree.update(e, -drop / resistance);
     }
 
     // return the answer, given the flow state
     public double[] solve_return() {
+        double[] currentFlow = flowTree.getTreeFlows();
         double[] voltages = new double[spanningTree.nv];
 
         // build voltage vector from bottom up
