@@ -11,8 +11,6 @@
 
 package lapsolver;
 
-import lapsolver.util.GraphUtils;
-
 public class EdgeList {
     public int ne;
     public int[] u;
@@ -36,6 +34,16 @@ public class EdgeList {
         u = other.u.clone();
         v = other.v.clone();
         weight = other.weight.clone();
+    }
+
+    // EdgeList from two lists of length N (consider the weights = 1)
+    public EdgeList (int[] u, int[] v) {
+        ne = u.length;
+        this.u = u;
+        this.v = v;
+        this.weight = new double[ne];
+        for (int i = 0; i < ne; i++)
+            this.weight[i] = 1;
     }
 
     // EdgeList from a three lists of length N
