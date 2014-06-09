@@ -1,37 +1,38 @@
 #include "lapsolver_generators_Grid2.h"
+#include "common.h"
 
 #define getIdx(i,j) (width*(i) + (j))
-static void doPopulate(int * restrict src, int * restrict dst, double * restrict weight,
-                const int height, const int width, const double verticalWeight)
+void doPopulate(int * restrict src, int * restrict dst, double * restrict weight,
+                 const int height, const int width, const double verticalWeight)
 {
     const int N = width*height;
     const int shortHeight = height-1;
     const int shortWidth = width-1;
 
-    int e = 0;
     // populate the majority of edges
+    #pragma omp parallel for
     for(int i = 0; i < shortHeight; i++) {
-        for(int j = 0; j < width; j++, e++) {
-            src[e] = getIdx(i, j);
-            dst[e] = getIdx(i+1, j);
-            weight[e] = verticalWeight;
+        int e = i * (2 * width - 1);
+        for(int j = 0; j < width; j++) {
+            src[e+j] = getIdx(i, j);
+            dst[e+j] = getIdx(i+1, j);
+            weight[e+j] = verticalWeight;
         }
-        for(int j = 0; j < shortWidth; j++, e++) {
-            src[e] = getIdx(i, j);
-            dst[e] = getIdx(i, j+1);
-            weight[e] = 1.0;
+        e += width;
+        for(int j = 0; j < shortWidth; j++) {
+            src[e+j] = getIdx(i, j);
+            dst[e+j] = getIdx(i, j+1);
+            weight[e+j] = 1.0;
         }
     }
 
     // populate bottom edge
-    const int oldE = e;
-    for (int j = width*shortHeight+1; j < N; j++, e++) {
-        src[e] = j-1;
-        dst[e] = j;
-    }
-    e = oldE;
-    for (int j = width*shortHeight+1; j < N; j++, e++) {
-        weight[e] = 1.0;
+    const int base = shortHeight*(2*width-1);
+    src += base; dst += base; weight += base;
+    for (int j = 0; j < shortWidth; j++) {
+        src[j] = getIdx(shortHeight,j);
+        dst[j] = getIdx(shortHeight,j+1);
+        weight[j] = 1.0;
     }
 }
 
