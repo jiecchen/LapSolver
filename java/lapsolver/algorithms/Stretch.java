@@ -22,7 +22,8 @@ public class Stretch {
 
         // divide by edge length for stretch; accumulate
         for (int i = 0; i < graph.ne; i++) {
-            stretches[i] /= edges.weight[i];
+            // divide by length = 1/weight
+            stretches[i] *= edges.weight[i];
             total += stretches[i];
         }
 
