@@ -25,15 +25,15 @@ public class DirectFlowTree extends FlowTree {
         int v = super.offEdges.v[e];
         int root = super.tree.getRoot();
 
-        do {
+        while (u != root) {
             treeFlows[u] += alpha;
             u = super.tree.getNode(u).getParent().getId();
-        } while(u != root);
+        }
 
-        do {
+        while (v != root) {
             treeFlows[v] -= alpha;
             v = super.tree.getNode(v).getParent().getId();
-        } while(v != root);
+        }
     }
 
     // find sum of V = IR along the tree path on edge e
@@ -44,15 +44,15 @@ public class DirectFlowTree extends FlowTree {
 
         double total = 0;
 
-        do {
+        while (u != root) {
             total += treeFlows[u];
             u = super.tree.getNode(u).getParent().getId();
-        } while(u != root);
+        }
 
-        do {
+        while (v != root) {
             total -= treeFlows[v];
             v = super.tree.getNode(v).getParent().getId();
-        } while(v != root);
+        }
 
         return total;
     }
