@@ -50,10 +50,10 @@ public class TreeSolver implements Solver {
         for (int i = 1; i < tree.nv; i++) {
             int v = order[i];
             int parent = tree.getNode(v).getParent().getId();
-            double len = tree.getNode(parent).getLength();
+            double len = tree.getNode(v).getLength();
 
             // V = IR
-            voltages[v] = voltages[parent] - flowUp[v]/len;
+            voltages[v] = voltages[parent] - flowUp[v]*len;
         }
 
         // subtract mean voltage

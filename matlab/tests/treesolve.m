@@ -4,7 +4,10 @@ function err = treesolve( n )
     import lapsolver.solvers.TreeSolver;
 
     a = cbt(n);
+    a(1,2) = 2;
+    a(2,1) = 2;
     l = lap(a);
+    full(l)
     
     solver = TreeSolver;
     solver.init(a2g(a));
@@ -12,10 +15,7 @@ function err = treesolve( n )
     b = rand(n,1);
     b = b - mean(b)
     x = solver.solve(b);
-    
-    x = x - x(1)
     y = pinv(full(l)) * b;
-    y = y - y(1)
     
     err = norm( l*x - b );
 end

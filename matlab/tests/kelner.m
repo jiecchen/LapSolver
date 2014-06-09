@@ -10,5 +10,6 @@ function x = kelner( a, b )
     
     solver.solve_init(b);
     x = solver.solve_return;
+    err = norm(lap(a)*x - b')
 end
 
