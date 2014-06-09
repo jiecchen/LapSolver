@@ -58,4 +58,24 @@ public class TreeSolver implements Solver {
 
         return voltages;
     }
+
+    // just find the feasible flow that gives i_out = b
+    // stored as a parent list
+    public double[] solveFlow(double[] b) {
+        int[] order = TreeUtils.bfsOrder(tree);
+
+        // compute currents from bottom up
+        double[] flowTo = new double[tree.nv]; // total flow to v
+        double[] flowUp = new double[tree.nv]; // flow along (v -> parent)
+        for (int i = tree.nv-1; i >= 1; i--) {
+            int v = order[i];
+            int parent = tree.getNode(v).getParent().getId();
+
+            flowUp[v] = flowTo[v] - b[v];
+            flowTo[parent] += flowUp[v];
+        }
+
+        return flowUp;
+    }
+
 }
