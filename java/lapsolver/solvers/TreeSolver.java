@@ -34,15 +34,28 @@ public class TreeSolver implements Solver {
     public double[] solve(double[] b) {
         int[] order = TreeUtils.bfsOrder(tree);
 
-        // result to build up (starts with x[root] = 0)
-        double[] x = new double[tree.nv];
+        // compute currents from bottom up
+        double[] flowTo = new double[tree.nv]; // total flow to v
+        double[] flowUp = new double[tree.nv]; // flow along (v -> parent)
+        for (int i = tree.nv-1; i >= 1; i--) {
+            int v = order[i];
+            int parent = tree.getNode(v).getParent().getId();
 
-        for (int i = 0; i < tree.nv; i++) {
-            int v = order[i], parent = tree.getNode(v).getParent().getId();
-
-            // at this point we've set x[parent]
+            flowUp[v] = flowTo[v] - b[v];
+            flowTo[parent] += flowUp[v];
         }
 
-        return null;
+        // compute voltages from top down
+        double[] voltages = new double[tree.nv];
+        for (int i = 1; i < tree.nv; i++) {
+            int v = order[i];
+            int parent = tree.getNode(v).getParent().getId();
+            double len = tree.getNode(parent).getLength();
+
+            // V = IR
+            voltages[v] = voltages[parent] - flowUp[v]/len;
+        }
+
+        return voltages;
     }
 }
