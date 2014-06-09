@@ -128,6 +128,10 @@ public class Graph {
         ne = other.ne;
         deg = other.deg.clone();
 
+        nbrs = new int[nv][];
+        weights = new double[nv][];
+        backInd = new int[nv][];
+
         for (int i = 0; i < nv; i++) {
             nbrs[i] = other.nbrs[i].clone();
             weights[i] = other.weights[i].clone();
