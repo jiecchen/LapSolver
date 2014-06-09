@@ -1,4 +1,4 @@
-function errs = kelner( a, b, iters )
+function [x, errs] = kelner( a, b, iters )
 %KELNER Watch iterations of the Kelner algorithm.
 %Sample:
 %errs = kelner(grid2(100,100),randb(10000),10000);
