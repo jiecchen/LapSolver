@@ -59,7 +59,7 @@ public class EdgeList {
             if (i != tree.getRoot()) {
                 u[index] = i;
                 v[index] = tree.getNode(i).getParent().getId();
-                weight[index] = tree.getNode(i).getLength();
+                weight[index] = 1 / tree.getNode(i).getLength();
                 index++;
             }
         }

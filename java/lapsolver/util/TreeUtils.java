@@ -118,4 +118,10 @@ public class TreeUtils {
         return new EdgeList(u, v, w);
     }
 
+    // turn a tree into an undirected graph
+    public static Graph toGraph (Tree tree) {
+        EdgeList edges = new EdgeList(tree);
+        return new Graph(edges);
+    }
+
 }
