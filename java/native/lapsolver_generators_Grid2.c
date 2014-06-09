@@ -1,7 +1,7 @@
 #include "lapsolver_generators_Grid2.h"
 
 #define getIdx(i,j) (width*(i) + (j))
-void doPopulate(int * restrict src, int * restrict dst, double * restrict weight,
+static void doPopulate(int * restrict src, int * restrict dst, double * restrict weight,
                 const int height, const int width, const double verticalWeight)
 {
     const int N = width*height;
