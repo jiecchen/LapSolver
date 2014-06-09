@@ -45,12 +45,14 @@ public class DirectFlowTree extends FlowTree {
         double total = 0;
 
         while (u != root) {
-            total += treeFlows[u];
+            double length = super.tree.getNode(u).getLength();
+            total += treeFlows[u] * length;
             u = super.tree.getNode(u).getParent().getId();
         }
 
         while (v != root) {
-            total -= treeFlows[v];
+            double length = super.tree.getNode(v).getLength();
+            total -= treeFlows[v] * length;
             v = super.tree.getNode(v).getParent().getId();
         }
 
