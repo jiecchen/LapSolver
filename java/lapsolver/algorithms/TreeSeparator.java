@@ -14,10 +14,12 @@ package lapsolver.algorithms;
 import lapsolver.Tree;
 import lapsolver.util.TreeUtils;
 
+import java.util.Arrays;
+
 public class TreeSeparator {
     // Find a tree separator.
     public static int find (Tree tree) {
-        int[] order = TreeUtils.bfsOrder(tree);
+        int[] order = TreeUtils.dfsOrder(tree);
         int[] sizes = new int[tree.nv]; // subtree sizes
         boolean[] notSep = new boolean[tree.nv]; // eliminated candidate
 
@@ -25,9 +27,9 @@ public class TreeSeparator {
         for (int i = tree.nv-1; i >= 0; i--) {
             // get subtree sizes
             int v = order[i];
-            int parent = tree.getNode(i).getParent().getId();
+            int parent = tree.getNode(v).getParent().getId();
             sizes[v] += 1;
-            if (i != tree.getRoot()) {
+            if (v != tree.getRoot()) {
                 sizes[parent] += sizes[v];
 
                 // too big to be child?
@@ -41,7 +43,7 @@ public class TreeSeparator {
                 notSep[v] = true;
             }
         }
-        
+
         // find separator
         for (int i = 0; i < tree.nv; i++) {
             if (!notSep[i]) return i;

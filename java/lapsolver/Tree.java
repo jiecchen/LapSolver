@@ -50,7 +50,7 @@ public class Tree {
         nodes = new TreeNode[nv];
 
         for (int i = 0; i < nv; i++) {
-            nodes[i] = new TreeNode(other.nodes[i]);
+            nodes[i] = new TreeNode(other.getNode(i));
         }
     }
 
@@ -140,6 +140,16 @@ public class Tree {
 
         public int getNumberOfChildren() {
             return children.size();
+        }
+
+        public int getDegree() {
+            // root has no parent
+            if (id == Tree.this.root) {
+                return children.size();
+            }
+
+            // otherwise, node has a parent
+            return children.size() + 1;
         }
 
         public int getChild(int i) {
