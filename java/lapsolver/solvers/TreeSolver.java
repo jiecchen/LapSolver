@@ -56,6 +56,16 @@ public class TreeSolver implements Solver {
             voltages[v] = voltages[parent] - flowUp[v]/len;
         }
 
+        // subtract mean voltage
+        double meanVoltage = 0;
+        for (int i = 0; i < tree.nv; i++) {
+            meanVoltage += voltages[i];
+        }
+        meanVoltage /= tree.nv;
+        for (int i = 0; i < tree.nv; i++) {
+            voltages[i] -= meanVoltage;
+        }
+
         return voltages;
     }
 
