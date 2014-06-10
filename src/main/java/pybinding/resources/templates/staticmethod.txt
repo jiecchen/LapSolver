@@ -1,0 +1,4 @@
+
+    @staticmethod
+    def {{METHOD}}(*args):
+        return _from_java({{CLASS}}._java_class.{{METHOD}}(*_java_typecast(*args)))

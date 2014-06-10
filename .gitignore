@@ -6,7 +6,7 @@
 *.dylib
 *.dll
 *.gcda
-build/
+target/
 
 # Eclipse
 .classpath
