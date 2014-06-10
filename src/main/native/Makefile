@@ -2,17 +2,30 @@ CC=gcc
 PROF_FLAGS=-fprofile-generate
 #PROF_FLAGS=-fprofile-use
 TARGET=../resources/lib
-LIBRARY=liblapsolver.so
-CFLAGS=-O3 -mtune=native -march=native -fopenmp -flto -std=c99 -fPIC -Wa,-q
+LIBRARY=liblapsolver
+CFLAGS=-O3 -march=native -mtune=native -fopenmp -flto -std=c99 -fPIC
 INCLUDES=-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -Iinclude -I/System/Library/Frameworks/JavaVM.framework/Versions/A/Headers
 CLASSES=lapsolver.generators.Grid2
 SOURCES=$(addsuffix .c,$(addprefix src/,$(subst .,_,$(CLASSES))))
 OBJECTS=$(SOURCES:.c=.o)
 
+LIB_NAME_OPT=-soname
+
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+	DYNAMIC=-dynamiclib
+	LIBRARY+=.jnilib
+	CFLAGS+=-mno-avx
+endif
+ifeq ($(UNAME_S), Linux)
+	DYNAMIC=-shared -Wl,-soname,liblapsolver
+	LIBRARY+=.so
+endif
+
 all: $(SOURCES) $(LIBRARY) tests
 
 $(LIBRARY): $(OBJECTS)
-	$(CC) $(CFLAGS) $(PROF_FLAGS) $^ -shared -o $@ -Wl,-soname,liblapsolver
+	$(CC) $(CFLAGS) $(PROF_FLAGS) $^ $(DYNAMIC) -o $@
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(PROF_FLAGS) $(INCLUDES) -c $< -o $@
