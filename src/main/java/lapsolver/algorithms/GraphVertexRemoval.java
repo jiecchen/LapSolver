@@ -248,7 +248,7 @@ public class GraphVertexRemoval {
     }
 
     /*
-        A utility function that can picks the vertex with smallest degree
+        A utility function that can pick the vertex with smallest degree
      */
     public int canPickVertex(int[][] Q, int[] first, int[] last, int[] eliminated, int maxDegree) {
         for (int degree = 0; degree <= maxDegree; degree++) {
