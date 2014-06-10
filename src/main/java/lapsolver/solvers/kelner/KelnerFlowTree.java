@@ -13,16 +13,13 @@ import lapsolver.Tree;
 import lapsolver.algorithms.TreeSeparator;
 import lapsolver.util.TreeUtils;
 
-import java.lang.reflect.Array;
-import java.util.Arrays;
-
 public class KelnerFlowTree extends FlowTree {
-    public KelnerStructure rootStructure;
+    public SeparatorNode rootStructure;
 
     // base constructor
     public KelnerFlowTree (Tree tree, EdgeList offEdges) {
         super(tree, offEdges);
-        rootStructure = new KelnerStructure(tree);
+        rootStructure = new SeparatorNode(tree);
     }
 
     // push `alpha` units of flow along the tree path on edge e
@@ -70,37 +67,12 @@ public class KelnerFlowTree extends FlowTree {
         return flowUp;
     }
 
-    // dump the tree structure
-    public void dump () {
-        dump(rootStructure,0);
-    }
-
-    public void dump (KelnerStructure root, int depth) {
-        for(int i=0; i<depth; ++i) System.out.print(" ");
-        System.out.println(root.tree.nv + " d=" + root.drop + " e=" + root.ext + " sep=" + root.separator);
-        for(int i=0; i<depth; ++i) System.out.print(" ");
-        EdgeList edges = new EdgeList(root.tree);
-        for (int i = 0; i < edges.ne; i++) {
-            System.out.print(edges.u[i] + "-" + edges.v[i] + " ");
-        }System.out.println("");
-        for(int i=0; i<depth; ++i) System.out.print(" ");
-        System.out.println(Arrays.toString(root.component));
-        for(int i=0; i<depth; ++i) System.out.print(" ");
-        System.out.println(Arrays.toString(root.relabel));
-        for(int i=0; i<depth; ++i) System.out.print(" ");
-        System.out.println(Arrays.toString(root.height));
-        if(root.children != null)
-        for(KelnerStructure ch : root.children) {
-            if (ch != null) dump(ch,depth+1);
-        }
-    }
-
     // recursively defined data structure
-    private class KelnerStructure {
+    private class SeparatorNode {
         // structure
         public Tree tree;
         public int separator;
-        public KelnerStructure[] children;
+        public SeparatorNode[] children;
         public int[] component; // component id for each vertex
         public int[] relabel; // names of vertices in substructures
         public double[] height; // length of root -> LCA(v, separator) path
@@ -110,7 +82,7 @@ public class KelnerFlowTree extends FlowTree {
         public double ext;
 
         // recursive constructor
-        public KelnerStructure(Tree tree) {
+        public SeparatorNode(Tree tree) {
             this.tree = tree;
             drop = 0;
             ext = 0;
@@ -226,10 +198,10 @@ public class KelnerFlowTree extends FlowTree {
                 }
 
                 // call constructor on child structures
-                children = new KelnerStructure[componentCount];
+                children = new SeparatorNode[componentCount];
                 for (int i = 0; i < componentCount; i++) {
                     if (subtrees[i] != null) {
-                        children[i] = new KelnerStructure(subtrees[i]);
+                        children[i] = new SeparatorNode(subtrees[i]);
                     }
                 }
             }
