@@ -54,7 +54,7 @@ public class KelnerSolver implements Solver {
         treeSolver.init(spanningTree);
 
         // initialize the cycle query data structure
-        flowTree = new DirectFlowTree(spanningTree, offEdges);
+        flowTree = new KelnerFlowTree(spanningTree, offEdges);
     }
 
     // solve for x in Lx = b, with default parameters
