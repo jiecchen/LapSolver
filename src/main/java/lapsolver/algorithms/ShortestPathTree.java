@@ -28,19 +28,19 @@ public class ShortestPathTree {
         return parent;
     }
 
-    public ShortestPathTree(Graph input, int source) {
-        dist = new double[input.nv];
-        parent = new int[input.nv];
+    public ShortestPathTree(Graph G, int source) {
+        dist = new double[G.nv];
+        parent = new int[G.nv];
 
-        PriorityQueue<Integer> nextNodes = new PriorityQueue<>(input.nv, new Comparator<Integer>() {
+        PriorityQueue<Integer> nextNodes = new PriorityQueue<>(G.nv, new Comparator<Integer>() {
             @Override
             public int compare(Integer o1, Integer o2) {
-                return (int) Math.signum(dist[o1] - dist[o2]);
+                return Double.compare(dist[o1], dist[o2]);
             }
         });
 
         dist[source] = 0;
-        for (int i = 0; i < input.nv; i++) {
+        for (int i = 0; i < G.nv; i++) {
             if(i != source) {
                 dist[i] = Double.POSITIVE_INFINITY;
                 parent[i] = -1;
@@ -51,10 +51,10 @@ public class ShortestPathTree {
         HashSet<Integer> settled = new HashSet<>();
         while (!nextNodes.isEmpty()) {
             int u = nextNodes.poll();
-            for (int i = 0; i < input.deg[u]; i++) {
-                int v = input.nbrs[u][i];
+            for (int i = 0; i < G.deg[u]; i++) {
+                int v = G.nbrs[u][i];
                 if(!settled.contains(v)) {
-                    double alt = dist[u] + input.weights[u][i];
+                    double alt = dist[u] + G.weights[u][i];
                     if(alt < dist[v]) {
                         nextNodes.remove(v);
                         dist[v] = alt;
@@ -65,6 +65,7 @@ public class ShortestPathTree {
             }
             settled.add(u);
         }
+
         parent[source] = source; // Follow parent array convention
     }
 
