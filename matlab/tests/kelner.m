@@ -22,5 +22,7 @@ function [x, errs] = kelner( a, b, iters )
         x = solver.solve_return;
         errs(i) = norm(lap(a)*x - b);
     end
+    
+    lap(a)*x-b
 end
 

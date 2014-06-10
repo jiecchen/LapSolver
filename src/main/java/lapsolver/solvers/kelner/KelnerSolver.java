@@ -75,6 +75,10 @@ public class KelnerSolver implements Solver {
 
     // improve the current flow on a cycle induced by an off-tree edge
     public void solve_iter() {
+        if (offEdges.ne == 0) {
+            return;
+        }
+
         int e = edgeSampler.next();
         double drop = flowTree.query(e);
         double resistance = offStretch[e] / offEdges.weight[e];

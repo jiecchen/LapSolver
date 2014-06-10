@@ -17,6 +17,7 @@ public class DirectFlowTree extends FlowTree {
     // base constructor
     public DirectFlowTree (Tree tree, EdgeList offEdges) {
         super(tree, offEdges);
+        treeFlows = new double[tree.nv];
     }
 
     // push `alpha` units of flow along the tree path on edge e
