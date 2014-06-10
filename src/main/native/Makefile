@@ -4,30 +4,26 @@ PROF_FLAGS=-fprofile-generate
 TARGET=../resources/lib
 LIBRARY_NAME=liblapsolver
 CFLAGS=-O3 -march=native -mtune=native -flto -std=c99 -fPIC
-INCLUDES=-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -Iinclude -I/System/Library/Frameworks/JavaVM.framework/Versions/A/Headers
 CLASSES=lapsolver.generators.Grid2
 SOURCES=$(addsuffix .c,$(addprefix src/,$(subst .,_,$(CLASSES))))
 OBJECTS=$(SOURCES:.c=.o)
 
-LIB_NAME_OPT=-soname
-
-UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S),Darwin)
-	DYNAMIC=-dynamiclib
-	LIBRARY=$(addsuffix .dylib,$(LIBRARY_NAME))
-	CFLAGS+=-mno-avx
-	INCLUDES=-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/darwin -Iinclude
-endif
-ifeq ($(UNAME_S), Linux)
-	DYNAMIC=-shared -Wl,-soname,liblapsolver
-	LIBRARY=$(addsuffix .so,$(LIBRARY_NAME))
-	INCLUDES=-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -Iinclude
-endif
-
-ISCLANG := $(shell $(CC) --version 2>&1 | grep clang; echo $?)
+ISCLANG:=$(shell gcc --version 2>&1 | grep clang ; echo $$?)
 ifeq "$(ISCLANG)" "1"
     CFLAGS += -fopenmp
 endif
+
+PLATFORM := $(shell uname -s | tr A-Z a-z)
+ifeq ($(PLATFORM),darwin)
+	DYNAMIC=-dynamiclib
+	LIBRARY=$(addsuffix .dylib,$(LIBRARY_NAME))
+	CFLAGS+=-mno-avx
+endif
+ifeq ($(PLATFORM), linux)
+	DYNAMIC=-shared -Wl,-soname,$(LIBRARY_NAME)
+	LIBRARY=$(addsuffix .so,$(LIBRARY_NAME))
+endif
+INCLUDES=-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/$(PLATFORM) -Iinclude
 
 all: $(SOURCES) $(LIBRARY) tests
 
