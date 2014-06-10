@@ -14,7 +14,7 @@ LIB_NAME_OPT=-soname
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
 	DYNAMIC=-dynamiclib
-	LIBRARY=$(addsuffix .jnilib,$(LIBRARY_NAME))
+	LIBRARY=$(addsuffix .dylib,$(LIBRARY_NAME))
 	CFLAGS+=-mno-avx
 	INCLUDES=-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/darwin -Iinclude
 endif
@@ -37,6 +37,7 @@ grid2benchmark: tests/grid2benchmark.o $(OBJECTS)
 	$(CC) $(CFLAGS) $(PROF_FLAGS) $^ -o $@
 
 install: all
+	mkdir -p $(TARGET)/
 	mv $(LIBRARY) $(TARGET)/
 
 .PHONY: clean
