@@ -51,9 +51,10 @@ public class ShortestPathTree {
         HashSet<Integer> settled = new HashSet<>();
         while (!nextNodes.isEmpty()) {
             int u = nextNodes.poll();
-            for (int v : input.nbrs[u]) {
+            for (int i = 0; i < input.deg[u]; i++) {
+                int v = input.nbrs[u][i];
                 if(!settled.contains(v)) {
-                    double alt = dist[u] + input.weights[u][v];
+                    double alt = dist[u] + input.weights[u][i];
                     if(alt < dist[v]) {
                         nextNodes.remove(v);
                         dist[v] = alt;
