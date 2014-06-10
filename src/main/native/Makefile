@@ -16,16 +16,18 @@ ifeq ($(UNAME_S),Darwin)
 	DYNAMIC=-dynamiclib
 	LIBRARY+=.jnilib
 	CFLAGS+=-mno-avx
+	INCLUDES=-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/darwin -Iinclude
 endif
 ifeq ($(UNAME_S), Linux)
 	DYNAMIC=-shared -Wl,-soname,liblapsolver
 	LIBRARY+=.so
+	INCLUDES=-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -Iinclude
 endif
 
 all: $(SOURCES) $(LIBRARY) tests
 
 $(LIBRARY): $(OBJECTS)
-	$(CC) $(CFLAGS) $(PROF_FLAGS) $^ $(DYNAMIC) -o $@
+	$(CC) $(CFLAGS) $(PROF_FLAGS) $(DYNAMIC) $^ -o $@
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(PROF_FLAGS) $(INCLUDES) -c $< -o $@

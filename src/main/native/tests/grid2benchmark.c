@@ -8,9 +8,9 @@ int main()
     const int height = 1000;
     const int width  = 1000;
     const int ne = (2 * width * height) - width - height;
-    int *src = aligned_alloc(32, sizeof(int)*ne);
-    int *dst = aligned_alloc(32, sizeof(int)*ne);
-    double *weights = aligned_alloc(32, sizeof(double)*ne);
+    int *src = malloc(sizeof(int)*ne);
+    int *dst = malloc(sizeof(int)*ne);
+    double *weights = malloc(sizeof(double)*ne);
 
     doPopulate(src, dst, weights, height, width, 1.0);
 
