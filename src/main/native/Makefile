@@ -2,7 +2,7 @@ CC=gcc
 PROF_FLAGS=-fprofile-generate
 #PROF_FLAGS=-fprofile-use
 TARGET=../resources/lib
-LIBRARY=liblapsolver
+LIBRARY_NAME=liblapsolver
 CFLAGS=-O3 -march=native -mtune=native -fopenmp -flto -std=c99 -fPIC
 INCLUDES=-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -Iinclude -I/System/Library/Frameworks/JavaVM.framework/Versions/A/Headers
 CLASSES=lapsolver.generators.Grid2
@@ -14,13 +14,13 @@ LIB_NAME_OPT=-soname
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
 	DYNAMIC=-dynamiclib
-	LIBRARY+=.jnilib
+	LIBRARY=$(addsuffix .jnilib,$(LIBRARY_NAME))
 	CFLAGS+=-mno-avx
 	INCLUDES=-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/darwin -Iinclude
 endif
 ifeq ($(UNAME_S), Linux)
 	DYNAMIC=-shared -Wl,-soname,liblapsolver
-	LIBRARY+=.so
+	LIBRARY=$(addsuffix .so,$(LIBRARY_NAME))
 	INCLUDES=-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -Iinclude
 endif
 
