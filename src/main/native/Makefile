@@ -1,6 +1,6 @@
 CC=gcc
-PROF_FLAGS=-fprofile-generate
-#PROF_FLAGS=-fprofile-use
+#PROF_FLAGS=-fprofile-generate
+PROF_FLAGS=-fprofile-use
 TARGET=../resources/lib
 LIBRARY_NAME=liblapsolver
 CFLAGS=-O3 -march=native -mtune=native -flto -std=c99 -fPIC
@@ -44,6 +44,6 @@ install: all
 .PHONY: clean
 
 clean:
-	rm -f src/*.o tests/*.o
+	rm -f src/*.o tests/*.o grid2benchmark
 	rm -f $(TARGET)/$(LIBRARY)
 
