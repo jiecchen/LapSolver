@@ -69,6 +69,20 @@
                             <arguments><argument>clean</argument></arguments>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>build-python-bindings</id>
+                        <phase>install</phase>
+                        <goals><goal>java</goal></goals>
+
+                        <configuration>
+                            <mainClass>pybinding.BindingGenerator</mainClass>
+                            <arguments>
+                                <argument>target/LapSolver.jar</argument>
+                                <argument>lapsolver</argument>
+                                <argument>python</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>

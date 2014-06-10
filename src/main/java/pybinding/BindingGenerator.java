@@ -13,10 +13,7 @@
 
 package pybinding;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
@@ -113,9 +110,16 @@ public class BindingGenerator {
      * @return The contents of the template file
      */
     private String getTemplate(String templateFile) {
-        InputStream headerInput = getClass().getResourceAsStream("resources/templates/" + templateFile + ".txt");
-        Scanner reader = new Scanner(headerInput).useDelimiter("\\A");
-        return reader.hasNext() ? reader.next() : "";
+        try {
+            InputStream headerInput = getClass().getResourceAsStream("templates/" + templateFile + ".txt");
+            if(headerInput == null) {
+                headerInput = new FileInputStream("src/main/resources/templates/" + templateFile + ".txt");
+            }
+            Scanner reader = new Scanner(headerInput).useDelimiter("\\A");
+            return reader.hasNext() ? reader.next() : "";
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
