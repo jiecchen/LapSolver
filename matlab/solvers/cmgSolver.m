@@ -1,4 +1,4 @@
-function [x] = cmgSolver(la,b,opts)
+function [x,iter] = cmgSolver(la,b,opts)
 % function [x] = cmgSolver(la,b,opts)
 % function [f] = cmgSolver(la,[],opts)
 %
@@ -24,15 +24,15 @@ if isempty(b)
     f = @(b)(internal(la,pfun,b,opts));
     x = f;
 else
-    x = internal(la,pfun,b,opts);
+    [x,iter] = internal(la,pfun,b,opts);
 end
 
 end % main function
 
 
-function x = internal(la,pfun,b,opts)
+function [x, iter] = internal(la,pfun,b,opts)
 
-  [x,flag] = pcg(la, b, opts.tol, opts.maxit, pfun);
+  [x,flag, relres, iter] = pcg(la, b, opts.tol, opts.maxit, pfun);
   %  [x] = pcg(la, b, opts.tol, opts.maxit, pfun);
 
 end
