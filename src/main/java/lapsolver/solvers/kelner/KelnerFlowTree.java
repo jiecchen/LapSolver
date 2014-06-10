@@ -17,7 +17,7 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 
 public class KelnerFlowTree extends FlowTree {
-    private KelnerStructure rootStructure;
+    public KelnerStructure rootStructure;
 
     // base constructor
     public KelnerFlowTree (Tree tree, EdgeList offEdges) {
@@ -77,7 +77,16 @@ public class KelnerFlowTree extends FlowTree {
 
     public void dump (KelnerStructure root, int depth) {
         for(int i=0; i<depth; ++i) System.out.print(" ");
-        System.out.println(root.tree.nv + " " + root.drop + " " + root.ext);
+        System.out.println(root.tree.nv + " d=" + root.drop + " e=" + root.ext + " sep=" + root.separator);
+        for(int i=0; i<depth; ++i) System.out.print(" ");
+        EdgeList edges = new EdgeList(root.tree);
+        for (int i = 0; i < edges.ne; i++) {
+            System.out.print(edges.u[i] + "-" + edges.v[i] + " ");
+        }System.out.println("");
+        for(int i=0; i<depth; ++i) System.out.print(" ");
+        System.out.println(Arrays.toString(root.component));
+        for(int i=0; i<depth; ++i) System.out.print(" ");
+        System.out.println(Arrays.toString(root.relabel));
         for(int i=0; i<depth; ++i) System.out.print(" ");
         System.out.println(Arrays.toString(root.height));
         if(root.children != null)
@@ -118,6 +127,7 @@ public class KelnerFlowTree extends FlowTree {
             else {
                 // split into subtrees by separator
                 separator = TreeSeparator.find(tree);
+                boolean sepRoot = (separator == tree.getRoot());
                 int[] order = TreeUtils.dfsOrder(tree);
 
                 // separator has index 0 in each component
@@ -181,15 +191,23 @@ public class KelnerFlowTree extends FlowTree {
                     weights[i] = new double[componentSize[i]+1];
                 }
 
+                // set roots
                 parentArrays[0][relabel[tree.getRoot()]] = relabel[tree.getRoot()];
+                for (int i = 1; i < componentCount; i++) {
+                    parentArrays[i][relabel[separator]] = relabel[separator];
+                }
 
                 // build parent arrays
                 for (int i = 0; i < tree.nv; i++) {
+                    if (i == tree.getRoot()) continue;
+
                     int parent = tree.getNode(i).getParent().getId();
                     int comp = component[i];
 
-                    if (comp == -1) comp = component[parent];
-                    if (comp == -1) continue;
+                    if (i == separator) {
+                        if (sepRoot) continue; // separator is root in every subtree
+                        comp = component[parent]; // separator has parent in upper subtree 0
+                    }
 
                     parentArrays[comp][relabel[i]] = relabel[parent];
                     weights[comp][relabel[i]] = 1 / tree.getNode(i).getLength();
@@ -198,7 +216,7 @@ public class KelnerFlowTree extends FlowTree {
                 // build trees from parent arrays
                 Tree[] subtrees = new Tree[componentCount];
                 for (int i = 0; i < componentCount; i++) {
-                    if (separator == tree.getRoot() && i == 0) {
+                    if (sepRoot && i == 0) {
                         // leave parent subtree empty
                         subtrees[i] = null;
                     }
@@ -221,7 +239,7 @@ public class KelnerFlowTree extends FlowTree {
         public void update(int v, double alpha) {
             drop += alpha * height[v];
             if (tree.nv == 2) return;
-            if (component[v] > 0) ext += alpha;
+            if (component[v] != 0) ext += alpha;
             if (v != separator) {
                 children[component[v]].update(relabel[v], alpha);
             }
