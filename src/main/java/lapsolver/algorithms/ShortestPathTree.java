@@ -3,7 +3,8 @@
  * @author Alex Reinking <alexander.reinking@yale.edu>
  * @date Tue Jun 10 2014
  *
- * Crappy implementation of Dijkstra's algorithm. Probably has bugs, but is pretty close.
+ * Slow implementation of Dijkstra's algorithm.
+ * Correct, but the boxing/unboxing is a major performance hit.
  *
  */
 package lapsolver.algorithms;
