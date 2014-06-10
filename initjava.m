@@ -4,7 +4,7 @@
 % called by init function
 
 clear java
-javaaddpath build/LapSolver.jar
+javaaddpath target/LapSolver.jar
 import lapsolver.*;
 import lapsolver.algorithms.*;
 import lapsolver.lsst.*;
