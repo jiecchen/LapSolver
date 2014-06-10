@@ -3,7 +3,7 @@ PROF_FLAGS=-fprofile-generate
 #PROF_FLAGS=-fprofile-use
 TARGET=../resources/lib
 LIBRARY_NAME=liblapsolver
-CFLAGS=-O3 -march=native -mtune=native -fopenmp -flto -std=c99 -fPIC
+CFLAGS=-O3 -march=native -mtune=native -flto -std=c99 -fPIC
 INCLUDES=-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -Iinclude -I/System/Library/Frameworks/JavaVM.framework/Versions/A/Headers
 CLASSES=lapsolver.generators.Grid2
 SOURCES=$(addsuffix .c,$(addprefix src/,$(subst .,_,$(CLASSES))))
@@ -22,6 +22,11 @@ ifeq ($(UNAME_S), Linux)
 	DYNAMIC=-shared -Wl,-soname,liblapsolver
 	LIBRARY=$(addsuffix .so,$(LIBRARY_NAME))
 	INCLUDES=-I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux -Iinclude
+endif
+
+ISCLANG := $(shell $(CC) --version 2>&1 | grep clang; echo $?)
+ifeq "$(ISCLANG)" "1"
+    CFLAGS += -fopenmp
 endif
 
 all: $(SOURCES) $(LIBRARY) tests
