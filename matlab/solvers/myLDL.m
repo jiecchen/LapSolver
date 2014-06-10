@@ -12,6 +12,9 @@ function [L,D] = myLDL(A,k)
 % >> L = full(L)
 %
 % it would be interesting to try this with a prefix of the amd or symrcm ordering
+%
+% This is absurdly slow, and that's OK.
+% it is just for testing.
 
 n = length(A);
 

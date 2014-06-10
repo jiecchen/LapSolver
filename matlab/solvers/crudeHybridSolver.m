@@ -18,7 +18,7 @@ default('b',[]);
 
 laperm = la(perm,perm);
 
-[L,D] = myLDL(laperm,k);
+[L,D] = myLDL2(laperm,k);
 nnz(L)
 Ltrans = L';
 
