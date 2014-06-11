@@ -14,22 +14,32 @@ import lapsolver.Tree;
 public class GraphUtils {
     public static Graph permuteGraph(Graph g, int[] perm) {
         int N = perm.length;
-        Graph ans = new Graph();
+        int M = g.ne;
 
-        ans.nv = g.nv;
-        ans.ne = g.ne;
+        int[] posInPermutation = new int[N];
+        for (int i = 0; i < N; i++)
+            posInPermutation[perm[i]] = i;
 
-        for (int i = 0; i < N; i++) {
-            ans.deg[i] = g.deg[perm[i]];
-            ans.nbrs[i] = new int[ans.deg[i]];
-            ans.weights[i] = new double[ans.deg[i]];
+        int index = 0;
+        int[] src = new int[M];
+        int[] dst = new int[M];
+        double[] weight = new double[M];
 
-            for (int j = 0; j < ans.deg[i]; j++) {
-                ans.nbrs[i][j] = g.nbrs[perm[i]][j];
-                ans.weights[i][j] = g.weights[perm[i]][j];
+        for (int i = 0; i < N; i++)
+            for (int j = 0; j < g.deg[i]; j++) {
+                if (i < g.nbrs[i][j]) {
+                    int u = i;
+                    int v = g.nbrs[i][j];
+                    double w = g.weights[i][j];
+
+                    src[index] = posInPermutation[u];
+                    dst[index] = posInPermutation[v];
+                    weight[index] = w;
+                    index++;
+                }
             }
-        }
 
+        Graph ans = new Graph(src, dst, weight);
         return ans;
     }
 
