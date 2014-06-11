@@ -11,15 +11,23 @@ package lapsolver.generators;
 import lapsolver.EdgeList;
 import lapsolver.Graph;
 
+/**
+ * FractalGridGraph generates a low-stretch spanning tree for a
+ * power-of-two grid graph. It is based on a recursive construction.
+ */
 public class FractalGridGraph implements GraphFactory {
     public int N;       // the number of vertices
     public int index;   // a global iterator to make recursion easier
     public int[] u;
     public int[] v;
 
+    /**
+     * Allocate space for the fractal grid spanning tree
+     * @param vertexCount the number of levels of recursion desired for this
+     *                    fractal construction. the number of vertices is 2^N,
+     *                    the number of edges is 4^(N+1)-1
+     */
     public FractalGridGraph(int vertexCount) {
-        // the number of vertices is 2^N, the number of edges is 4^(N+1)-1
-
         this.N = (int) Math.pow(2, vertexCount);
         this.u = new int[N * N - 1];
         this.v = new int[N * N - 1];
@@ -65,7 +73,7 @@ public class FractalGridGraph implements GraphFactory {
         cover(X + 1, Y + 1, x1, y1);
     }
 
-    public int getIndex(int p, int q) {
+    private int getIndex(int p, int q) {
         return p + q * N;
     }
 }

@@ -29,6 +29,11 @@ public class ShortestPathTree {
         return parent;
     }
 
+    /**
+     * Construct a shortest-path tree for a given graph and source node
+     * @param G the input graph
+     * @param source the starting node
+     */
     public ShortestPathTree(Graph G, int source) {
         dist = new double[G.nv];
         parent = new int[G.nv];
@@ -70,6 +75,10 @@ public class ShortestPathTree {
         parent[source] = source; // Follow parent array convention
     }
 
+    /**
+     *
+     * @return the shortest path tree computed by the constructor
+     */
     public Tree getTree() {
         return new Tree(parent);
     }
