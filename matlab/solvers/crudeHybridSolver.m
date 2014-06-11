@@ -1,5 +1,5 @@
-function [x,iter] = crudeHybridSolver(la,perm,k,b,opts)
-% function [x,iter] = crudeHybridSolver(la,perm,k,b,opts)
+function [x,iter] = crudeHybridSolver(la,perm,k,b,opts,inneropts)
+% function [x,iter] = crudeHybridSolver(la,perm,k,b,opts,inneropts)
 % function [f] = crudeHybridSolver(la,perm,k,[],opts)
 %
 % This is a crude, two-level hybrid solver.
@@ -16,14 +16,18 @@ function [x,iter] = crudeHybridSolver(la,perm,k,b,opts)
     
 default('b',[]);
 
+default('inneropts','tol',1e-1);
+default('opts','tol',1e-6);
+default('opts','maxit',1000);
+
+
 laperm = la(perm,perm);
 
 [L,D] = myLDL2(laperm,k);
-nnz(L)
 Ltrans = L';
 
 Dsub = D(k+1:end,k+1:end);
-DsubSolve = cmgSolver(Dsub);
+DsubSolve = cmgSolver(Dsub,[],inneropts);
 
 Dtop = diag(D(1:k,1:k));
 
