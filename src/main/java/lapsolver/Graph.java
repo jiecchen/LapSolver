@@ -42,6 +42,7 @@ public class Graph {
     public int[] deg;
 
     //-----------------------------
+    //  backInd[x][i] = the position of x in the neighbor list of u = G.nbrs[x][i]
     //  nbrs[nbrs[x][i],backInd[x][i]] = x
     public int[][] backInd;
 

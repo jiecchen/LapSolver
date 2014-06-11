@@ -19,14 +19,22 @@ public class GraphUtils {
         ans.nv = g.nv;
         ans.ne = g.ne;
 
+        ans.deg = new int[N];
+        ans.nbrs = new int[N][];
+        ans.weights = new double[N][];
+        ans.backInd = new int[N][];
+
         for (int i = 0; i < N; i++) {
             ans.deg[i] = g.deg[perm[i]];
+
             ans.nbrs[i] = new int[ans.deg[i]];
             ans.weights[i] = new double[ans.deg[i]];
+            ans.backInd[i] = new int[ans.deg[i]];
 
             for (int j = 0; j < ans.deg[i]; j++) {
                 ans.nbrs[i][j] = g.nbrs[perm[i]][j];
                 ans.weights[i][j] = g.weights[perm[i]][j];
+                ans.backInd[i][j] = g.backInd[perm[i]][j];
             }
         }
 
