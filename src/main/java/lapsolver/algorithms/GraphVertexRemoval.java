@@ -123,7 +123,7 @@ public class GraphVertexRemoval {
         int[] answer = new int[N];
         int[] isInGraph = new int[N];
 
-        for (int i = 0; i < L; i++)
+        for (int i = 0; i < N; i++)
             isInGraph[i] = 1;
         for (int i = 0; i < L; i++)
             isInGraph[retArray[i]] = 0;
