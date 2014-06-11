@@ -1,5 +1,5 @@
 CC=gcc
-PROF_FLAGS=-fprofile-generate
+#PROF_FLAGS=-fprofile-generate
 #PROF_FLAGS=-fprofile-use
 TARGET=../resources/lib
 LIBRARY_NAME=liblapsolver
@@ -44,6 +44,6 @@ install: all
 .PHONY: clean
 
 clean:
-	rm -f src/*.o tests/*.o
+	rm -f src/*.o tests/*.o grid2benchmark
 	rm -f $(TARGET)/$(LIBRARY)
 

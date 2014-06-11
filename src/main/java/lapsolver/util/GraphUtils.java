@@ -12,6 +12,27 @@ import lapsolver.Graph;
 import lapsolver.Tree;
 
 public class GraphUtils {
+    public static Graph permuteGraph(Graph g, int[] perm) {
+        int N = perm.length;
+        Graph ans = new Graph();
+
+        ans.nv = g.nv;
+        ans.ne = g.ne;
+
+        for (int i = 0; i < N; i++) {
+            ans.deg[i] = g.deg[perm[i]];
+            ans.nbrs[i] = new int[ans.deg[i]];
+            ans.weights[i] = new double[ans.deg[i]];
+
+            for (int j = 0; j < ans.deg[i]; j++) {
+                ans.nbrs[i][j] = g.nbrs[perm[i]][j];
+                ans.weights[i][j] = g.weights[perm[i]][j];
+            }
+        }
+
+        return ans;
+    }
+
     // given a graph structure that represents a tree, turn it into a rooted tree
     public static Tree toTree(Graph g, int root) {
         // DFS state

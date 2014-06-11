@@ -7,6 +7,7 @@
 *.dll
 *.gcda
 target/
+src/main/native/grid2benchmark
 
 # Eclipse
 .classpath

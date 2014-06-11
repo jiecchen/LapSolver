@@ -5,8 +5,8 @@
 
 int main()
 {
-    const int height = 1000;
-    const int width  = 1000;
+    const int height = 4000;
+    const int width  = 4000;
     const int ne = (2 * width * height) - width - height;
     int *src = malloc(sizeof(int)*ne);
     int *dst = malloc(sizeof(int)*ne);

@@ -10,25 +10,24 @@ function t = kelnertree( n )
     kt = KelnerFlowTree(t, edges);
     dt = DirectFlowTree(t, edges);
     
-    kt.setTreeFlows([0 1 2 3 4 5 6 7 8 9 10]);
-    dt.setTreeFlows([0 1 2 3 4 5 6 7 8 9 10]);
+    % kt.setTreeFlows(0:(n-1));
+    % dt.setTreeFlows(0:(n-1));
     
-    kt.update(1,1);
-    kt.update(0,1);
-    kt.update(2,-3);
-    kt.update(3,-5);
-    [kt.query(0) kt.query(1) kt.query(2) kt.query(3)]
+    %kt.update(1,1);
+    %kt.update(0,1);
+    kt.update(2,1);
+    %kt.update(3,-5);
     kf = kt.getTreeFlows;
     
-    dt.update(1,1);
-    dt.update(0,1);
-    dt.update(2,-3);
-    dt.update(3,-5);
-    [dt.query(0) dt.query(1) dt.query(2) dt.query(3)]
+    %dt.update(1,1);
+    %dt.update(0,1);
+    dt.update(2,1);
+    %dt.update(3,-5);
     df = dt.getTreeFlows;
     
-    kt.dump
-    
     [kf df]
+    nnz(kf-df)
+    
+    kt.rootStructure.query(2)
 end
 
