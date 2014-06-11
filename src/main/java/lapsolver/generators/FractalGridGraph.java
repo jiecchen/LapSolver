@@ -11,7 +11,7 @@ package lapsolver.generators;
 import lapsolver.EdgeList;
 import lapsolver.Graph;
 
-public class FractalGridGraph {
+public class FractalGridGraph implements GraphFactory {
     public int N;       // the number of vertices
     public int index;   // a global iterator to make recursion easier
     public int[] u;
@@ -26,8 +26,9 @@ public class FractalGridGraph {
         this.index = 0;
     }
 
-    public Graph getFractalTree() {
-        EdgeList edgeList = new EdgeList(N * N -1);
+    @Override
+    public Graph generateGraph() {
+        EdgeList edgeList = new EdgeList(N * N - 1);
 
         cover(0, 0, N - 1, N - 1);
 
@@ -36,14 +37,12 @@ public class FractalGridGraph {
             edgeList.v[i] = v[i];
         }
 
-        Graph answer = new Graph(edgeList);
-        return answer;
+        return new Graph(edgeList);
     }
 
-    public void cover(int x0, int y0, int x1, int y1) {
-        if (x0 == x1 && y0 == y1) {
+    private void cover(int x0, int y0, int x1, int y1) {
+        if (x0 == x1 && y0 == y1)
             return;
-        }
 
         int X = x0 + (x1 - x0) / 2;
         int Y = y0 + (y1 - y0) / 2;
