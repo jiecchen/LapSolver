@@ -11,6 +11,8 @@ package lapsolver.algorithms;
 
 import lapsolver.Graph;
 
+import java.util.Arrays;
+
 public class GraphVertexRemoval {
     public Graph G;
     public int N;
@@ -252,7 +254,7 @@ public class GraphVertexRemoval {
      */
     public int canPickVertex(int[][] Q, int[] first, int[] last, int[] eliminated, int maxDegree) {
         for (int degree = 0; degree <= maxDegree; degree++) {
-            if (first[degree] < last[degree]) {
+            while (first[degree] < last[degree]) {
                 int ret = Q[degree][first[degree]];
                 first[degree]++;
 
