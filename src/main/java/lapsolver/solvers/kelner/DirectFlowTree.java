@@ -24,7 +24,7 @@ public class DirectFlowTree extends FlowTree {
     public void treeUpdate(int e, double alpha) {
         int u = super.offEdges.u[e];
         int v = super.offEdges.v[e];
-        int root = super.tree.getRoot();
+        int root = super.tree.root;
 
         while (u != root) {
             treeFlows[u] += alpha;
@@ -41,7 +41,7 @@ public class DirectFlowTree extends FlowTree {
     public double treeQuery(int e) {
         int u = super.offEdges.u[e];
         int v = super.offEdges.v[e];
-        int root = super.tree.getRoot();
+        int root = super.tree.root;
 
         double total = 0;
 

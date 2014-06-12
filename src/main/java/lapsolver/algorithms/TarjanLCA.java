@@ -81,7 +81,7 @@ public class TarjanLCA {
             Tree.TreeNode curNode = tree.getNode(v);
             Tree.TreeNode parent = curNode.getParent();
 
-            if (v != tree.getRoot()) {
+            if (v != tree.root) {
                 childrenVisited[parent.getId()]++;
             }
 

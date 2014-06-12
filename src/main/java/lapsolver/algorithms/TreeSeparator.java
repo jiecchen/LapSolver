@@ -29,7 +29,7 @@ public class TreeSeparator {
             int v = order[i];
             int parent = tree.getNode(v).getParent().getId();
             sizes[v] += 1;
-            if (v != tree.getRoot()) {
+            if (v != tree.root) {
                 sizes[parent] += sizes[v];
 
                 // too big to be child?
