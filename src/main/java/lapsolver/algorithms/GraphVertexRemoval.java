@@ -167,8 +167,6 @@ public class GraphVertexRemoval {
                 }
             }
 
-        // This can be swapped between bsfOrdering/dfsOrdering
-        //answer = bfsOrdering(G, queue, count, isInGraph);
         answer = dfsOrdering(G, queue, count, isInGraph);
 
         return answer;
@@ -208,45 +206,6 @@ public class GraphVertexRemoval {
         for (int i = 0; i < G.deg[vertex]; i++)
             if (isInGraph[G.nbrs[vertex][i]] == 0)
                 dfs(G.nbrs[vertex][i], G, isInGraph);
-    }
-
-    public int[] bfsOrdering(Graph G, int[] Q, int count, int[] isInGraph) {
-        int[] bfsOrder = new int[N];
-        int[] visited = new int[N];
-        int left = 0;
-        int right = 0;
-
-        for (int index = 0; index < count; index++) {
-            if (visited[Q[index]] == 0) {
-                bfsOrder[right++] = Q[index];
-                visited[Q[index]] = 1;
-            }
-
-            // do Iterative BFS
-            while (left < right) {
-                int vertex = bfsOrder[left];
-                int degree = G.deg[vertex];
-
-                for (int i = 0; i < degree; i++) {
-                    int neighbor = G.nbrs[vertex][i];
-                    if (visited[neighbor] == 0 && isInGraph[neighbor] == 0) {
-                        visited[neighbor] = 1;
-                        bfsOrder[right++] = neighbor;
-                    }
-                }
-
-                left++;
-            }
-        }
-
-        // Reverse the BFS ordering vector, so leafs come first
-        for (int i = 0; i < right / 2; i++) {
-            int aux = bfsOrder[i];
-            bfsOrder[i] = bfsOrder[right - 1 - i];
-            bfsOrder[right - 1 - i] = aux;
-        }
-
-        return bfsOrder;
     }
 
     /*
