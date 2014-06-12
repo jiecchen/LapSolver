@@ -1,5 +1,9 @@
-function drawgraph( a )
+function drawgraph( a, opt )
 %DRAWGRAPH Draws a graph using its spectral embedding.
-    gplot(a, specxy(a));
+    if nargin < 2
+        gplot(a, specxy(a));
+    elseif strcmp(opt,'3d')
+        gplot3(a, specxyz(a));
+    end
 end
 
