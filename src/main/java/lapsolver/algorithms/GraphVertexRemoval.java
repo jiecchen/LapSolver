@@ -3,8 +3,8 @@
  * @author Serban Stan <serban.stan@yale.edu>
  * @date Mon Jun 9 2014
  *
- * For an input graph G removes degree one and degree two vertices, and possibly degree three vertices. Returns a list of the
- * removed vertices. Can remove vertices of degrees 0...K, where K is given.
+ * For an input graph G removes degree one and degree two vertices. Returns a list of the
+ * removed vertices.
  */
 
 package lapsolver.algorithms;
@@ -41,13 +41,13 @@ public class GraphVertexRemoval {
         This is the class's main function. It returns an array of elements representing the order of the
         removed vertices as a prefix of a N size permutation. It also return the size of this prefix.
      */
-    public AnswerPair solve(int maxRemovedDegree) {
+    public AnswerPair solve() {
         int[] answer = new int[N];
         int cntAnswer = 0;
 
-        int[][] Q = new int[maxRemovedDegree + 1][N];
-        int first[] = new int[maxRemovedDegree + 1];
-        int last[] = new int[maxRemovedDegree + 1];
+        int[][] Q = new int[3][N];
+        int first[] = new int[3];
+        int last[] = new int[3];
 
         int eliminated[] = new int[N];
 
@@ -58,7 +58,7 @@ public class GraphVertexRemoval {
 
         // Introduces all vertices that can be initially removed into separate queues.
         for (int i = 0; i < N; i++) {
-            if (G.deg[i] <= maxRemovedDegree) {
+            if (G.deg[i] <= 2) {
                 int degree = G.deg[i];
 
                 Q[degree][last[degree]] = i;
@@ -67,7 +67,7 @@ public class GraphVertexRemoval {
         }
 
         // Pick vertices sequentially, and remove them from the graph
-        int vertex = canPickVertex(Q, first, last, eliminated, maxRemovedDegree);
+        int vertex = canPickVertex(Q, first, last, eliminated);
         while (vertex != -1) {
             eliminated[vertex] = 1;
             answer[cntAnswer++] = vertex;
@@ -76,7 +76,7 @@ public class GraphVertexRemoval {
                 int neighbor = G.nbrs[vertex][i];
                 updatedDegree[neighbor]--;
 
-                if (updatedDegree[neighbor] <= maxRemovedDegree && eliminated[neighbor] == 0) {
+                if (updatedDegree[neighbor] <= 2 && eliminated[neighbor] == 0) {
                     int degree = updatedDegree[neighbor];
 
                     Q[degree][last[degree]] = neighbor;
@@ -84,7 +84,7 @@ public class GraphVertexRemoval {
                 }
             }
 
-            vertex = canPickVertex(Q, first, last, eliminated, maxRemovedDegree);
+            vertex = canPickVertex(Q, first, last, eliminated);
         }
 
         // Place the eliminated vertices in a cache-friendly sequencing
@@ -252,8 +252,8 @@ public class GraphVertexRemoval {
     /*
         A utility function that can pick the vertex with smallest degree
      */
-    public int canPickVertex(int[][] Q, int[] first, int[] last, int[] eliminated, int maxDegree) {
-        for (int degree = 0; degree <= maxDegree; degree++) {
+    public int canPickVertex(int[][] Q, int[] first, int[] last, int[] eliminated) {
+        for (int degree = 0; degree <= 2; degree++) {
             while (first[degree] < last[degree]) {
                 int ret = Q[degree][first[degree]];
                 first[degree]++;
