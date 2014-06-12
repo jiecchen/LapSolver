@@ -54,12 +54,12 @@ public class ShortestPathTree {
             nextNodes.add(i);
         }
 
-        HashSet<Integer> settled = new HashSet<>();
+        boolean[] settled = new boolean[G.nv];
         while (!nextNodes.isEmpty()) {
             int u = nextNodes.poll();
             for (int i = 0; i < G.deg[u]; i++) {
                 int v = G.nbrs[u][i];
-                if(!settled.contains(v)) {
+                if(!settled[v]) {
                     double alt = dist[u] + G.weights[u][i];
                     if(alt < dist[v]) {
                         nextNodes.remove(v);
@@ -69,7 +69,7 @@ public class ShortestPathTree {
                     }
                 }
             }
-            settled.add(u);
+            settled[u] = true;
         }
 
         parent[source] = source; // Follow parent array convention

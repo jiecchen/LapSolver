@@ -8,6 +8,7 @@
 
 package lapsolver.solvers.kelner;
 
+import java.lang.Math;
 import lapsolver.algorithms.DiscreteSampler;
 import lapsolver.algorithms.Stretch;
 import lapsolver.solvers.Solver;
@@ -60,8 +61,13 @@ public class KelnerSolver implements Solver {
     // solve for x in Lx = b, with default parameters
     @Override
     public double[] solve(double[] b) {
+        return solve (b, spanningTree.nv + offEdges.ne);
+    }
+
+    // solve for x in Lx = b, with number of iterations
+    public double[] solve(double[] b, int iters) {
         solve_init(b);
-        for (int i = 0; i < 100; ++i) {
+        for (int i = 0; i < iters; ++i) {
             solve_iter();
         }
         return solve_return();

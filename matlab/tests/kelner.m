@@ -1,8 +1,5 @@
-function [x, errs] = kelner( a, b, iters )
-%KELNER Watch iterations of the Kelner algorithm.
-%Sample:
-%errs = kelner(grid2(100,100),randb(10000),10000);
-%semilogy(errs)
+function x = kelner( a, b, iters )
+%KELNER Run the Kelner algorithm.
     import lapsolver.lsst.SimulPathTree;
     import lapsolver.solvers.kelner.KelnerSolver;
     import lapsolver.algorithms.Stretch;
@@ -12,17 +9,6 @@ function [x, errs] = kelner( a, b, iters )
     strat = SimulPathTree;
     solver = KelnerSolver(strat);
     solver.init(g);
-    solver.solve_init(b);
-    
-    stretch = Stretch.compute(g, solver.spanningTree).total
-    
-    errs = zeros(1,iters);
-    for i = 1:iters
-        solver.solve_iter;
-        x = solver.solve_return;
-        errs(i) = norm(lap(a)*x - b);
-    end
-    
-    lap(a)*x-b
+    x = solver.solve(b, iters);
 end
 
