@@ -21,8 +21,10 @@ import java.util.ArrayList;
  */
 public class Tree {
     public int nv;
+    public int root;
+
     private TreeNode[] nodes;
-    private int root;
+
 
     // empty tree
     public Tree(int nv) {
@@ -56,9 +58,6 @@ public class Tree {
 
     public TreeNode getNode(int n) {
         return nodes[n];
-    }
-    public int getRoot() {
-        return root;
     }
 
     // assuming parents are set, build lists of children for each node

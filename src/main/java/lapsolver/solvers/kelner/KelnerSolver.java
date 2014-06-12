@@ -127,7 +127,7 @@ public class KelnerSolver implements Solver {
         double[] currentFlow = flowTree.getTreeFlows();
         // sum tree energies
         for (int i = 0; i < currentFlow.length; i++) {
-            if (i == spanningTree.getRoot()) continue;
+            if (i == spanningTree.root) continue;
 
             double f = currentFlow[i];
             double r = spanningTree.getNode(i).getLength();

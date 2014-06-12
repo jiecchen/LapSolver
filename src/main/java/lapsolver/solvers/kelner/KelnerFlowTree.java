@@ -89,7 +89,7 @@ public class KelnerFlowTree extends FlowTree {
 
             if (tree.nv == 2) {
                 // base case
-                separator = 1 - tree.getRoot(); // whichever isn't the root
+                separator = 1 - tree.root; // whichever isn't the root
 
                 height = new double[2];
                 height[separator] = tree.getNode(separator).getLength();
@@ -99,7 +99,7 @@ public class KelnerFlowTree extends FlowTree {
             else {
                 // split into subtrees by separator
                 separator = TreeSeparator.find(tree);
-                boolean sepRoot = (separator == tree.getRoot());
+                boolean sepRoot = (separator == tree.root);
                 int[] order = TreeUtils.dfsOrder(tree);
 
                 // separator has index 0 in each component
@@ -109,7 +109,7 @@ public class KelnerFlowTree extends FlowTree {
                 // need to flip child-parent relation for edges going from sep to root
                 boolean[] sepToRoot = new boolean[tree.nv];
                 int sepAncestor = separator;
-                while (sepAncestor != tree.getRoot()) {
+                while (sepAncestor != tree.root) {
                     sepToRoot[sepAncestor] = true;
                     sepAncestor = tree.getNode(sepAncestor).getParent().getId();
                 }
@@ -137,7 +137,7 @@ public class KelnerFlowTree extends FlowTree {
                 // dfs to find child components
                 for (int v : order) {
                     int parent = tree.getNode(v).getParent().getId();
-                    if (v != tree.getRoot() && parent == separator) { // new child component
+                    if (v != tree.root && parent == separator) { // new child component
                         component[v] = componentCount;
                         componentSize[componentCount] = 1;
                         relabel[v] = 1;
@@ -164,14 +164,14 @@ public class KelnerFlowTree extends FlowTree {
                 }
 
                 // set roots
-                parentArrays[0][relabel[tree.getRoot()]] = relabel[tree.getRoot()];
+                parentArrays[0][relabel[tree.root]] = relabel[tree.root];
                 for (int i = 1; i < componentCount; i++) {
                     parentArrays[i][relabel[separator]] = relabel[separator];
                 }
 
                 // build parent arrays
                 for (int i = 0; i < tree.nv; i++) {
-                    if (i == tree.getRoot()) continue;
+                    if (i == tree.root) continue;
 
                     int parent = tree.getNode(i).getParent().getId();
                     int comp = component[i];

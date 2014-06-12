@@ -18,10 +18,10 @@ public class TreeUtils {
         int[] order = new int[tree.nv];
 
         // start at root
-        order[0] = tree.getRoot();
+        order[0] = tree.root;
         int orderPtr = 1;
         int curPtr = 1;
-        int curNode = tree.getRoot();
+        int curNode = tree.root;
 
         // at each step, expand to children of curNode, then advance curNode
         while (curPtr < tree.nv) {
@@ -39,7 +39,7 @@ public class TreeUtils {
         int[] stack = new int[tree.nv];
 
         // start at root
-        stack[0] = tree.getRoot();
+        stack[0] = tree.root;
         int stack_pos = 1, order_pos = 0;
 
         // do DFS
@@ -61,7 +61,7 @@ public class TreeUtils {
         double[] depth = new double[tree.nv];
 
         // at any point, we have order[i]'s parent's depth
-        depth[tree.getRoot()] = 0;
+        depth[tree.root] = 0;
         for (int i = 1; i < tree.nv; i++) {
             depth[ order[i] ] = depth[tree.getNode(order[i]).getParent().getId()]
                               + tree.getNode(order[i]).getLength();
