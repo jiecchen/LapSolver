@@ -12,3 +12,4 @@ addpath([root, 'matlab/util']);
 addpath([root, 'matlab/sparsify']);
 addpath([root, 'matlab/cut']);
 addpath([root, 'matlab/tests']);
+addpath([root, 'matlab/flow']);
