@@ -27,7 +27,7 @@ public class TreeSeparator {
         for (int i = tree.nv-1; i >= 0; i--) {
             // get subtree sizes
             int v = order[i];
-            int parent = tree.getNode(v).getParent().getId();
+            int parent = tree.parent[v];
             sizes[v] += 1;
             if (v != tree.root) {
                 sizes[parent] += sizes[v];

@@ -100,8 +100,8 @@ public class KelnerSolver implements Solver {
         // build voltage vector from bottom up
         for (int i = 1; i < spanningTree.nv; i++) {
             int v = order[i];
-            int parent = spanningTree.getNode(v).getParent().getId();
-            double len = spanningTree.getNode(v).getLength();
+            int parent = spanningTree.parent[v];
+            double len = spanningTree.length[v];
 
             // V = IR
             voltages[v] = voltages[parent] - currentFlow[v]*len;
@@ -130,7 +130,7 @@ public class KelnerSolver implements Solver {
             if (i == spanningTree.root) continue;
 
             double f = currentFlow[i];
-            double r = spanningTree.getNode(i).getLength();
+            double r = spanningTree.length[i];
             energy += f*f*r;
         }
 

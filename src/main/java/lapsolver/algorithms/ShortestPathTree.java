@@ -13,7 +13,6 @@ import lapsolver.Graph;
 import lapsolver.Tree;
 
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.PriorityQueue;
 
 
@@ -80,6 +79,6 @@ public class ShortestPathTree {
      * @return the shortest path tree computed by the constructor
      */
     public Tree getTree() {
-        return new Tree(parent);
+        return new Tree(parent, dist);
     }
 }

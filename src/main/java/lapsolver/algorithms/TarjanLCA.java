@@ -78,14 +78,13 @@ public class TarjanLCA {
 
         for (int i = tree.nv-1; i >= 0; i--) {
             int v = order[i];
-            Tree.TreeNode curNode = tree.getNode(v);
-            Tree.TreeNode parent = curNode.getParent();
+            int parent = tree.parent[v];
 
             if (v != tree.root) {
-                childrenVisited[parent.getId()]++;
+                childrenVisited[parent]++;
             }
 
-            if (childrenVisited[v] == curNode.getNumberOfChildren()) {
+            if (childrenVisited[v] == tree.children[v].length) {
                 black[v] = true;
 
                 for (int j = 0; j < queries[v].length; j++) {
@@ -95,8 +94,8 @@ public class TarjanLCA {
                     }
                 }
 
-                unionFind.union(parent.getId(), v);
-                ancestor[unionFind.find(parent.getId())] = parent.getId();
+                unionFind.union(parent, v);
+                ancestor[unionFind.find(parent)] = parent;
             }
         }
 

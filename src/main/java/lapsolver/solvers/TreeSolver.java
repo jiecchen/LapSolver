@@ -39,7 +39,7 @@ public class TreeSolver implements Solver {
         double[] flowUp = new double[tree.nv]; // flow along (v -> parent)
         for (int i = tree.nv-1; i >= 1; i--) {
             int v = order[i];
-            int parent = tree.getNode(v).getParent().getId();
+            int parent = tree.parent[v];
 
             flowUp[v] = flowTo[v] - b[v];
             flowTo[parent] += flowUp[v];
@@ -49,8 +49,8 @@ public class TreeSolver implements Solver {
         double[] voltages = new double[tree.nv];
         for (int i = 1; i < tree.nv; i++) {
             int v = order[i];
-            int parent = tree.getNode(v).getParent().getId();
-            double len = tree.getNode(v).getLength();
+            int parent = tree.parent[v];
+            double len = tree.length[v];
 
             // V = IR
             voltages[v] = voltages[parent] - flowUp[v]*len;
@@ -79,7 +79,7 @@ public class TreeSolver implements Solver {
         double[] flowUp = new double[tree.nv]; // flow along (v -> parent)
         for (int i = tree.nv-1; i >= 1; i--) {
             int v = order[i];
-            int parent = tree.getNode(v).getParent().getId();
+            int parent = tree.parent[v];
 
             flowUp[v] = flowTo[v] - b[v];
             flowTo[parent] += flowUp[v];

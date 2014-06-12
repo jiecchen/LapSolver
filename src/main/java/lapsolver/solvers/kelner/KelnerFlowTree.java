@@ -40,7 +40,7 @@ public class KelnerFlowTree extends FlowTree {
 
         for (int i = tree.nv-1; i >= 1; i--) {
             int v = order[i];
-            int parent = tree.getNode(v).getParent().getId();
+            int parent = tree.parent[v];
             flowTo[parent] += treeFlows[v];
         }
 
@@ -59,8 +59,8 @@ public class KelnerFlowTree extends FlowTree {
         }
 
         for (int i = 0; i < tree.nv; i++) {
-            int parent = tree.getNode(i).getParent().getId();
-            double resistance = tree.getNode(i).getLength();
+            int parent = tree.parent[i];
+            double resistance = tree.length[i];
             flowUp[i] = (voltages[i] - voltages[parent]) / resistance;
         }
 
@@ -92,7 +92,7 @@ public class KelnerFlowTree extends FlowTree {
                 separator = 1 - tree.root; // whichever isn't the root
 
                 height = new double[2];
-                height[separator] = tree.getNode(separator).getLength();
+                height[separator] = tree.length[separator];
 
                 children = null;
             }
@@ -111,16 +111,16 @@ public class KelnerFlowTree extends FlowTree {
                 int sepAncestor = separator;
                 while (sepAncestor != tree.root) {
                     sepToRoot[sepAncestor] = true;
-                    sepAncestor = tree.getNode(sepAncestor).getParent().getId();
+                    sepAncestor = tree.parent[sepAncestor];
                 }
 
                 // compute heights
                 height = new double[tree.nv];
                 for (int v : order) {
-                    int parent = tree.getNode(v).getParent().getId();
+                    int parent = tree.parent[v];
 
                     if (sepToRoot[v]) {
-                        height[v] = height[parent] + tree.getNode(v).getLength();
+                        height[v] = height[parent] + tree.length[v];
                     }
                     else {
                         height[v] = height[parent];
@@ -136,7 +136,7 @@ public class KelnerFlowTree extends FlowTree {
 
                 // dfs to find child components
                 for (int v : order) {
-                    int parent = tree.getNode(v).getParent().getId();
+                    int parent = tree.parent[v];
                     if (v != tree.root && parent == separator) { // new child component
                         component[v] = componentCount;
                         componentSize[componentCount] = 1;
@@ -173,7 +173,7 @@ public class KelnerFlowTree extends FlowTree {
                 for (int i = 0; i < tree.nv; i++) {
                     if (i == tree.root) continue;
 
-                    int parent = tree.getNode(i).getParent().getId();
+                    int parent = tree.parent[i];
                     int comp = component[i];
 
                     if (i == separator) {
@@ -182,7 +182,7 @@ public class KelnerFlowTree extends FlowTree {
                     }
 
                     parentArrays[comp][relabel[i]] = relabel[parent];
-                    weights[comp][relabel[i]] = 1 / tree.getNode(i).getLength();
+                    weights[comp][relabel[i]] = 1 / tree.length[i];
                 }
 
                 // build trees from parent arrays

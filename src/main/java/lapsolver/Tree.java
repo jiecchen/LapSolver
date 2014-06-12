@@ -7,156 +7,68 @@
  * (c) Daniel Spielman, 2014, part of the YINSmat package
  *
  * A static tree data structure.
+ * Heavily refactored on Thursday, June 12, 2014.
+ *
  */
 
 package lapsolver;
 
-import java.util.ArrayList;
-
-/**
- * a class enabling tree operations
- * that are useful for preconditioning
- * Fat because it is implemented for easy code,
- * not speed
- */
 public class Tree {
-    public int nv;
-    public int root;
+    public int nv;    // number of vertices (ne = nv-1)
+    public int root;  // index of root of tree
+    public int[] parent;     // parent[v] = id of v's parent, parent[root] = root
+    public double[] length;  // length[v] = 1 / weight(v, parent[v])
+    public int[][] children; // children[v][0..nChildren[v]-1] = indices of children
 
-    private TreeNode[] nodes;
-
-
-    // empty tree
-    public Tree(int nv) {
-        nodes = new TreeNode[nv];
-    }
-
-    // tree from parent array
-    public Tree(int[] p) {
-        nv = p.length;
-        nodes = new TreeNode[nv];
+    // tree from parent array and weights
+    public Tree(int[] parent, double[] weight) {
+        nv = parent.length;
+        this.parent = parent;
+        length = new double[nv];
+        int[] nChildren = new int[nv];
 
         for (int i = 0; i < nv; i++) {
-            nodes[i] = new TreeNode(p[i], i);
-            if (p[i] == i)
+            // set lengths
+            if (weight == null) length[i] = 1;
+            else length[i] = 1/weight[i];
+
+            if (parent[i] == i) { // find root
                 root = i;
+            }
+            else { // count child
+                nChildren[parent[i]]++;
+            }
         }
 
-        buildChildrenFromParents();
+        // build children arrays from parents
+        children = new int[nv][];
+        for (int i = 0; i < nv; i++) {
+            children[i] = new int[nChildren[i]];
+        }
+
+        int[] childPos = new int[nv];
+        for (int i = 0; i < nv; i++) {
+            if (i != root) {
+                children[parent[i]][childPos[parent[i]]++] = i;
+            }
+        }
+    }
+
+    // build tree from parent array, setting all lengths to 1
+    public Tree(int[] parent) {
+        this(parent, null);
     }
 
     // copy constructor
     public Tree (Tree other) {
         nv = other.nv;
         root = other.root;
-        nodes = new TreeNode[nv];
+        parent = other.parent.clone();
+        length = other.length.clone();
+        children = new int[nv][];
 
         for (int i = 0; i < nv; i++) {
-            nodes[i] = new TreeNode(other.getNode(i));
-        }
-    }
-
-    public TreeNode getNode(int n) {
-        return nodes[n];
-    }
-
-    // assuming parents are set, build lists of children for each node
-    public void buildChildrenFromParents() {
-        for (int i = 0; i < nv; i++)
-            if (i != root)
-                nodes[nodes[i].parent].addChild(i);
-    }
-
-    // build tree from parent array with weights
-    // sets lengths to reciprocals of weights
-    public Tree(int[] p, double[] w) {
-        nodes = new TreeNode[p.length];
-        nv = p.length;
-        nodes = new TreeNode[nv];
-
-        for (int i = 0; i < nv; i++) {
-            nodes[i] = new TreeNode(p[i], i, 1 / w[i]);
-            if (p[i] == i)
-                root = i;
-        }
-
-        buildChildrenFromParents();
-    }
-
-    // a vertex in the tree, which contain parent and children pointers
-    // length is reciprocal of weight of edge from node to parent
-    public class TreeNode {
-        private int parent;
-        private final int id;
-        private double length;
-        private final ArrayList<Integer> children;
-
-        // constructor with weight 1
-        public TreeNode(int parent, int id) {
-            this(parent, id, 1.0);
-        }
-
-        // parent id, self id, edge length (like a directed EdgeList element)
-        // remember length = 1/weight
-        public TreeNode(int parent, int id, double length) {
-            this.parent = parent;
-            this.id = id;
-            this.length = length;
-            children = new ArrayList<>();
-        }
-
-        // copy constructor
-        public TreeNode(TreeNode other) {
-            parent = other.parent;
-            id = other.id;
-            length = other.length;
-            children = new ArrayList<>(other.children);
-        }
-
-        public ArrayList<Integer> getChildren() {
-            return children;
-        }
-
-        public TreeNode getParent() {
-            return nodes[parent];
-        }
-
-        public void setParent(TreeNode p) {
-            parent = p.getId();
-        }
-
-        public double getLength() {
-            return length;
-        }
-
-        public void setLength(double length) {
-            this.length = length;
-        }
-
-        public void addChild(int k) {
-            children.add(k);
-        }
-
-        public int getNumberOfChildren() {
-            return children.size();
-        }
-
-        public int getDegree() {
-            // root has no parent
-            if (id == Tree.this.root) {
-                return children.size();
-            }
-
-            // otherwise, node has a parent
-            return children.size() + 1;
-        }
-
-        public int getChild(int i) {
-            return children.get(i);
-        }
-
-        public int getId() {
-            return id;
+            children[i] = other.children[i].clone();
         }
     }
 }

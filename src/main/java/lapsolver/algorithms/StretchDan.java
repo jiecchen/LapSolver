@@ -55,7 +55,7 @@ public class StretchDan {
         for (orderPtr = graph.nv-1; orderPtr >= 0; orderPtr--) {
             node = order[orderPtr];
 
-            if (spanningTree.getNode(node).getNumberOfChildren() == 0) {
+            if (spanningTree.children[node].length == 0) {
                 comp[node] = ++numComps;
                 nodeSize[node] = graph.deg[node];
                 // nothing to merge
@@ -66,7 +66,7 @@ public class StretchDan {
                 int maxKid = -1;
                 int maxKidSize = -1;
 
-                for (int kid : spanningTree.getNode(node).getChildren()) {
+                for (int kid : spanningTree.children[node]) {
                     int kidSize = nodeSize[kid];
 
                     nodeSize[node] += kidSize;
@@ -83,7 +83,7 @@ public class StretchDan {
                 // re-componentizing,
                 // and checking edges for new merge (if other end is this comp)
 
-                for (int kid : spanningTree.getNode(node).getChildren()) {
+                for (int kid : spanningTree.children[node]) {
                     if (kid != maxKid)
                         totStretch += totStretchTraverse(kid, node, curComp);
                 }
@@ -122,7 +122,7 @@ public class StretchDan {
             // except when we are handling the root of the tree
 
             if (comp[curNode] != curComp) {
-                for (int v : spanningTree.getNode(node).getChildren())
+                for (int v : spanningTree.children[node])
                     aux.add(v);
 
                 // put node on list to change comp
@@ -191,7 +191,7 @@ public class StretchDan {
         for (orderPtr = graph.nv-1; orderPtr >= 0; orderPtr--) {
             node = order[orderPtr];
 
-            if (spanningTree.getNode(node).getNumberOfChildren() == 0) {
+            if (spanningTree.children[node].length == 0) {
                 comp[node] = ++numComps;
                 nodeSize[node] = graph.deg[node];
                 // nothing to merge
@@ -203,7 +203,7 @@ public class StretchDan {
                 int maxKid = -1;
                 int maxKidSize = -1;
 
-                for (int kid : spanningTree.getNode(node).getChildren()) {
+                for (int kid : spanningTree.children[node]) {
                     int kidSize = nodeSize[kid];
 
                     nodeSize[node] += kidSize;
@@ -220,7 +220,7 @@ public class StretchDan {
                 // re-componentizing,
                 // and checking edges for new merge (if other end is this comp)
 
-                for (int kid : spanningTree.getNode(node).getChildren()) {
+                for (int kid : spanningTree.children[node]) {
                     if (kid != maxKid)
                         totStretch += allStretchTraverse(kid, node, curComp);
                 }
@@ -260,7 +260,7 @@ public class StretchDan {
             // except when we are handling the root of the tree
 
             if (comp[curNode] != curComp) {
-                for (int v : spanningTree.getNode(node).getChildren())
+                for (int v : spanningTree.children[node])
                     aux.add(v);
 
                 // put node on list to change comp

@@ -66,8 +66,8 @@ public class EdgeList {
             // get all parents except root
             if (i != tree.root) {
                 u[index] = i;
-                v[index] = tree.getNode(i).getParent().getId();
-                weight[index] = 1 / tree.getNode(i).getLength();
+                v[index] = tree.parent[i];
+                weight[index] = 1 / tree.length[i];
                 index++;
             }
         }

@@ -25,8 +25,8 @@ public class TreeUtils {
 
         // at each step, expand to children of curNode, then advance curNode
         while (curPtr < tree.nv) {
-            for (int i = 0; i < tree.getNode(curNode).getNumberOfChildren(); i++)
-                order[orderPtr++] = tree.getNode(curNode).getChild(i);
+            for (int child : tree.children[curNode])
+                order[orderPtr++] = child;
             curNode = order[curPtr++];
         }
 
@@ -48,7 +48,7 @@ public class TreeUtils {
             order[order_pos++] = v;
 
             // push children
-            for(int ch : tree.getNode(v).getChildren()) {
+            for(int ch : tree.children[v]) {
                 stack[stack_pos++] = ch;
             }
         }
@@ -63,8 +63,8 @@ public class TreeUtils {
         // at any point, we have order[i]'s parent's depth
         depth[tree.root] = 0;
         for (int i = 1; i < tree.nv; i++) {
-            depth[ order[i] ] = depth[tree.getNode(order[i]).getParent().getId()]
-                              + tree.getNode(order[i]).getLength();
+            depth[ order[i] ] = depth[tree.parent[order[i]]]
+                              + tree.length[order[i]];
         }
 
         return depth;
@@ -79,8 +79,8 @@ public class TreeUtils {
     public static void dumpBFSTree(Tree tree) {
         for (int i : bfsOrder(tree)) {
             System.out.println("Vertex " + i + " with parent " +
-                    tree.getNode(i).getParent().getId() + " with cost " +
-                    tree.getNode(i).getLength() + " on the edge to the parent");
+                    tree.parent[i] + " with cost " +
+                    tree.length[i] + " on the edge to the parent");
         }
     }
 
@@ -100,8 +100,8 @@ public class TreeUtils {
                 double wt = graph.weights[i][j];
 
                 // skip tree edges
-                if (spanningTree.getNode(i).getParent().getId() == dest ||
-                        spanningTree.getNode(dest).getParent().getId() == i) {
+                if (spanningTree.parent[i] == dest ||
+                    spanningTree.parent[dest] == i) {
                     continue;
                 }
 

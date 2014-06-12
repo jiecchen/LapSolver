@@ -59,13 +59,12 @@ public class Congestion {
         int[] bfsOrdering = TreeUtils.bfsOrder(spanningTree);   // Get the BFS ordering
 
         for (int i = spanningTree.nv - 1; i > 0; i--) {
-            int child = bfsOrdering[i];
-            int parent = spanningTree.getNode(child).getParent().getId();
+            int v = bfsOrdering[i];
+            int parent = spanningTree.parent[v];
 
             // congestion cost
-            answer.getNode(child).setLength(vertexWeights[child] / spanningTree.getNode(child).getLength());
-
-            vertexWeights[parent] += vertexWeights[child];
+            answer.length[v] = vertexWeights[v] / spanningTree.length[v];
+            vertexWeights[parent] += vertexWeights[v];
         }
 
         return answer;
