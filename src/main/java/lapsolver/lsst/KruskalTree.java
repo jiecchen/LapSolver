@@ -12,9 +12,6 @@
  */
 package lapsolver.lsst;
 
-import com.google.common.collect.ContiguousSet;
-import com.google.common.collect.DiscreteDomain;
-import com.google.common.collect.Range;
 import lapsolver.EdgeList;
 import lapsolver.Graph;
 import lapsolver.Tree;
@@ -29,7 +26,7 @@ public class KruskalTree implements SpanningTreeStrategy {
     @Override
     public Tree getTree(Graph graph) {
         UnionFind disjointSet = new UnionFind(graph.nv);
-        EdgeList treeEdges = new EdgeList(graph.nv-1);
+        EdgeList treeEdges = new EdgeList(graph.nv - 1);
 
         // Compute index
         EdgeList inputEdges = new EdgeList(graph);
@@ -51,8 +48,8 @@ public class KruskalTree implements SpanningTreeStrategy {
             int u = inputEdges.u[edge];
             int v = inputEdges.v[edge];
 
-            if(disjointSet.find(u) != disjointSet.find(v)) {
-                disjointSet.union(u,v);
+            if (disjointSet.find(u) != disjointSet.find(v)) {
+                disjointSet.union(u, v);
 
                 treeEdges.u[currentEdge] = u;
                 treeEdges.v[currentEdge] = v;
