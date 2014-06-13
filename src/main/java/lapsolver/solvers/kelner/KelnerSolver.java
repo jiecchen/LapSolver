@@ -55,7 +55,7 @@ public class KelnerSolver implements Solver {
         treeSolver.init(spanningTree);
 
         // initialize the cycle query data structure
-        flowTree = new KelnerFlowTree(spanningTree, offEdges);
+        flowTree = new DirectFlowTree(spanningTree, offEdges);
     }
 
     // solve for x in Lx = b, with default parameters
@@ -87,7 +87,7 @@ public class KelnerSolver implements Solver {
 
         int e = edgeSampler.next();
         double drop = flowTree.query(e);
-        double resistance = offStretch[e] / offEdges.weight[e];
+        double resistance = offStretch[e] * offEdges.weight[e];
 
         flowTree.update(e, -drop / resistance);
     }
@@ -101,7 +101,7 @@ public class KelnerSolver implements Solver {
         for (int i = 1; i < spanningTree.nv; i++) {
             int v = order[i];
             int parent = spanningTree.parent[v];
-            double len = spanningTree.length[v];
+            double len = spanningTree.weight[v];
 
             // V = IR
             voltages[v] = voltages[parent] - currentFlow[v]*len;
@@ -130,7 +130,7 @@ public class KelnerSolver implements Solver {
             if (i == spanningTree.root) continue;
 
             double f = currentFlow[i];
-            double r = spanningTree.length[i];
+            double r = spanningTree.weight[i];
             energy += f*f*r;
         }
 

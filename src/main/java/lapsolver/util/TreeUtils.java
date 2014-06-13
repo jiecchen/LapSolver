@@ -64,7 +64,7 @@ public class TreeUtils {
         depth[tree.root] = 0;
         for (int i = 1; i < tree.nv; i++) {
             depth[ order[i] ] = depth[tree.parent[order[i]]]
-                              + tree.length[order[i]];
+                              + tree.weight[order[i]];
         }
 
         return depth;
@@ -80,7 +80,7 @@ public class TreeUtils {
         for (int i : bfsOrder(tree)) {
             System.out.println("Vertex " + i + " with parent " +
                     tree.parent[i] + " with cost " +
-                    tree.length[i] + " on the edge to the parent");
+                    tree.weight[i] + " on the edge to the parent");
         }
     }
 

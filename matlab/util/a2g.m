@@ -3,6 +3,6 @@ function g = a2g( a )
     import lapsolver.Graph;
     import lapsolver.EdgeList;
     [ai,aj,av] = find(tril(a));
-    g = Graph(ai-1, aj-1, av);
+    g = Graph(ai-1, aj-1, 1./av);
 end
 

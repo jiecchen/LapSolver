@@ -132,7 +132,7 @@ public class StretchDan {
                 for (int i = 0; i < graph.deg[curNode]; i++) {
                     if (comp[graph.nbrs[curNode][i]] == curComp) {
                         int nbr = graph.nbrs[curNode][i];
-                        double len = 1 / graph.weights[curNode][i];
+                        double len = graph.weights[curNode][i];
                         stretch += (depth[curNode] + depth[nbr] - 2 * depth[node]) / len;
                         /*
                         System.out.println("(" + curNode + ", " + nbr + ") : " +
@@ -270,7 +270,7 @@ public class StretchDan {
                 for (int i = 0; i < graph.deg[curNode]; i++) {
                     if (comp[graph.nbrs[curNode][i]] == curComp) {
                         int nbr = graph.nbrs[curNode][i];
-                        double len = 1 / graph.weights[curNode][i];
+                        double len = graph.weights[curNode][i];
                         double thisStretch = (depth[curNode] + depth[nbr] - 2 * depth[node]) / len;
                         stretch += thisStretch;
                         stretchGraph.weights[curNode][i] = thisStretch;

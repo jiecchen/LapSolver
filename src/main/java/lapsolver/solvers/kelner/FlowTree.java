@@ -32,7 +32,7 @@ public abstract class FlowTree {
 
     // find sum of V = IR along the tree cycle on edge e
     public double query(int e) {
-        return treeQuery(e) + offFlow[e] / offEdges.weight[e];
+        return treeQuery(e) + offFlow[e] * offEdges.weight[e];
     }
 
     // push `alpha` units of flow along the tree path on edge e

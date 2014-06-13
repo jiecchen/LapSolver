@@ -71,7 +71,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
             for (int i = 0; i < graph.deg[u]; i++) {
                 int v = graph.nbrs[u][i];
                 double wt = graph.weights[u][i];
-                double t = rates[u] / wt;
+                double t = rates[u] * wt;
 
                 if (t < times[v]) {
                     times[v] = t;
@@ -114,7 +114,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
                 if (uf.find(v) != uf.find(u)) {
                     double wt = graph.weights[u][i];
 
-                    double t = ev.time + ev.rate / wt;
+                    double t = ev.time + ev.rate * wt;
                     if (t < times[v]) {
                         times[v] = t;
 
@@ -170,7 +170,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
             for (int i = 0; i < graph.deg[u]; i++) {
                 int v = graph.nbrs[u][i];
                 double wt = graph.weights[u][i];
-                double t = rates[u] / wt;
+                double t = rates[u] * wt;
 
                 if (rates[u] < leastRate[v]) {
                     leastRate[v] = rates[u];
@@ -206,7 +206,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
             for (int i = 0; i < graph.deg[u]; i++) {
                 v = graph.nbrs[u][i];
                 double wt = graph.weights[u][i];
-                double t = ev.time + ev.rate / wt;
+                double t = ev.time + ev.rate * wt;
 
                 if (ev.rate < leastRate[v]) {
                     leastRate[v] = rates[u];
@@ -269,9 +269,9 @@ public class SimulPathTree implements SpanningTreeStrategy {
                     double rate = rand.nextDouble();
                     int e = edgeNums[u][i];
                     double wt = graph.weights[u][i];
-                    times[e] = rate / wt;
+                    times[e] = rate * wt;
 
-                    EdgeEvent ev = new EdgeEvent(u, v, rate / wt, rate, wt);
+                    EdgeEvent ev = new EdgeEvent(u, v, rate * wt, rate, wt);
                     events[e] = ev;
                     pq.add(ev);
                 }
@@ -305,7 +305,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
             for (int i = 0; i < graph.deg[u]; i++) {
                 int e = edgeNums[u][i];
                 double wt = graph.weights[u][i];
-                double t = ev.time + ev.rate / wt;
+                double t = ev.time + ev.rate * wt;
                 if (t < times[e]) {
                     times[e] = t;
 
@@ -323,7 +323,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
             for (int i = 0; i < graph.deg[v]; i++) {
                 int e = edgeNums[v][i];
                 double wt = graph.weights[v][i];
-                double t = ev.time + ev.rate / wt;
+                double t = ev.time + ev.rate * wt;
                 if (t < times[e]) {
                     times[e] = t;
 

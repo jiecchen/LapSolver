@@ -7,7 +7,7 @@
  * (c) Daniel Spielman, 2014, part of the YINSmat package
  *
  * A static tree data structure.
- * Heavily refactored on Thursday, June 12, 2014.
+ * Heavily refactored by Cyril on Thursday, June 12, 2014.
  *
  */
 
@@ -17,21 +17,24 @@ public class Tree {
     public int nv;    // number of vertices (ne = nv-1)
     public int root;  // index of root of tree
     public int[] parent;     // parent[v] = id of v's parent, parent[root] = root
-    public double[] length;  // length[v] = 1 / weight(v, parent[v])
+    public double[] weight;  // weight[v] = edge weight of (v, parent[v])
     public int[][] children; // children[v][0..nChildren[v]-1] = indices of children
 
     // tree from parent array and weights
     public Tree(int[] parent, double[] weight) {
         nv = parent.length;
         this.parent = parent;
-        length = new double[nv];
+        this.weight = weight;
         int[] nChildren = new int[nv];
 
-        for (int i = 0; i < nv; i++) {
-            // set lengths
-            if (weight == null) length[i] = 1;
-            else length[i] = 1/weight[i];
+        if (weight == null) {
+            this.weight = new double[nv];
+            for (int i = 0; i < nv; i++) {
+                this.weight[i] = 1.0;
+            }
+        }
 
+        for (int i = 0; i < nv; i++) {
             if (parent[i] == i) { // find root
                 root = i;
             }
@@ -64,7 +67,7 @@ public class Tree {
         nv = other.nv;
         root = other.root;
         parent = other.parent.clone();
-        length = other.length.clone();
+        weight = other.weight.clone();
         children = new int[nv][];
 
         for (int i = 0; i < nv; i++) {

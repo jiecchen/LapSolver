@@ -63,7 +63,7 @@ public class Congestion {
             int parent = spanningTree.parent[v];
 
             // congestion cost
-            answer.length[v] = vertexWeights[v] / spanningTree.length[v];
+            answer.weight[v] = vertexWeights[v] / spanningTree.weight[v];
             vertexWeights[parent] += vertexWeights[v];
         }
 

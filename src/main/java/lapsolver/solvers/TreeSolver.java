@@ -50,7 +50,7 @@ public class TreeSolver implements Solver {
         for (int i = 1; i < tree.nv; i++) {
             int v = order[i];
             int parent = tree.parent[v];
-            double len = tree.length[v];
+            double len = tree.weight[v];
 
             // V = IR
             voltages[v] = voltages[parent] - flowUp[v]*len;

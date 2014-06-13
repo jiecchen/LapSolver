@@ -60,7 +60,7 @@ public class KelnerFlowTree extends FlowTree {
 
         for (int i = 0; i < tree.nv; i++) {
             int parent = tree.parent[i];
-            double resistance = tree.length[i];
+            double resistance = tree.weight[i];
             flowUp[i] = (voltages[i] - voltages[parent]) / resistance;
         }
 
@@ -92,7 +92,7 @@ public class KelnerFlowTree extends FlowTree {
                 separator = 1 - tree.root; // whichever isn't the root
 
                 height = new double[2];
-                height[separator] = tree.length[separator];
+                height[separator] = tree.weight[separator];
 
                 children = null;
             }
@@ -120,7 +120,7 @@ public class KelnerFlowTree extends FlowTree {
                     int parent = tree.parent[v];
 
                     if (sepToRoot[v]) {
-                        height[v] = height[parent] + tree.length[v];
+                        height[v] = height[parent] + tree.weight[v];
                     }
                     else {
                         height[v] = height[parent];
@@ -182,7 +182,7 @@ public class KelnerFlowTree extends FlowTree {
                     }
 
                     parentArrays[comp][relabel[i]] = relabel[parent];
-                    weights[comp][relabel[i]] = 1 / tree.length[i];
+                    weights[comp][relabel[i]] = tree.weight[i];
                 }
 
                 // build trees from parent arrays

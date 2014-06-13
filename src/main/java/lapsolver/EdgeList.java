@@ -67,7 +67,7 @@ public class EdgeList {
             if (i != tree.root) {
                 u[index] = i;
                 v[index] = tree.parent[i];
-                weight[index] = 1 / tree.length[i];
+                weight[index] = tree.weight[i];
                 index++;
             }
         }

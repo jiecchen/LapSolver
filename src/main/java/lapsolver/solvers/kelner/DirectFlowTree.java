@@ -46,13 +46,13 @@ public class DirectFlowTree extends FlowTree {
         double total = 0;
 
         while (u != root) {
-            double length = super.tree.parent[u];
+            double length = super.tree.weight[u];
             total += treeFlows[u] * length;
             u = super.tree.parent[u];
         }
 
         while (v != root) {
-            double length = super.tree.parent[v];
+            double length = super.tree.weight[v];
             total -= treeFlows[v] * length;
             v = super.tree.parent[v];
         }

@@ -22,8 +22,8 @@ public class Stretch {
 
         // divide by edge length for stretch; accumulate
         for (int i = 0; i < stretches.length; i++) {
-            // divide by length = 1/weight
-            stretches[i] *= edges.weight[i];
+            // divide by edge length
+            stretches[i] /= edges.weight[i];
             total += stretches[i];
         }
 
