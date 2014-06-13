@@ -12,7 +12,7 @@ package lapsolver.lsst;
 import lapsolver.Graph;
 import lapsolver.Tree;
 
-public class StarDecompositionTree {
+public class StarDecompositionTree implements SpanningTreeStrategy {
     @Override
     public Tree getTree(Graph graph) {
         return null;
