@@ -1,8 +1,21 @@
-function g = a2g( a )
+function g = a2g(a, datastruct)
 %A2G Converts an adjacency matrix to a Java graph object.
-    import lapsolver.Graph;
-    import lapsolver.EdgeList;
+%datastruct can be 'graph', 'tree', or 'edgelist' (default 'graph')
+    import lapsolver.*;
+    
+    if nargin < 2
+        datastruct = 'graph';
+    end
+    
     [ai,aj,av] = find(tril(a));
-    g = Graph(ai-1, aj-1, 1./av);
+    edges = EdgeList(ai-1, aj-1, 1./av);
+    
+    if strcmp(datastruct, 'graph')
+        g = Graph(edges);
+    elseif strcmp(datastruct, 'tree')
+        g = Tree(edges);
+    else
+        g = edges;
+    end
 end
 
