@@ -1,10 +1,9 @@
 /**
- * @file KruskalTree.java
+ * @file RandomTree.java
  * @author Alex Reinking <alexander.reinking@yale.edu>
- * @date Tue Jun 3 2014
+ * @date Fri Jun 13 2014
  *
- * A not-so-low-stretch spanning tree strategy, which just uses Kruskal's algorithm.
- * This will not produce good low stretch spanning trees.
+ * A random spanning tree. Very high stretch, probably ;)
  *
  */
 package lapsolver.lsst;
@@ -16,10 +15,9 @@ import lapsolver.algorithms.UnionFind;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
-public class KruskalTree implements SpanningTreeStrategy {
+public class RandomTree implements SpanningTreeStrategy {
     @Override
     public Tree getTree(Graph graph) {
         UnionFind disjointSet = new UnionFind(graph.nv);
@@ -34,12 +32,7 @@ public class KruskalTree implements SpanningTreeStrategy {
             indices.add(i, i);
         }
 
-        Collections.sort(indices, new Comparator<Integer>() {
-            @Override
-            public int compare(Integer o1, Integer o2) {
-                return Double.compare(weights[o1], weights[o2]);
-            }
-        });
+        Collections.shuffle(indices);
 
         int currentEdge = 0;
         for (Integer edge : indices) {
