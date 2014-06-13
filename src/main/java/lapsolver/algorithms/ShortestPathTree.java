@@ -28,12 +28,7 @@ public class ShortestPathTree {
         return parent;
     }
 
-    /**
-     * Construct a shortest-path tree for a given graph and source node
-     * @param G the input graph
-     * @param source the starting node
-     */
-    public ShortestPathTree(Graph G, int source) {
+    public ShortestPathTree(Graph G, int source, int[] ignore) {
         dist = new double[G.nv];
         parent = new int[G.nv];
 
@@ -46,7 +41,7 @@ public class ShortestPathTree {
 
         dist[source] = 0;
         for (int i = 0; i < G.nv; i++) {
-            if(i != source) {
+            if (i != source) {
                 dist[i] = Double.POSITIVE_INFINITY;
                 parent[i] = -1;
             }
@@ -56,15 +51,17 @@ public class ShortestPathTree {
         boolean[] settled = new boolean[G.nv];
         while (!nextNodes.isEmpty()) {
             int u = nextNodes.poll();
-            for (int i = 0; i < G.deg[u]; i++) {
-                int v = G.nbrs[u][i];
-                if(!settled[v]) {
-                    double alt = dist[u] + G.weights[u][i];
-                    if(alt < dist[v]) {
-                        nextNodes.remove(v);
-                        dist[v] = alt;
-                        parent[v] = u;
-                        nextNodes.add(v);
+            if (ignore == null || ignore[u] == -1) {
+                for (int i = 0; i < G.deg[u]; i++) {
+                    int v = G.nbrs[u][i];
+                    if (!settled[v] && (ignore == null || ignore[v] == -1)) {
+                        double alt = dist[u] + G.weights[u][i];
+                        if (alt < dist[v]) {
+                            nextNodes.remove(v);
+                            dist[v] = alt;
+                            parent[v] = u;
+                            nextNodes.add(v);
+                        }
                     }
                 }
             }
@@ -72,6 +69,15 @@ public class ShortestPathTree {
         }
 
         parent[source] = source; // Follow parent array convention
+    }
+
+    /**
+     * Construct a shortest-path tree for a given graph and source node
+     * @param G the input graph
+     * @param source the starting node
+     */
+    public ShortestPathTree(Graph G, int source) {
+        this(G, source, null);
     }
 
     /**
