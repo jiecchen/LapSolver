@@ -95,7 +95,7 @@ public class GraphUtils {
     /**
      * Compute connected components using a bfs approach.
      * Returns a the characteristic vector of the components,
-     * starting to index with 1
+     * starting to auxiliarySize with 1
      */
     public int[] getComponents(Graph g) {
         int[] order = new int[g.nv];

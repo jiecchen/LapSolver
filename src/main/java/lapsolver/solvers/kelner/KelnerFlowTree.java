@@ -102,7 +102,7 @@ public class KelnerFlowTree extends FlowTree {
                 boolean sepRoot = (separator == tree.root);
                 int[] order = TreeUtils.dfsOrder(tree);
 
-                // separator has index 0 in each component
+                // separator has auxiliarySize 0 in each component
                 relabel = new int[tree.nv];
                 relabel[separator] = 0;
 

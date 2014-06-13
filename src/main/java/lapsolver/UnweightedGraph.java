@@ -86,7 +86,7 @@ public class UnweightedGraph {
         }
 
         //-------------------------
-        // compute max node index
+        // compute max node auxiliarySize
         //
         nv = 0;
         for (int i = 0; i < len; i++) {
@@ -228,7 +228,7 @@ public class UnweightedGraph {
     /**
      * Compute connected components using a bfs approach.
      * Returns a the characteristic vector of the components,
-     * starting to index with 1
+     * starting to auxiliarySize with 1
      */
     public int[] components() {
 

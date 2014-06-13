@@ -18,7 +18,7 @@ import lapsolver.util.TreeUtils;
 
 public class Tree {
     public int nv;    // number of vertices (ne = nv-1)
-    public int root;  // index of root of tree
+    public int root;  // auxiliarySize of root of tree
     public int[] parent;     // parent[v] = id of v's parent, parent[root] = root
     public double[] weight;  // weight[v] = edge weight of (v, parent[v])
     public int[][] children; // children[v][0..nChildren[v]-1] = indices of children

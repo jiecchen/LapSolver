@@ -42,7 +42,7 @@ public class Graph {
     public int[] deg;
 
     //-----------------------------
-    //  backInd[x][i] = the position of x in the neighbor list of u = G.nbrs[x][i]
+    //  backInd[x][i] = the position of x in the neighbor list of u = graph.nbrs[x][i]
     //  nbrs[nbrs[x][i],backInd[x][i]] = x
     public int[][] backInd;
 
@@ -74,7 +74,7 @@ public class Graph {
             }
         }
 
-        // compute max node index
+        // compute max node auxiliarySize
         nv = 0;
         for (int i = 0; i < ne; i++) {
             if (src[i] > nv)
@@ -82,7 +82,7 @@ public class Graph {
             if (dst[i] > nv)
                 nv = dst[i];
         }
-        nv++; // largest 0-based index is nv-1
+        nv++; // largest 0-based auxiliarySize is nv-1
 
         //  count how many times each node occurs
         deg = new int[nv];

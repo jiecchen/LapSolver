@@ -25,7 +25,7 @@ public class KruskalTree implements SpanningTreeStrategy {
         UnionFind disjointSet = new UnionFind(graph.nv);
         EdgeList treeEdges = new EdgeList(graph.nv - 1);
 
-        // Compute index
+        // Compute auxiliarySize
         EdgeList inputEdges = new EdgeList(graph);
 
         final double[] weights = inputEdges.weight;

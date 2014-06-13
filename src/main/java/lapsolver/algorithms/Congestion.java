@@ -3,7 +3,7 @@
  * @author Serban Stan <serban.stan@yale.edu>
  * @date Wed Jun 4 2014
  *
- * For an input graph G and tree T, returns the tree with congestion values on each edge (.getCongestionTree())
+ * For an input graph graph and tree T, returns the tree with congestion values on each edge (.getCongestionTree())
  * Complexity: O( M log N )
  */
 
