@@ -2,10 +2,30 @@ import numpy as np
 import sys, os
 from jpype import *
 
-prefix = os.path.dirname(os.path.realpath(__file__))
-startJVM(getDefaultJVMPath(), '-Djava.class.path={}'.format(prefix + "/_src/{{JAR_FILE}}"))
-del prefix
+jarFile = os.path.dirname(os.path.realpath(__file__)) + "/_src/LapSolver.jar"
+jvmPath = None
+if sys.platform == 'darwin' and 'JAVA_HOME' in os.environ:
+    JRE_PATHS = [ "server/libjvm.dylib",   "amd64/server/libjvm.so",
+                  "i386/client/libjvm.so", "i386/server/libjvm.so" ]
 
+    java_home = os.getenv("JAVA_HOME")
+    rootJre = ""
+    if os.path.exists(java_home+"/bin/javac"):
+        rootJre = java_home + '/jre/lib'
+    elif os.path.exists(java_home+"/bin/java"):
+        rootJre = java_home + '/lib'
+
+    for i in JRE_PATHS:
+        if os.path.exists(rootJre+"/"+i):
+            jvmPath = rootJre + "/" + i
+            break
+
+if jvmPath is None:
+    jvmPath = getDefaultJVMPath()
+
+startJVM(jvmPath, '-Djava.class.path={}'.format(jarFile))
+del jarFile
+del jvmPath
 
 def _from_java(val):
     try:
