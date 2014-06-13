@@ -70,6 +70,8 @@ public class Tree {
         this(GraphUtils.toTree(treeGraph));
     }
 
+    public Tree(EdgeList edges) { this(new Graph(edges)); }
+
     // copy constructor
     public Tree (Tree other) {
         nv = other.nv;

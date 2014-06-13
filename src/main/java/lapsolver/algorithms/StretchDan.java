@@ -1,6 +1,6 @@
 /**
- * @file Congestion.java
- * @author Cyril Zhang <cyril.zhang@yale.edu>
+ * @file StretchDan.java
+ * @author Dan Spielman <spielman@cs.yale.edu>
  * @date Thu Jun 5 2014
  *
  * Dan's old code for computing stretch.
@@ -14,9 +14,6 @@ import lapsolver.util.TreeUtils;
 
 import java.util.ArrayDeque;
 
-/**
- * Created by cyrilzhang on 6/5/14.
- */
 public class StretchDan {
     Graph graph, stretchGraph;
     Tree spanningTree;

@@ -3,7 +3,7 @@
  * @author Alex Reinking <alexander.reinking@yale.edu>
  * @date Tue Jun 10 2014
  *
- * Slow implementation of Dijkstra's algorithm.
+ * Implementation of Dijkstra's algorithm.
  * Correct, but the boxing/unboxing is a major performance hit.
  *
  */
