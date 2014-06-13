@@ -38,8 +38,10 @@ public class SpanningTreeRunner implements SpanningTreeStrategy {
             result = executorService.invokeAny(tasks);
         } catch (InterruptedException e) {
             e.printStackTrace();
+            throw new RuntimeException("Error: Spanning tree construction was interrupted.", e);
         } catch (ExecutionException e) {
             e.printStackTrace();
+            throw new RuntimeException("Error: Spanning tree construction failed unexpectedly.", e);
         } finally {
             executorService.shutdown();
         }
