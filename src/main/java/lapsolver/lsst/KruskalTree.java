@@ -30,10 +30,11 @@ public class KruskalTree implements SpanningTreeStrategy {
 
         // Compute index
         EdgeList inputEdges = new EdgeList(graph);
+
         final double[] weights = inputEdges.weight;
         List<Integer> indices = new ArrayList<>(weights.length);
         for (int i = 0; i < weights.length; i++) {
-            indices.set(i, i);
+            indices.add(i, i);
         }
 
         Collections.sort(indices, new Comparator<Integer>() {
