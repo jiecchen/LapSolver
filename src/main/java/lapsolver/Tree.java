@@ -13,6 +13,9 @@
 
 package lapsolver;
 
+import lapsolver.util.GraphUtils;
+import lapsolver.util.TreeUtils;
+
 public class Tree {
     public int nv;    // number of vertices (ne = nv-1)
     public int root;  // index of root of tree
@@ -60,6 +63,11 @@ public class Tree {
     // build tree from parent array, setting all lengths to 1
     public Tree(int[] parent) {
         this(parent, null);
+    }
+
+    // build tree from undirected acyclic graph
+    public Tree(Graph treeGraph) {
+        this(GraphUtils.toTree(treeGraph));
     }
 
     // copy constructor

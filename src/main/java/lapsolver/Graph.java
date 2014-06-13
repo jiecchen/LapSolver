@@ -123,6 +123,11 @@ public class Graph {
         }
     }
 
+    // get graph from tree
+    public Graph(Tree tree) {
+        this(new EdgeList(tree));
+    }
+
     // copy constructor (perform a deep copy)
     public Graph(Graph other) {
         nv = other.nv;
