@@ -1,5 +1,5 @@
 # LapSolver
-An ultra-fast solver for LaPlacian systems of linear equations.
+An ultra-fast solver for Laplacian systems of linear equations.
 
 ## Dependencies
 
