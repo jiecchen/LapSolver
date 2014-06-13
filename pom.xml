@@ -27,11 +27,11 @@
             <version>4.8.2</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>17.0</version>
-        </dependency>
+        <!--<dependency>-->
+        <!--<groupId>com.google.guava</groupId>-->
+        <!--<artifactId>guava</artifactId>-->
+        <!--<version>17.0</version>-->
+        <!--</dependency>-->
     </dependencies>
 
     <build>
@@ -55,29 +55,39 @@
                     <execution>
                         <id>build-native</id>
                         <phase>generate-resources</phase>
-                        <goals><goal>exec</goal></goals>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
 
                         <configuration>
                             <executable>make</executable>
                             <workingDirectory>src/main/native</workingDirectory>
-                            <arguments><argument>install</argument></arguments>
+                            <arguments>
+                                <argument>install</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                     <execution>
                         <id>clean-native</id>
                         <phase>clean</phase>
-                        <goals><goal>exec</goal></goals>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
 
                         <configuration>
                             <executable>make</executable>
                             <workingDirectory>src/main/native</workingDirectory>
-                            <arguments><argument>clean</argument></arguments>
+                            <arguments>
+                                <argument>clean</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                     <execution>
                         <id>build-python-bindings</id>
                         <phase>install</phase>
-                        <goals><goal>java</goal></goals>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
 
                         <configuration>
                             <mainClass>pybinding.BindingGenerator</mainClass>

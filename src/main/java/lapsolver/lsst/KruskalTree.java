@@ -20,6 +20,7 @@ import lapsolver.Graph;
 import lapsolver.Tree;
 import lapsolver.algorithms.UnionFind;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -33,9 +34,10 @@ public class KruskalTree implements SpanningTreeStrategy {
         // Compute index
         EdgeList inputEdges = new EdgeList(graph);
         final double[] weights = inputEdges.weight;
-        List<Integer> indices = ContiguousSet.create(
-                Range.closedOpen(0, weights.length),
-                DiscreteDomain.integers()).asList();
+        List<Integer> indices = new ArrayList<>(weights.length);
+        for (int i = 0; i < weights.length; i++) {
+            indices.set(i, i);
+        }
 
         Collections.sort(indices, new Comparator<Integer>() {
             @Override
