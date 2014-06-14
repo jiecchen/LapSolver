@@ -19,6 +19,8 @@ import java.util.PriorityQueue;
 public class ShortestPathTree {
     private final double [] dist;
     private final int [] parent;
+    private final double [] parentWeight;
+    private final Graph graph;
 
     public double[] getDist() {
         return dist;
@@ -29,8 +31,10 @@ public class ShortestPathTree {
     }
 
     public ShortestPathTree(Graph G, int source, int[] ignore) {
+        graph = G;
         dist = new double[G.nv];
         parent = new int[G.nv];
+        parentWeight = new double[G.nv];
 
         PriorityQueue<Integer> nextNodes = new PriorityQueue<>(G.nv, new Comparator<Integer>() {
             @Override
@@ -59,6 +63,7 @@ public class ShortestPathTree {
                         if (alt < dist[v]) {
                             nextNodes.remove(v);
                             dist[v] = alt;
+                            parentWeight[v] = G.weights[u][i];
                             parent[v] = u;
                             nextNodes.add(v);
                         }
@@ -85,6 +90,6 @@ public class ShortestPathTree {
      * @return the shortest path tree computed by the constructor
      */
     public Tree getTree() {
-        return new Tree(parent, dist);
+        return new Tree(parent, parentWeight);
     }
 }
