@@ -11,6 +11,9 @@ package lapsolver.algorithms;
 
 import lapsolver.Graph;
 import lapsolver.EdgeList;
+import lapsolver.util.GraphUtils;
+
+import java.util.Arrays;
 
 public class LDLDecomposition {
     public int N;
@@ -47,27 +50,33 @@ public class LDLDecomposition {
     }
 
     public returnPair solve(int numSteps) {
-        returnPair answer = new returnPair();
+        EdgeList L = new EdgeList();
 
         // Initialize the answer pair
-        initAns(answer, numSteps);
+        initAns(L, numSteps);
 
         // I will first construct the L matrix after removing the degree 1 vertices from the graph
         int[] currentDegree = new int[N];
         for (int i = 0; i < N; i++) {
-            X[i] += graph.deg[i];
+            for (int j = 0; j < graph.deg[i]; j++)
+                X[i] = X[i] + 1 / graph.weights[i][j];
+
             currentDegree[i] = graph.deg[i];
         }
 
         for (int i = 0; i < numSteps; i++)
             if (currentDegree[i] == 1) {                    // Eliminate the degree one vertices
+                /**
+                 * TODO: case when graph is a tree
+                 */
+
                 for (int j = 0; j < graph.deg[i]; j++) {
                     int u = i;
                     int v = graph.nbrs[i][j];
-                    double weight = graph.weights[i][j];
+                    double weight = 1 / graph.weights[i][j];
 
                     if (u < v) {
-                        addToEdgeList(answer.L, v, u, -weight / X[u]);
+                        addToEdgeList(L, v, u, -weight / X[u]);
                         X[v] = X[v] - weight * weight / X[u];
 
                         currentDegree[v]--;
@@ -88,7 +97,7 @@ public class LDLDecomposition {
                 // outerStart and outerStop represent the higher degree vertices connected to the chain
                 // these variables are initialized to 0 so I don't get any warning
                 int outerStart = 0, outerStop = 0;
-                double outerUpdt;
+                double outerUpdt = -1;
 
                 if (start == stop) {
                     outerStart = graph.nbrs[start][0];
@@ -96,48 +105,56 @@ public class LDLDecomposition {
                 }
                 else {
                     for (int j = 0; j < 2; j++) {
-                        if (graph.deg[graph.nbrs[start][j]] > 2)
+                        if (currentDegree[graph.nbrs[start][j]] > 2)
                             outerStart = graph.nbrs[start][j];
-                        if (graph.deg[graph.nbrs[stop][j]] > 2)
+                        if (currentDegree[graph.nbrs[stop][j]] > 2)
                             outerStop = graph.nbrs[stop][j];
                     }
                 }
-                outerUpdt = -graph.weights[start][0] / X[start];
 
                 for (int u = start; u <= stop; u++) {
-                    addToEdgeList(answer.L, outerStart, u, outerUpdt);
-
                     for (int k = 0; k < 2; k++) {
                         int v = graph.nbrs[u][k];
-                        double weight = graph.weights[u][k];
+                        double weight = 1 / graph.weights[u][k];
 
-                        if ((v > u && graph.deg[v] == 2) || (v == outerStop)) { // vertex v is the next vertex in the chain
-                            addToEdgeList(answer.L, v, u, -weight / X[u]);
-                            X[v] = X[v] - weight * weight * X[u];
+                        if ((v > u && currentDegree[v] == 2) || (v == outerStop)) { // vertex v is the next vertex in the chain
+                            addToEdgeList(L, v, u, -weight / X[u]);
+                            X[v] = X[v] - weight * weight / X[u];
 
-                            outerUpdt = outerUpdt * (-weight / X[u]);
+                            outerUpdt = outerUpdt * (weight / X[u]);
                         }
                     }
+
+                    addToEdgeList(L, outerStart, u, outerUpdt);
                 }
 
-                addToEdgeList(answer.L, outerStop, stop, outerUpdt);
+//                if (outerStop < outerStart) {
+//                    int aux = outerStop;
+//                    outerStop = outerStart;
+//                    outerStart = aux;
+//                }
+//                addToEdgeList(L, outerStop, stop, outerUpdt);
 
                 i = stop;
             }
 
+        returnPair answer = new returnPair(L, L);
         return answer;
     }
 
-    public void initAns(returnPair LDLt, int steps) {
+    public void initAns(EdgeList el, int steps) {
+        // This number of declared elements is an overestimate for the actual needed memory. It has an extra O(steps) field used.
         int cnt = N;
-        for (int i = 0; i < steps; i++) {
-            cnt += graph.deg[i];
-        }
+        for (int i = 0; i < steps; i++)
+            cnt += graph.deg[i] + 1;
 
-        LDLt.L = new EdgeList(cnt);
+        el.ne = cnt;
+        el.u = new int[cnt];
+        el.v = new int[cnt];
+        el.weight = new double[cnt];
 
         for (int i = 0; i < N; i++)
-            addToEdgeList(LDLt.L, i, i, 1);
+            addToEdgeList(el, i, i, 1);
     }
 
     public void addToEdgeList(EdgeList el, int u, int v, double weight) {
