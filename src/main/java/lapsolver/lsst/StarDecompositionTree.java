@@ -91,7 +91,6 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
     // (StarDecomp in EEST05)
     public EdgeList getStarColoring(Graph graph, int x0, int[] colors) {
         // initially nobody's part of the decomposition
-        colors = new int[graph.nv];
         Arrays.fill(colors, -1);
 
         ShortestPathTree sptInstance = new ShortestPathTree(graph, x0);
@@ -117,7 +116,7 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
 
         // build bridge vertices
         EdgeList bridges = new EdgeList(nColors);
-        for (int i = 0; i < nColors; i++) {
+        for (int i = 0; i < nColors-1; i++) {
             bridges.v[i] = bridgeSources.get(i);
             bridges.u[i] = shortestPathTree.parent[bridges.v[i]];
             bridges.weight[i] = shortestPathTree.weight[bridges.v[i]];
