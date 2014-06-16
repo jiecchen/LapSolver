@@ -1,6 +1,7 @@
 /**
  * @file StarDecompositionTree.java
  * @author Cyril Zhang <cyril.zhang@yale.edu>
+ * @author Alex Reinking <alexander.reinking@yale.edu>
  * @date Fri Jun 13 2014
  *
  * An implementation of the star decomposition tree algorithm in EEST05.
@@ -103,14 +104,12 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
         // grow low-cut cones from shell
         int nColors = 1;
         ArrayList<Integer> bridgeSources = new ArrayList<>();
-        for (int i = 0; i < ballShell.length; i++) {
-            if (colors[ballShell[i]] != -1) {
-                // oops, another cone took this already
-                continue;
-            }
+        for (int aBallShell : ballShell) {
+            if (colors[aBallShell] != -1)
+                continue; // oops, another cone took this already
 
-            growCone(graph, shortestPathTree, ballShell[i], 0.0, colors, nColors);
-            bridgeSources.add(ballShell[i]);
+            growCone(graph, shortestPathTree, aBallShell, 0.0, colors, nColors);
+            bridgeSources.add(aBallShell);
             nColors++;
         }
 
