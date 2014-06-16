@@ -13,6 +13,7 @@ import lapsolver.EdgeList;
 import lapsolver.Graph;
 import lapsolver.Tree;
 import lapsolver.algorithms.ShortestPathTree;
+import lapsolver.util.TreeUtils;
 
 import java.util.*;
 
@@ -115,6 +116,8 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
     }
 
     /**
+     * Find a low-cut ball between 1/3 and 2/3 of the total vertices
+     *
      * @param graph  the containing graph
      * @param dist   the distance array from a shortest path tree
      * @param colors the colors of each vertex in graph
@@ -183,9 +186,14 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
     // should be called with
     public void growCone(Graph graph, Tree shortestPathTree,
                          int source, double radius, int[] colors, int color) {
-        // TODO(Cyril): implement this. might need other parameters
-
-        colors[source] = color;
+        Queue<Integer> bfs = new LinkedList<>();
+        bfs.add(source);
+        while (!bfs.isEmpty()) {
+            int u = bfs.poll();
+            colors[u] = color;
+            for (int v : shortestPathTree.children[u])
+                bfs.add(v);
+        }
     }
 
     // split graph into induced subgraphs with same color
