@@ -141,8 +141,10 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
             int u = order.get(i);
             inCut[u] = true;
 
-            for (int v : graph.nbrs[u])
-                cutValue += ((inCut[v]) ? -1 : 1) * graph.weights[u][v];
+            for (int j = 0; j < graph.deg[u]; j++) {
+                int v = graph.nbrs[u][j];
+                cutValue += ((inCut[v]) ? -1 : 1) * graph.weights[u][j];
+            }
 
             if (i >= order.size() / 3 && cutValue < bestValue) {
                 bestCut = i;
