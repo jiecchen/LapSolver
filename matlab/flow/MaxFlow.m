@@ -19,7 +19,7 @@ function x = MaxFlow(A, s, t, c, m, n, ep)
 		   eye(m, m), eye(m, m), -1 * eye(m, m), zeros(m, n-2), zeros(m, n-2)];
 	bip = [zeros(n-2, 1); c];
 	p = 4 * U / epflow;
-	cip = [ut; zeros(m, 1); p * ones(m, 1); p * ones(n-2, 1); p * ones(n-2, 1)];
+	cip = [-1 * ut; zeros(m, 1); p * ones(m, 1); p * ones(n-2, 1); p * ones(n-2, 1)];
 	lmin = 2;
 	T = 1000; % ???
 	p = -2 * U / epflow;
