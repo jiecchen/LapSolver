@@ -13,7 +13,6 @@ import lapsolver.EdgeList;
 import lapsolver.Graph;
 import lapsolver.Tree;
 import lapsolver.algorithms.ShortestPathTree;
-import lapsolver.util.TreeUtils;
 
 import java.util.*;
 
@@ -42,7 +41,7 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
 
         // obtain star coloring
         int[] colors = new int[graph.nv];
-        EdgeList bridges = getStarColoring(graph, x0, colors);
+        EdgeList bridges = makeStarCut(graph, x0, colors);
         int nColors = bridges.ne + 1;
 
         // expand contracted edges
@@ -89,7 +88,7 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
     //     colors, where colors[v] = component label of v (0 for ball)
     // and I'll return an EdgeList with bridge edges (u[i] = x_(i+1), v[i] = y_(i+1))
     // (StarDecomp in EEST05)
-    public EdgeList getStarColoring(Graph graph, int x0, int[] colors) {
+    public EdgeList makeStarCut(Graph graph, int x0, int[] colors) {
         // initially nobody's part of the decomposition
         Arrays.fill(colors, -1);
 
@@ -123,6 +122,19 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
         }
 
         return bridges;
+    }
+
+    /**
+     * Return the star coloring of a graph, for MATLAB testing.
+     *
+     * @param graph the input graph
+     * @param x0    the source of the inner ball
+     * @return      an array colored with ball/cone cuts
+     */
+    public int[] getStarColoring(Graph graph, int x0) {
+        int[] colors = new int[graph.nv];
+        makeStarCut(graph, x0, colors);
+        return colors;
     }
 
     /**
