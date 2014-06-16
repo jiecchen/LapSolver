@@ -143,19 +143,49 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
     //          vertex v in its subgraph
     public Graph[] splitGraph(Graph graph, int[] colors, int nColors,
                               int[][] relabelUp, int[] relabelDown) {
-        Graph[] subgraphs = new Graph[nColors];
-
-        // count frequency of each color
+        // compute relabeling
         int[] subgraphSizes = new int[nColors];
-        for (int color : colors) {
-            subgraphSizes[color]++;
+        for (int i = 0; i < graph.nv; i++) {
+            relabelUp[colors[i]][subgraphSizes[colors[i]]] = i;
+            relabelDown[i] = subgraphSizes[colors[i]];
+            subgraphSizes[colors[i]]++;
         }
 
+        // traverse edges once to get subgraph edge counts
+        EdgeList parentEdges = new EdgeList(graph);
+        int[] subgraphEdgeCounts = new int[nColors];
+        for (int i = 0; i < parentEdges.ne; i++) {
+            int u = parentEdges.u[i], v = parentEdges.v[i];
+            if (colors[u] == colors[v]) {
+                // count edge in induced subgraph
+                subgraphEdgeCounts[colors[u]]++;
+            }
+        }
+
+        // build subgraph edge lists
+        EdgeList[] subgraphEdges = new EdgeList[nColors];
+        int[] edgePos = new int[nColors];
         for (int color = 0; color < nColors; color++) {
-            subgraphs[color] = null;
-            relabelUp[color] = new int[subgraphSizes[color]];
-            // TODO(Cyril): compute induced subgraphs
-            // TODO(Cyril): consider making GraphUtil for this? too specialized?
+            subgraphEdges[color] = new EdgeList(color);
+        }
+        for (int i = 0; i < parentEdges.ne; i++) {
+            int u = parentEdges.u[i], v = parentEdges.v[i];
+            if (colors[u] == colors[v]) {
+                // add edge to induced subgraph
+                int color = colors[u];
+                double weight = parentEdges.weight[i];
+                subgraphEdges[color].u[edgePos[color]] = relabelDown[u];
+                subgraphEdges[color].v[edgePos[color]] = relabelDown[v];
+                subgraphEdges[color].weight[edgePos[color]] = weight;
+                edgePos[colors[u]]++;
+            }
+            double w = parentEdges.weight[i];
+        }
+
+        // convert edge lists to graphs
+        Graph[] subgraphs = new Graph[nColors];
+        for (int color = 0; color < nColors; color++) {
+            subgraphs[color] = new Graph(subgraphEdges[color]);
         }
 
         return subgraphs;
