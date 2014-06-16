@@ -3,10 +3,11 @@ function [t,xy] = drawtree(a, strat)
     import lapsolver.lsst.*;
     xy = specxy(a);
     if nargin < 2
-        strat = StarDecompositionTree
+        strat = StarDecompositionTree;
     end
     g = a2g(a);
     t = strat.getTree(g);
+    t = strat.getLowStretchTree(g,0);
     gplot(g2a(t),xy);
 end
 
