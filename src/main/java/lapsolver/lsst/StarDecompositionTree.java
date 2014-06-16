@@ -49,7 +49,7 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
         // TODO(Cyril): implement this! change weights back to original
 
         // generate induced subgraphs
-        int[][] relabelUp = new int[graph.nv][];
+        int[][] relabelUp = new int[nColors][];
         int[] relabelDown = new int[graph.nv];
         Graph[] subgraphs = splitGraph(graph, colors, nColors, relabelUp, relabelDown);
         EdgeList[] childTreeEdges = new EdgeList[nColors];
@@ -211,6 +211,7 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
         bfs.add(source);
         while (!bfs.isEmpty()) {
             int u = bfs.poll();
+            if (colors[u] != -1) continue;
             colors[u] = color;
             for (int v : shortestPathTree.children[u])
                 bfs.add(v);
@@ -227,7 +228,6 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
                               int[][] relabelUp, int[] relabelDown) {
         // compute relabeling
         int[] subgraphSizes = new int[nColors];
-        int[] relabeUpPos = new int[nColors];
         for (int i = 0; i < graph.nv; i++) {
             relabelDown[i] = subgraphSizes[colors[i]];
             subgraphSizes[colors[i]]++;
@@ -236,7 +236,7 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
             relabelUp[i] = new int[subgraphSizes[i]];
         }
         for (int i = 0; i < graph.nv; i++) {
-            relabelUp[colors[i]][relabeUpPos[colors[i]]++] = i;
+            relabelUp[colors[i]][relabelDown[i]] = i;
         }
 
         // traverse edges once to get subgraph edge counts
@@ -267,7 +267,6 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
                 subgraphEdges[color].weight[edgePos[color]] = weight;
                 edgePos[color]++;
             }
-            double w = parentEdges.weight[i];
         }
 
         // convert edge lists to graphs
