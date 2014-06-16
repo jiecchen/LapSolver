@@ -98,17 +98,28 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
         double[] dist = sptInstance.getDist();
 
         // grow low-cut ball, build bridges from shell
-        int[] roots = growBall(graph, dist, colors, 0);
-        EdgeList bridges = new EdgeList(roots.length);
-        for (int i = 0; i < roots.length; i++) {
-            bridges.u[i] = shortestPathTree.parent[roots[i]];
-            bridges.v[i] = roots[i];
-            bridges.weight[i] = shortestPathTree.weight[roots[i]];
-        }
+        int[] ballShell = growBall(graph, dist, colors, 0);
 
         // grow low-cut cones from shell
-        for (int i = 0; i < roots.length; i++) {
-            growCone(graph, shortestPathTree, roots[i], 0.0, colors, i+1);
+        int nColors = 1;
+        ArrayList<Integer> bridgeSources = new ArrayList<>();
+        for (int i = 0; i < ballShell.length; i++) {
+            if (colors[ballShell[i]] != -1) {
+                // oops, another cone took this already
+                continue;
+            }
+
+            growCone(graph, shortestPathTree, ballShell[i], 0.0, colors, nColors);
+            bridgeSources.add(ballShell[i]);
+            nColors++;
+        }
+
+        // build bridge vertices
+        EdgeList bridges = new EdgeList(nColors);
+        for (int i = 0; i < nColors; i++) {
+            bridges.v[i] = bridgeSources.get(i);
+            bridges.u[i] = shortestPathTree.parent[bridges.v[i]];
+            bridges.weight[i] = shortestPathTree.weight[bridges.v[i]];
         }
 
         return bridges;

@@ -7,7 +7,7 @@ function [t,xy] = drawtree(a, strat)
     end
     g = a2g(a);
     t = strat.getTree(g);
-    t = strat.getLowStretchTree(g,0);
+    % t = strat.getLowStretchTree(g,0);
     gplot(g2a(t),xy);
 end
 
