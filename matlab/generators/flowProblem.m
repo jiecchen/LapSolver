@@ -19,15 +19,15 @@ n = length(a);
 
 start = ceil(n*rand(1));
 
-pg = yins.Graph(ai,aj);
-pg.bfsWalk(start-1);
-bfs = pg.bfs + 1;
+g = lapsolver.UnweightedGraph(ai,aj);
+g.bfsWalk(start-1);
+bfs = g.bfs + 1;
 
 s1 = bfs(1:k);
 
 last = bfs(end);
-pg.bfsWalk(last-1);
-bfs = pg.bfs + 1;
+g.bfsWalk(last-1);
+bfs = g.bfs + 1;
 
 s2 = bfs(1:k);
 
