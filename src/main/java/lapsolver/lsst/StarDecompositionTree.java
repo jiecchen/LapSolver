@@ -19,12 +19,14 @@ import java.util.*;
 
 public class StarDecompositionTree implements SpanningTreeStrategy {
     public Graph graph;
+    private int[] colors;
 
     @Override
     public Tree getTree(Graph graph) {
-       // TODO(Cyril): set beta/n contraction threshold her
-       // TODO(Cyril): randomized centre picking strategy?
-       return new Tree( getLowStretchTree(graph, 0) );
+        // TODO(Cyril): set beta/n contraction threshold her
+        // TODO(Cyril): randomized centre picking strategy?
+        colors = new int[graph.nv];
+        return new Tree(getLowStretchTree(graph, 0));
     }
 
     // generate the spanning tree
@@ -41,24 +43,21 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
         // TODO(Cyril): implement this! change weights to 0 (don't forget both directions)
 
         // obtain star coloring
-        int[] colors = new int[graph.nv];
-        EdgeList bridges = makeStarCut(graph, x0, colors);
+        EdgeList bridges = makeStarCut(graph, x0);
         int nColors = bridges.ne + 1;
 
         // expand contracted edges
         // TODO(Cyril): implement this! change weights back to original
 
-        // generate induced subgraphs
-        int[][] relabelUp = new int[nColors][];
-        int[] relabelDown = new int[graph.nv];
-        Graph[] subgraphs = splitGraph(graph, colors, nColors, relabelUp, relabelDown);
+        // generate induced subgraph
+        Decomposition decomp = splitGraph(graph, nColors);
         EdgeList[] childTreeEdges = new EdgeList[nColors];
 
         // get trees recursively
         // TODO(Alex): parallelize here
         for (int color = 0; color < nColors; color++) {
-            int xi = relabelDown[color == 0 ? x0 : bridges.v[color-1]];
-            childTreeEdges[color] = getLowStretchTree(subgraphs[color], xi);
+            int xi = decomp.newLabels[color == 0 ? x0 : bridges.v[color - 1]];
+            childTreeEdges[color] = getLowStretchTree(decomp.subgraphs[color], xi);
         }
 
         // merge results from child calls
@@ -67,8 +66,8 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
         for (int color = 0; color < nColors; color++) {
             // merge child with relabeled vertices
             for (int i = 0; i < childTreeEdges[color].ne; i++) {
-                parentTreeEdges.u[edgePos] = relabelUp[color][childTreeEdges[color].u[i]];
-                parentTreeEdges.v[edgePos] = relabelUp[color][childTreeEdges[color].v[i]];
+                parentTreeEdges.u[edgePos] = decomp.originalLabels[color][childTreeEdges[color].u[i]];
+                parentTreeEdges.v[edgePos] = decomp.originalLabels[color][childTreeEdges[color].v[i]];
                 parentTreeEdges.weight[edgePos] = childTreeEdges[color].weight[i];
                 edgePos++;
             }
@@ -89,7 +88,7 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
     //     colors, where colors[v] = component label of v (0 for ball)
     // and I'll return an EdgeList with bridge edges (u[i] = x_(i+1), v[i] = y_(i+1))
     // (StarDecomp in EEST05)
-    public EdgeList makeStarCut(Graph graph, int x0, int[] colors) {
+    public EdgeList makeStarCut(Graph graph, int x0) {
         // initially nobody's part of the decomposition
         Arrays.fill(colors, -1);
 
@@ -131,8 +130,7 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
      * @return      an array colored with ball/cone cuts
      */
     public int[] getStarColoring(Graph graph, int x0) {
-        int[] colors = new int[graph.nv];
-        makeStarCut(graph, x0, colors);
+        makeStarCut(graph, x0);
         return colors;
     }
 
@@ -218,15 +216,29 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
         }
     }
 
+    private class Decomposition {
+        public final Graph[] subgraphs;
+        public final int[][] originalLabels;
+        public final int[] newLabels;
+
+        private Decomposition(Graph[] subgraphs, int[][] originalLabels, int[] newLabels) {
+            this.subgraphs = subgraphs;
+            this.originalLabels = originalLabels;
+            this.newLabels = newLabels;
+        }
+    }
+
     // split graph into induced subgraphs with same color
     // if you pass in arrays of length graph.nv, I write back:
-    //     relabelUp, such that relabelUp[k][v] is the name in
+    //     originalLabels, such that originalLabels[k][v] is the name in
     //          parent graph of vertex v in subgraph k
-    //     relabelDown, such that relabelDown[i] is the name of
+    //     newLabels, such that newLabels[i] is the name of
     //          vertex v in its subgraph
-    public Graph[] splitGraph(Graph graph, int[] colors, int nColors,
-                              int[][] relabelUp, int[] relabelDown) {
+    public Decomposition splitGraph(Graph graph, int nColors) {
         // compute relabeling
+        int[][] relabelUp = new int[nColors][];
+        int[] relabelDown = new int[graph.nv];
+
         int[] subgraphSizes = new int[nColors];
         for (int i = 0; i < graph.nv; i++) {
             relabelDown[i] = subgraphSizes[colors[i]];
@@ -271,10 +283,9 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
 
         // convert edge lists to graphs
         Graph[] subgraphs = new Graph[nColors];
-        for (int color = 0; color < nColors; color++) {
+        for (int color = 0; color < nColors; color++)
             subgraphs[color] = new Graph(subgraphEdges[color]);
-        }
 
-        return subgraphs;
+        return new Decomposition(subgraphs, relabelUp, relabelDown);
     }
 }
