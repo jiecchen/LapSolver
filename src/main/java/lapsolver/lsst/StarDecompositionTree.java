@@ -97,7 +97,7 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
         double[] dist = sptInstance.getDist();
 
         // grow low-cut ball, build bridges from shell
-        int[] ballShell = growBall(graph, dist, colors, 0);
+        int[] ballShell = growBall(graph, dist, 0);
 
         // grow low-cut cones from shell
         int nColors = 1;
@@ -106,7 +106,7 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
             if (colors[aBallShell] != -1)
                 continue; // oops, another cone took this already
 
-            growCone(graph, shortestPathTree, aBallShell, 0.0, colors, nColors);
+            growCone(graph, shortestPathTree, aBallShell, 0.0, nColors);
             bridgeSources.add(aBallShell);
             nColors++;
         }
@@ -139,11 +139,10 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
      *
      * @param graph  the containing graph
      * @param dist   the distance array from a shortest path tree
-     * @param colors the colors of each vertex in graph
      * @param color  the color of the ball (should be 0)
      * @return the set of vertices directly outside the ball (in the shortestPathTree's vertex labeling)
      */
-    public int[] growBall(Graph graph, final double[] dist, int[] colors, int color) {
+    public int[] growBall(Graph graph, final double[] dist, int color) {
         ArrayList<Integer> order = new ArrayList<>(graph.nv);
         for (int i = 0; i < graph.nv; i++) order.add(i, i);
 
@@ -204,7 +203,7 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
     // update colors (write back) with color for low-cut cone
     // should be called with
     public void growCone(Graph graph, Tree shortestPathTree,
-                         int source, double radius, int[] colors, int color) {
+                         int source, double radius, int color) {
         Queue<Integer> bfs = new LinkedList<>();
         bfs.add(source);
         while (!bfs.isEmpty()) {
