@@ -30,7 +30,7 @@ function x = InteriorPoint(A, b, c, lmin, T, y, ep)
 	Sn = diag(sn);
 
 	% v = pcg(An * inv(Sn^2) * An', An * inv(Sn) * ones(2 * m, 1), ep4);
-	v = inv(An * inv(Sn^2) * An')* An * inv(Sn) * ones(2 * m, 1);
+	v = inv(An * inv(Sn^2) * An') * An * inv(Sn) * ones(2 * m, 1);
 
 	x = (inv(S) * ones(m, 1) - inv(S^2) * A' * v) / ((m / sg) + (m / (sg^2)) * b' * v);
 end
