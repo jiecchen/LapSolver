@@ -4,7 +4,9 @@ import lapsolver.Graph;
 import lapsolver.util.NativeLoader;
 
 public class Grid2 implements GraphFactory {
-    static { NativeLoader.loadLibrary("lapsolver"); }
+    static {
+        NativeLoader.loadLibrary("lapsolver");
+    }
 
     private final int width;
     private final int height;
@@ -59,7 +61,6 @@ public class Grid2 implements GraphFactory {
         int[] dst = new int[ne];
         double[] weight = new double[ne];
 
-//        populate(src, dst, weight);
         populateC(src, dst, weight, height, width, verticalWeight);
 
         graph = new Graph(src, dst, weight);
@@ -67,42 +68,16 @@ public class Grid2 implements GraphFactory {
     }
 
     /**
-     * Native C version of populateC below. Not much faster than the JIT version.
+     * Native C call to vectorize the grid construction
      *
-     * @param src    the source vertices
-     * @param dst    the corresponding destinations
-     * @param weight the weight of each edge
-     * @param height same as the corresponding field in the class
-     * @param width same as the corresponding field in the class
+     * @param src            the source vertices
+     * @param dst            the corresponding destinations
+     * @param weight         the weight of each edge
+     * @param height         same as the corresponding field in the class
+     * @param width          same as the corresponding field in the class
      * @param verticalWeight same as the corresponding field in the class
      */
     private native void populateC(int[] src, int[] dst, double[] weight,
                                   int height, int width, int verticalWeight);
 
-    /**
-     * Populate the src, dst, and weight arrays with the grid edges
-     *
-     * @param src    the source vertices
-     * @param dst    the corresponding destinations
-     * @param weight the weight of each edge
-     */
-    private void populate(int[] src, int[] dst, double[] weight) {
-        // populate edge lists
-        int e = 0;
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                int cur = getIdx(i, j);
-                if (i + 1 > 0 && i + 1 < height) { //vertical edge
-                    src[e] = cur;
-                    dst[e] = getIdx(i + 1, j);
-                    weight[e++] = verticalWeight;
-                }
-                if (j + 1 > 0 && j + 1 < width) { //horizontal edge
-                    src[e] = cur;
-                    dst[e] = getIdx(i, j + 1);
-                    weight[e++] = 1;
-                }
-            }
-        }
-    }
 }

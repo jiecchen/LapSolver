@@ -17,10 +17,9 @@ import java.util.PriorityQueue;
 
 
 public class ShortestPathTree {
-    private final double [] dist;
-    private final int [] parent;
-    private final double [] parentWeight;
-    private final Graph graph;
+    private final double[] dist;
+    private final int[] parent;
+    private final double[] parentWeight;
 
     public double[] getDist() {
         return dist;
@@ -31,7 +30,6 @@ public class ShortestPathTree {
     }
 
     public ShortestPathTree(Graph G, int source, int[] ignore) {
-        graph = G;
         dist = new double[G.nv];
         parent = new int[G.nv];
         parentWeight = new double[G.nv];
@@ -78,7 +76,8 @@ public class ShortestPathTree {
 
     /**
      * Construct a shortest-path tree for a given graph and source node
-     * @param G the input graph
+     *
+     * @param G      the input graph
      * @param source the starting node
      */
     public ShortestPathTree(Graph G, int source) {
@@ -86,7 +85,6 @@ public class ShortestPathTree {
     }
 
     /**
-     *
      * @return the shortest path tree computed by the constructor
      */
     public Tree getTree() {

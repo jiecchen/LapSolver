@@ -14,7 +14,7 @@ import lapsolver.Graph;
 import lapsolver.Tree;
 import lapsolver.algorithms.ShortestPathTree;
 
-import java.util.Arrays;
+import java.util.*;
 
 public class StarDecompositionTree implements SpanningTreeStrategy {
     public Graph graph;
@@ -32,9 +32,8 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
         // below some threshold, just return the shortest path tree
         // same threshold as in Yu's code for now
         if (graph.nv < 32) {
-            // TODO(Cyril): play around with this
-            ShortestPathTree sptInstance = new ShortestPathTree(graph, x0);
-            return new EdgeList( sptInstance.getTree() );
+            // TODO(Cyril): play around with this constant (32)
+            return new EdgeList(new ShortestPathTree(graph, x0).getTree());
         }
 
         // contract small edges
@@ -55,7 +54,7 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
         EdgeList[] childTreeEdges = new EdgeList[nColors];
 
         // get trees recursively
-        // TODO(Cyril): parallelize here
+        // TODO(Alex): parallelize here
         for (int color = 0; color < nColors; color++) {
             int xi = relabelDown[color == 0 ? x0 : bridges.v[color-1]];
             childTreeEdges[color] = getLowStretchTree(subgraphs[color], xi);
@@ -99,7 +98,7 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
         double[] dist = sptInstance.getDist();
 
         // grow low-cut ball, build bridges from shell
-        int[] roots = growBall(graph, shortestPathTree, dist, x0, colors, 0);
+        int[] roots = growBall(graph, dist, colors, 0);
         EdgeList bridges = new EdgeList(roots.length);
         for (int i = 0; i < roots.length; i++) {
             bridges.u[i] = shortestPathTree.parent[roots[i]];
@@ -115,15 +114,67 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
         return bridges;
     }
 
-    // update colors (write back) with color for a low-cut ball
-    // return vertices in shell
-    // should be called with color=0 in this algorithm
-    public int[] growBall(Graph graph, Tree shortestPathTree, double[] dist,
-                          int source, int[] colors, int color) {
-        // TODO(Cyril): implement this. might need other parameters
+    /**
+     * @param graph  the containing graph
+     * @param dist   the distance array from a shortest path tree
+     * @param colors the colors of each vertex in graph
+     * @param color  the color of the ball (should be 0)
+     * @return the set of vertices directly outside the ball (in the shortestPathTree's vertex labeling)
+     */
+    public int[] growBall(Graph graph, final double[] dist, int[] colors, int color) {
+        ArrayList<Integer> order = new ArrayList<>(graph.nv);
+        for (int i = 0; i < graph.nv; i++) order.add(i, i);
 
-        colors[source] = color;
-        return new int[0];
+        Collections.sort(order, new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return Double.compare(dist[o1], dist[o2]);
+            }
+        });
+
+        boolean[] inCut = new boolean[graph.nv];
+        int bestCut = 0;
+        double bestValue = Double.POSITIVE_INFINITY;
+
+        double cutValue = 0;
+        for (int i = 0; i < 2 * order.size() / 3; i++) {
+            int u = order.get(i);
+            inCut[u] = true;
+
+            for (int v : graph.nbrs[u])
+                cutValue += ((inCut[v]) ? -1 : 1) * graph.weights[u][v];
+
+            if (i >= order.size() / 3 && cutValue < bestValue) {
+                bestCut = i;
+                bestValue = cutValue;
+            }
+        }
+
+        Arrays.fill(inCut, false);
+        boolean[] inShell = new boolean[graph.nv];
+        for (int i = 0; i <= bestCut; i++) {
+            int u = order.get(i);
+            inCut[u] = true;
+            inShell[u] = false;
+
+            colors[u] = color; // mark the ball
+
+            for (int v : graph.nbrs[u])
+                if (!inCut[v])
+                    inShell[v] = true; // mark the shell
+        }
+
+        // construct the shell
+        ArrayList<Integer> shellList = new ArrayList<>();
+        for (int i = 0; i < inShell.length; i++)
+            if (inShell[i]) shellList.add(i);
+
+        // convert it to a primitive array because lol Java lol
+        int[] shell = new int[shellList.size()];
+        for (int i = 0; i < shell.length; i++)
+            shell[i] = shellList.get(i);
+
+        return shell;
     }
 
     // update colors (write back) with color for low-cut cone
