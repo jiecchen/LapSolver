@@ -113,7 +113,7 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
         }
 
         // build bridge vertices
-        EdgeList bridges = new EdgeList(nColors);
+        EdgeList bridges = new EdgeList(nColors-1);
         for (int i = 0; i < nColors-1; i++) {
             bridges.v[i] = bridgeSources.get(i);
             bridges.u[i] = shortestPathTree.parent[bridges.v[i]];
@@ -227,10 +227,16 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
                               int[][] relabelUp, int[] relabelDown) {
         // compute relabeling
         int[] subgraphSizes = new int[nColors];
+        int[] relabeUpPos = new int[nColors];
         for (int i = 0; i < graph.nv; i++) {
-            relabelUp[colors[i]][subgraphSizes[colors[i]]] = i;
             relabelDown[i] = subgraphSizes[colors[i]];
             subgraphSizes[colors[i]]++;
+        }
+        for (int i = 0; i < nColors; i++) {
+            relabelUp[i] = new int[subgraphSizes[i]];
+        }
+        for (int i = 0; i < graph.nv; i++) {
+            relabelUp[colors[i]][relabeUpPos[colors[i]]++] = i;
         }
 
         // traverse edges once to get subgraph edge counts
@@ -248,7 +254,7 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
         EdgeList[] subgraphEdges = new EdgeList[nColors];
         int[] edgePos = new int[nColors];
         for (int color = 0; color < nColors; color++) {
-            subgraphEdges[color] = new EdgeList(color);
+            subgraphEdges[color] = new EdgeList(subgraphEdgeCounts[color]);
         }
         for (int i = 0; i < parentEdges.ne; i++) {
             int u = parentEdges.u[i], v = parentEdges.v[i];
@@ -259,7 +265,7 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
                 subgraphEdges[color].u[edgePos[color]] = relabelDown[u];
                 subgraphEdges[color].v[edgePos[color]] = relabelDown[v];
                 subgraphEdges[color].weight[edgePos[color]] = weight;
-                edgePos[colors[u]]++;
+                edgePos[color]++;
             }
             double w = parentEdges.weight[i];
         }
