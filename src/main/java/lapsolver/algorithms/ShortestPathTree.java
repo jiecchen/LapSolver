@@ -20,6 +20,7 @@ public class ShortestPathTree {
     private final double[] dist;
     private final int[] parent;
     private final double[] parentWeight;
+    private final double radius;
 
     public double[] getDist() {
         return dist;
@@ -29,10 +30,13 @@ public class ShortestPathTree {
         return parent;
     }
 
+    public double getRadius() { return radius; }
+
     public ShortestPathTree(Graph G, int source, int[] ignore) {
         dist = new double[G.nv];
         parent = new int[G.nv];
         parentWeight = new double[G.nv];
+        double radius = 0.0;
 
         PriorityQueue<Integer> nextNodes = new PriorityQueue<>(G.nv, new Comparator<Integer>() {
             @Override
@@ -68,9 +72,12 @@ public class ShortestPathTree {
                     }
                 }
             }
+
+            if (dist[u] > radius) radius = dist[u];
             settled[u] = true;
         }
 
+        this.radius = radius;
         parent[source] = source; // Follow parent array convention
     }
 
@@ -85,7 +92,8 @@ public class ShortestPathTree {
     }
 
     /**
-     * @return the shortest path tree computed by the constructor
+     * @build the shortest path tree using the parent-weight array
+     * computed by the constructor
      */
     public Tree getTree() {
         return new Tree(parent, parentWeight);
