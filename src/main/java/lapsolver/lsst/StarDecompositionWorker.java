@@ -54,7 +54,7 @@ public class StarDecompositionWorker {// scratch space for cut colorings
 
         // grow low-cut cones from shell
         int nColors = 1;
-        ArrayList<Integer> bridgeSources = new ArrayList<Integer>();
+        ArrayList<Integer> bridgeSources = new ArrayList<>();
         for (int aBallShell : ballShell) {
             if (colors[aBallShell] != -1)
                 continue; // oops, another cone took this already
@@ -76,10 +76,13 @@ public class StarDecompositionWorker {// scratch space for cut colorings
     }
 
     /**
-     * Find a low-cut ball between 1/3 and 2/3 of the total vertices
+     * Find a low-cut ball of radius in the open interval (low, high)
      *
      * @param graph the containing graph
-     * @param dist  the distance array from a shortest path tree
+     * @param dist  a distance array from a shortest path tree
+     *              the position marked 0 is considered the root
+     * @param low the lower bound of the target radius
+     * @param high the upper bound of the target radius
      * @param color the color of the ball (should be 0)
      * @return the set of vertices directly outside the ball (in the shortestPathTree's vertex labeling)
      */
@@ -95,11 +98,11 @@ public class StarDecompositionWorker {// scratch space for cut colorings
         });
 
         boolean[] inCut = new boolean[graph.nv];
-        int bestCut = 0;
+        int bestCut = -1;
         double bestValue = Double.POSITIVE_INFINITY;
 
         double cutValue = 0;
-        for (int i = 0; i < 2 * order.size() / 3; i++) {
+        for (int i = 0; i < order.size() && dist[order.get(i)] < high; i++) {
             int u = order.get(i);
             inCut[u] = true;
 
@@ -108,13 +111,18 @@ public class StarDecompositionWorker {// scratch space for cut colorings
                 cutValue += ((inCut[v]) ? -1 : 1) * graph.weights[u][j];
             }
 
-            if (i >= order.size() / 3 && cutValue < bestValue) {
+            if (dist[u] > low && cutValue < bestValue) {
                 bestCut = i;
                 bestValue = cutValue;
             }
         }
 
+        // If we couldn't find a cut, return null -- replace with exception?
+        if (bestCut == -1) return null;
+
+        // reset the array -- at least we don't have to reallocate memory
         Arrays.fill(inCut, false);
+
         boolean[] inShell = new boolean[graph.nv];
         for (int i = 0; i <= bestCut; i++) {
             int u = order.get(i);
