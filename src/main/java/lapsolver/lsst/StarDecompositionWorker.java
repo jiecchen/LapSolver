@@ -76,8 +76,8 @@ public class StarDecompositionWorker {// scratch space for cut colorings
      * @param color the color of the ball (should be 0)
      * @return the set of vertices directly outside the ball (in the shortestPathTree's vertex labeling)
      */
-    public int[] growBall(Graph graph, final double[] dist, int color) {
-        ArrayList<Integer> order = new ArrayList<Integer>(graph.nv);
+    private int[] growBall(Graph graph, final double[] dist, double low, double high, int color) {
+        ArrayList<Integer> order = new ArrayList<>(graph.nv);
         for (int i = 0; i < graph.nv; i++) order.add(i, i);
 
         Collections.sort(order, new Comparator<Integer>() {
