@@ -53,9 +53,6 @@ public class GraphVertexRemoval {
         /*
             Remove the degree one vertices from the graph. Reorder the vertices
          */
-        int[] answer = new int[N];
-        int answerCnt = 0;
-
         removeDegreeOnes(updatedDegree, eliminated);
         int[] dfsQueue = new int[N];
         int dfsQSize = 0;
@@ -66,7 +63,7 @@ public class GraphVertexRemoval {
 
             int willAdd = 0;
             for (int j = 0; j < graph.deg[v]; j++)
-                if (updatedDegree[graph.nbrs[v][j]] >= 2)
+                if (!eliminated[graph.nbrs[v][j]])
                     willAdd = 1;
             if (willAdd == 1)
                 dfsQueue[dfsQSize++] = v;
@@ -76,8 +73,8 @@ public class GraphVertexRemoval {
         if (dfsQSize == 0)                              // In case the tree graph is a tree
             dfsQueue[dfsQSize++] = auxiliary[0];
 
-        answer = dfsOrdering(dfsQueue, dfsQSize, canUse);
-        answerCnt = auxiliarySize;
+        int[] answer = dfsOrdering(dfsQueue, dfsQSize, canUse);
+        int answerCnt = auxiliarySize;
 
         /*
             Remove the degree two vertices from the graph. Reorder these vertices as well. Concatenate with previous answer.
@@ -87,7 +84,6 @@ public class GraphVertexRemoval {
 
         removeDegreeTwos(updatedDegree, eliminated);
 
-        dfsQueue = new int[auxiliarySize];
         canUse = new int[N];
         for (int i = 0; i < auxiliarySize; i++)
             canUse[auxiliary[i]] = 1;
@@ -112,16 +108,21 @@ public class GraphVertexRemoval {
                     for (int j = 0; j < graph.deg[i]; j++) {
                         int neighbor = graph.nbrs[i][j];
 
-                        if (graph.deg[neighbor] == 2 && !eliminated[neighbor]) {
+                        if (updatedDegree[neighbor] == 2 && !eliminated[neighbor]) {
                             // Eliminate the whole chain neighbor is part of
                             bfsDeg2Path(neighbor, updatedDegree, eliminated);
                         }
                     }
                 }
         } else {
-            // Case II, the given graph is a degree two cycle
+            // Case II, the remaining graph is a degree two cycle
+            int last = 0;
             for (int i = 0; i < N; i++)
                 if (graph.deg[i] == 2)
+                    last = i;
+
+            for (int i = 0; i < N; i++)
+                if (graph.deg[i] == 2 && i != last)
                     auxiliary[auxiliarySize++] = i;
         }
     }
@@ -132,10 +133,27 @@ public class GraphVertexRemoval {
         int right = 0;
 
         queue[right++] = v;
+
+        int outerStart = -1;
+        for (int i = 0; i < 2; i++)
+            if (updatedDegree[graph.nbrs[v][i]] > 2)
+                outerStart = graph.nbrs[v][i];
+
         while (left < right) {
             v = queue[left++];
-
             eliminated[v] = true;
+
+            // I treat the case when the degree two chain is connected to a single vertex, case in which I
+            // don't eliminate the full chain
+            int outerStop = -1;
+            for (int i = 0; i < 2; i++)
+                if (updatedDegree[graph.nbrs[v][i]] > 2)
+                    outerStop = graph.nbrs[v][i];
+
+            // Here is where I break the while in case this vertex is connected to the same vertex as queue[0]
+            if (outerStart == outerStop && v != queue[0])
+                break;
+
             auxiliary[auxiliarySize++] = v;
 
             for (int i = 0; i < graph.deg[v]; i++) {
@@ -162,6 +180,9 @@ public class GraphVertexRemoval {
 
         while (left < right) {
             int v = queue[left++];
+
+            if (left == N) // The whole graph is a tree, don't add all of it to the permutation
+                break;
 
             eliminated[v] = true;
             auxiliary[auxiliarySize++] = v;
