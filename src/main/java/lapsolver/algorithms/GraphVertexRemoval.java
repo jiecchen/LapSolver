@@ -36,8 +36,7 @@ public class GraphVertexRemoval {
         public AnswerPair(int[] elementList, int value) {
             this.n = value;
             this.v = new int[N];
-            for (int i = 0; i < N; i++)
-                this.v[i] = elementList[i];
+            System.arraycopy(elementList, 0, this.v, 0, N);
         }
     }
 
@@ -47,8 +46,7 @@ public class GraphVertexRemoval {
      */
     public AnswerPair solve() {
         int[] updatedDegree = new int[N];
-        for (int i = 0; i < N; i++)
-            updatedDegree[i] = graph.deg[i];
+        System.arraycopy(graph.deg, 0, updatedDegree, 0, N);
 
         boolean[] eliminated = new boolean[N];
 
@@ -68,7 +66,7 @@ public class GraphVertexRemoval {
 
             int willAdd = 0;
             for (int j = 0; j < graph.deg[v]; j++)
-                if (eliminated[graph.nbrs[v][j]] == false)
+                if (updatedDegree[graph.nbrs[v][j]] >= 2)
                     willAdd = 1;
             if (willAdd == 1)
                 dfsQueue[dfsQSize++] = v;
@@ -94,12 +92,10 @@ public class GraphVertexRemoval {
         for (int i = 0; i < auxiliarySize; i++)
             canUse[auxiliary[i]] = 1;
 
-        for (int i = 0; i < auxiliarySize; i++)
-            answer[answerCnt + i] = auxiliary[i];
+        System.arraycopy(auxiliary, 0, answer, answerCnt, auxiliarySize);
         answerCnt += auxiliarySize;
 
-        AnswerPair finalAnswer = new AnswerPair(buildPermutation(answer, answerCnt), answerCnt);
-        return finalAnswer;
+        return new AnswerPair(buildPermutation(answer, answerCnt), answerCnt);
     }
 
     public void removeDegreeTwos(int[] updatedDegree, boolean[] eliminated) {
@@ -121,7 +117,7 @@ public class GraphVertexRemoval {
                     for (int j = 0; j < graph.deg[i]; j++) {
                         int neighbor = graph.nbrs[i][j];
 
-                        if (updatedDegree[neighbor] == 2 && !eliminated[neighbor]) {
+                        if (graph.deg[neighbor] == 2 && !eliminated[neighbor]) {
                             // Eliminate the whole chain neighbor is part of
                             bfsDeg2Path(neighbor, updatedDegree, eliminated);
                         }
@@ -129,14 +125,9 @@ public class GraphVertexRemoval {
                 }
         }
         else {
-            // Case II, the remaining graph is a degree two cycle
-            int last = 0;
+            // Case II, the given graph is a degree two cycle
             for (int i = 0; i < N; i++)
                 if (graph.deg[i] == 2)
-                    last = i;
-
-            for (int i = 0; i < N; i++)
-                if (graph.deg[i] == 2 && i != last)
                     auxiliary[auxiliarySize++] = i;
         }
     }
@@ -147,27 +138,10 @@ public class GraphVertexRemoval {
         int right = 0;
 
         queue[right++] = v;
-
-        int outerStart = -1;
-        for (int i = 0; i < 2; i++)
-            if (updatedDegree[graph.nbrs[v][i]] > 2)
-                outerStart = graph.nbrs[v][i];
-
         while (left < right) {
             v = queue[left++];
+
             eliminated[v] = true;
-
-            // I treat the case when the degree two chain is connected to a single vertex, case in which I
-            // don't eliminate the full chain
-            int outerStop = -1;
-            for (int i = 0; i < 2; i++)
-                if (updatedDegree[graph.nbrs[v][i]] > 2)
-                    outerStop = graph.nbrs[v][i];
-
-            // Here is where I break the while in case this vertex is connected to the same vertex as queue[0]
-            if (outerStart == outerStop && v != queue[0])
-                break;
-
             auxiliary[auxiliarySize++] = v;
 
             for (int i = 0; i < graph.deg[v]; i++) {
@@ -194,9 +168,6 @@ public class GraphVertexRemoval {
 
         while (left < right) {
             int v = queue[left++];
-
-            if (left == N) // The whole graph is a tree, don't add all of it to the permutation
-                break;
 
             eliminated[v] = true;
             auxiliary[auxiliarySize++] = v;
