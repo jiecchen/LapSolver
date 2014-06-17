@@ -19,7 +19,10 @@ import java.util.*;
 
 public class StarDecompositionTree implements SpanningTreeStrategy {
     public Graph graph;
+
+    // scratch space for cut colorings
     private int[] colors;
+    private int nColors;
 
     @Override
     public Tree getTree(Graph graph) {
