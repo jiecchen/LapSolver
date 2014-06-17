@@ -41,9 +41,10 @@ public class StarDecompositionWorker {// scratch space for cut colorings
 
         Tree shortestPathTree = sptInstance.getTree();
         double[] dist = sptInstance.getDist();
+        double radius = sptInstance.getRadius();
 
         // grow low-cut ball, build bridges from shell
-        int[] ballShell = growBall(graph, dist, 0);
+        int[] ballShell = growBall(graph, dist, radius/3, 2*radius/3, 0);
 
         // grow low-cut cones from shell
         int nColors = 1;
