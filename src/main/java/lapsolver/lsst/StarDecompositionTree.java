@@ -40,14 +40,6 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
         return starDecompositionWorker.getColors();
     }
 
-    // if you pass in an array of size nv, I write back:
-    //     colors, where colors[v] = component label of v (0 for ball)
-    // and I'll return an EdgeList with bridge edges (u[i] = x_(i+1), v[i] = y_(i+1))
-    // (StarDecomp in EEST05)
-    public EdgeList makeStarCut(Graph graph, int x0, ShortestPathTree sptInstance) {
-        return starDecompositionWorker.makeStarCut(graph, x0, sptInstance);
-    }
-
     // generate the spanning tree (LowStretchTree in EEST05)
     public EdgeList getLowStretchTree(Graph graph, int x0) {
         // at every level, compute the shortest path tree
@@ -64,7 +56,7 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
         // TODO(Cyril): implement this! change weights to 0 (don't forget both directions)
 
         // obtain star coloring
-        EdgeList bridges = makeStarCut(graph, x0, sptInstance);
+        EdgeList bridges = starDecompositionWorker.makeStarCut(graph, x0, sptInstance);
         int nColors = bridges.ne + 1;
 
         // expand contracted edges
