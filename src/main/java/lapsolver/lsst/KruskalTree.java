@@ -29,7 +29,7 @@ public class KruskalTree implements SpanningTreeStrategy {
         EdgeList inputEdges = new EdgeList(graph);
 
         final double[] weights = inputEdges.weight;
-        List<Integer> indices = new ArrayList<>(weights.length);
+        final List<Integer> indices = new ArrayList<>(weights.length);
         for (int i = 0; i < weights.length; i++) {
             indices.add(i, i);
         }

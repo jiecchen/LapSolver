@@ -47,7 +47,7 @@ public class UnionFind {
 
         // path compression
         while(--find_stack_pos > 0) {
-            find_stack[find_stack_pos] = v;
+            ptr[find_stack[find_stack_pos]] = v;
         }
 
         return v;

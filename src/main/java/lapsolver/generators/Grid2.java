@@ -15,15 +15,22 @@ public class Grid2 implements GraphFactory {
     private Graph graph = null;
 
     /**
+     * Construct a square, evenly-weighted 2-dimensional grid graph
+     *
+     * @param dimension both height and width in vertices
+     */
+    public Grid2(int dimension) {
+        this(dimension, dimension);
+    }
+
+    /**
      * Construct an evenly-weighted 2-dimensional grid graph
      *
      * @param width  width of graph in vertices
      * @param height height of graph in vertices
      */
     public Grid2(int height, int width) {
-        this.width = width;
-        this.height = height;
-        this.verticalWeight = 1;
+        this(height, width, 1);
     }
 
     /**
