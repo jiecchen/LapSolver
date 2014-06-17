@@ -99,11 +99,6 @@ public class GraphVertexRemoval {
     }
 
     public void removeDegreeTwos(int[] updatedDegree, boolean[] eliminated) {
-        int[] cantUse = new int[N];
-        for (int i = 0; i < N; i++)
-            if (updatedDegree[i] > 2)
-                cantUse[i] = 1;
-
         int maxDeg = 0;
         for (int i = 0; i < N; i++)
             if (graph.deg[i] > maxDeg)
@@ -123,8 +118,7 @@ public class GraphVertexRemoval {
                         }
                     }
                 }
-        }
-        else {
+        } else {
             // Case II, the given graph is a degree two cycle
             for (int i = 0; i < N; i++)
                 if (graph.deg[i] == 2)
