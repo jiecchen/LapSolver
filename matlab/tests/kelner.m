@@ -1,7 +1,7 @@
 function x = kelner( a, b, iters )
 %KELNER Run the Kelner algorithm.
     import lapsolver.lsst.SimulPathTree;
-    import lapsolver.solvers.kelner.KelnerSolver;
+    import lapsolver.solvers.KelnerSolver;
     import lapsolver.algorithms.Stretch;
 
     g = a2g(a);
