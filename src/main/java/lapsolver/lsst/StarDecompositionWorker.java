@@ -149,21 +149,31 @@ public class StarDecompositionWorker {// scratch space for cut colorings
         return shell;
     }
 
-    // generate the spanning tree
-
-    // (LowStretchTree in EEST05)
-    // update colors (write back) with color for low-cut cone
-    // should be called with
+    /**
+     * Grows a low-cut cone in the graph.
+     *
+     * @param graph The input graph.
+     * @param shortestPathTree The shortest path tree on the graph's x0.
+     * @param source The center of this cone (x1, x2, ...)
+     * @param radius The radius of this cone.
+     * @param color The color (identifier) of this cone.
+     */
     public void growCone(Graph graph, Tree shortestPathTree,
                          int source, double radius, int color) {
-        Queue<Integer> bfs = new LinkedList<>();
-        bfs.add(source);
-        while (!bfs.isEmpty()) {
-            int u = bfs.poll();
+        // TODO(Cyril): fill in
+        propagateIdeal(shortestPathTree, source, color);
+    }
+
+    // floods the subtree of the shortest path tree rooted at source with color
+    public void propagateIdeal(Tree shortestPathTree, int source, int color) {
+        Queue<Integer> bfsQueue = new LinkedList<>();
+        bfsQueue.add(source);
+        while (!bfsQueue.isEmpty()) {
+            int u = bfsQueue.poll();
             if (colors[u] != -1) continue;
             colors[u] = color;
             for (int v : shortestPathTree.children[u])
-                bfs.add(v);
+                bfsQueue.add(v);
         }
     }
 
