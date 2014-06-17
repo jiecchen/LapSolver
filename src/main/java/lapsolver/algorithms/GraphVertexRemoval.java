@@ -36,8 +36,7 @@ public class GraphVertexRemoval {
         public AnswerPair(int[] elementList, int value) {
             this.n = value;
             this.v = new int[N];
-            for (int i = 0; i < N; i++)
-                this.v[i] = elementList[i];
+            System.arraycopy(elementList, 0, this.v, 0, N);
         }
     }
 
@@ -47,8 +46,7 @@ public class GraphVertexRemoval {
      */
     public AnswerPair solve() {
         int[] updatedDegree = new int[N];
-        for (int i = 0; i < N; i++)
-            updatedDegree[i] = graph.deg[i];
+        System.arraycopy(graph.deg, 0, updatedDegree, 0, N);
 
         boolean[] eliminated = new boolean[N];
 
@@ -94,20 +92,13 @@ public class GraphVertexRemoval {
         for (int i = 0; i < auxiliarySize; i++)
             canUse[auxiliary[i]] = 1;
 
-        for (int i = 0; i < auxiliarySize; i++)
-            answer[answerCnt + i] = auxiliary[i];
+        System.arraycopy(auxiliary, 0, answer, answerCnt, auxiliarySize);
         answerCnt += auxiliarySize;
 
-        AnswerPair finalAnswer = new AnswerPair(buildPermutation(answer, answerCnt), answerCnt);
-        return finalAnswer;
+        return new AnswerPair(buildPermutation(answer, answerCnt), answerCnt);
     }
 
     public void removeDegreeTwos(int[] updatedDegree, boolean[] eliminated) {
-        int[] cantUse = new int[N];
-        for (int i = 0; i < N; i++)
-            if (updatedDegree[i] > 2)
-                cantUse[i] = 1;
-
         int maxDeg = 0;
         for (int i = 0; i < N; i++)
             if (graph.deg[i] > maxDeg)
@@ -127,8 +118,7 @@ public class GraphVertexRemoval {
                         }
                     }
                 }
-        }
-        else {
+        } else {
             // Case II, the given graph is a degree two cycle
             for (int i = 0; i < N; i++)
                 if (graph.deg[i] == 2)
