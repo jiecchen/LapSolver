@@ -34,18 +34,21 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
     // generate the spanning tree
     // (LowStretchTree in EEST05)
     public EdgeList getLowStretchTree(Graph graph, int x0) {
+        // at every level, compute the shortest path tree
+        ShortestPathTree sptInstance = new ShortestPathTree(graph, x0);
+
         // below some threshold, just return the shortest path tree
         // same threshold as in Yu's code for now
         if (graph.nv < 32) {
             // TODO(Cyril): play around with this constant (32)
-            return new EdgeList(new ShortestPathTree(graph, x0).getTree());
+            return new EdgeList(sptInstance.getTree());
         }
 
         // contract small edges
         // TODO(Cyril): implement this! change weights to 0 (don't forget both directions)
 
         // obtain star coloring
-        EdgeList bridges = makeStarCut(graph, x0);
+        EdgeList bridges = makeStarCut(graph, x0, sptInstance);
         int nColors = bridges.ne + 1;
 
         // expand contracted edges
@@ -90,11 +93,10 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
     //     colors, where colors[v] = component label of v (0 for ball)
     // and I'll return an EdgeList with bridge edges (u[i] = x_(i+1), v[i] = y_(i+1))
     // (StarDecomp in EEST05)
-    public EdgeList makeStarCut(Graph graph, int x0) {
+    public EdgeList makeStarCut(Graph graph, int x0, ShortestPathTree sptInstance) {
         // initially nobody's part of the decomposition
         Arrays.fill(colors, -1);
 
-        ShortestPathTree sptInstance = new ShortestPathTree(graph, x0);
         Tree shortestPathTree = sptInstance.getTree();
         double[] dist = sptInstance.getDist();
 
@@ -132,7 +134,7 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
      * @return      an array colored with ball/cone cuts
      */
     public int[] getStarColoring(Graph graph, int x0) {
-        makeStarCut(graph, x0);
+        makeStarCut(graph, x0, new ShortestPathTree(graph, x0));
         return colors;
     }
 
