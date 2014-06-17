@@ -36,6 +36,7 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
      * @return an array colored with ball/cone cuts
      */
     public int[] getStarColoring(Graph graph, int x0) {
+        starDecompositionWorker = new StarDecompositionWorker(graph);
         starDecompositionWorker.makeStarCut(graph, x0, new ShortestPathTree(graph, x0));
         return starDecompositionWorker.getColors();
     }
@@ -45,21 +46,13 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
         // at every level, compute the shortest path tree
         ShortestPathTree sptInstance = new ShortestPathTree(graph, x0);
 
-        // below some threshold, just return the shortest path tree
-        // same threshold as in Yu's code for now
-        if (graph.nv < 32) {
-            // TODO(Cyril): play around with this constant (32)
-            return new EdgeList(sptInstance.getTree());
-        }
-
         // contract small edges
         // TODO(Cyril): implement this! change weights to 0 (don't forget both directions)
 
         // obtain star coloring
         EdgeList bridges = starDecompositionWorker.makeStarCut(graph, x0, sptInstance);
         if (bridges == null) {
-            // TODO(Cyril): finish in a minute
-            return null;
+            return new EdgeList(sptInstance.getTree());
         }
 
         int nColors = bridges.ne + 1;
