@@ -22,7 +22,6 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
 
     // scratch space for cut colorings
     private int[] colors;
-    private int nColors;
 
     @Override
     public Tree getTree(Graph graph) {
