@@ -81,12 +81,13 @@ public class StarDecompositionWorker {// scratch space for cut colorings
      * @param graph the containing graph
      * @param dist  a distance array from a shortest path tree
      *              the position marked 0 is considered the root
-     * @param low the lower bound of the target radius
-     * @param high the upper bound of the target radius
+     * @param minRadius the lower bound of the target radius
+     * @param maxRadius the upper bound of the target radius
      * @param color the color of the ball (should be 0)
      * @return the set of vertices directly outside the ball (in the shortestPathTree's vertex labeling)
      */
-    private int[] growBall(Graph graph, final double[] dist, double low, double high, int color) {
+    private int[] growBall(Graph graph, final double[] dist,
+                           double minRadius, double maxRadius, int color) {
         ArrayList<Integer> order = new ArrayList<>(graph.nv);
         for (int i = 0; i < graph.nv; i++) order.add(i, i);
 
@@ -102,7 +103,7 @@ public class StarDecompositionWorker {// scratch space for cut colorings
         double bestValue = Double.POSITIVE_INFINITY;
 
         double cutValue = 0;
-        for (int i = 0; i < order.size() && dist[order.get(i)] < high; i++) {
+        for (int i = 0; i < order.size() && dist[order.get(i)] < maxRadius; i++) {
             int u = order.get(i);
             inCut[u] = true;
 
@@ -111,7 +112,7 @@ public class StarDecompositionWorker {// scratch space for cut colorings
                 cutValue += ((inCut[v]) ? -1 : 1) * graph.weights[u][j];
             }
 
-            if (dist[u] > low && cutValue < bestValue) {
+            if (dist[u] > minRadius && cutValue < bestValue) {
                 bestCut = i;
                 bestValue = cutValue;
             }
@@ -155,26 +156,46 @@ public class StarDecompositionWorker {// scratch space for cut colorings
      * @param graph The input graph.
      * @param shortestPathTree The shortest path tree on the graph's x0.
      * @param source The center of this cone (x1, x2, ...)
-     * @param radius The radius of this cone.
+     * @param maxRadius The maximum radius of this cone.
      * @param color The color (identifier) of this cone.
      */
     public void growCone(Graph graph, Tree shortestPathTree,
-                         int source, double radius, int color) {
-        // TODO(Cyril): fill in
-        propagateIdeal(shortestPathTree, source, color);
+                         int source, double maxRadius, int color) {
+        // start with the cone
+        int[] ideal = getIdeal(shortestPathTree, source);
+        for (int v : ideal) {
+            colors[v] = color;
+        }
+
     }
 
-    // floods the subtree of the shortest path tree rooted at source with color
-    public void propagateIdeal(Tree shortestPathTree, int source, int color) {
+    /**
+     * Gets a subtree of the rooted shortest path tree.
+     *
+     * @param shortestPathTree The shortest path tree of the graph.
+     * @param source The root of the ideal.
+     * @return The set of vertices in the ideal, in BFS order.
+     */
+    public int[] getIdeal(Tree shortestPathTree, int source) {
         Queue<Integer> bfsQueue = new LinkedList<>();
+        ArrayList<Integer> ideal = new ArrayList<>();
+
+        // do BFS
         bfsQueue.add(source);
         while (!bfsQueue.isEmpty()) {
             int u = bfsQueue.poll();
             if (colors[u] != -1) continue;
-            colors[u] = color;
+            ideal.add(u);
             for (int v : shortestPathTree.children[u])
                 bfsQueue.add(v);
         }
+
+        // convert to primitive array
+        int[] idealArray = new int[ideal.size()];
+        for (int i = 0; i < idealArray.length; i++) {
+            idealArray[i] = ideal.get(i);
+        }
+        return idealArray;
     }
 
     // split graph into induced subgraphs with same color
