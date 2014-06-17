@@ -57,6 +57,11 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
 
         // obtain star coloring
         EdgeList bridges = starDecompositionWorker.makeStarCut(graph, x0, sptInstance);
+        if (bridges == null) {
+            // TODO(Cyril): finish in a minute
+            return null;
+        }
+
         int nColors = bridges.ne + 1;
 
         // expand contracted edges

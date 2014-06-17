@@ -31,10 +31,15 @@ public class StarDecompositionWorker {// scratch space for cut colorings
         }
     }
 
-    // if you pass in an array of size nv, I write back:
-    //     colors, where colors[v] = component label of v (0 for ball)
-    // and I'll return an EdgeList with bridge edges (u[i] = x_(i+1), v[i] = y_(i+1))
-    // (StarDecomp in EEST05)
+    /**
+     *
+     * @param graph The input graph.
+     * @param x0 Central vertex of the cut (source of ball).
+     * @param sptInstance ShortestPathTree object, made by parent with call to
+     *                    constructor on graph and x0.
+     * @return The set of bridge edges going from the ball to the shell vertices.
+     *         Returns null if no ball was found.
+     */
     public EdgeList makeStarCut(Graph graph, int x0, ShortestPathTree sptInstance) {
         // initially nobody's part of the decomposition
         Arrays.fill(colors, -1);
@@ -45,6 +50,7 @@ public class StarDecompositionWorker {// scratch space for cut colorings
 
         // grow low-cut ball, build bridges from shell
         int[] ballShell = growBall(graph, dist, radius/3, 2*radius/3, 0);
+        if (ballShell == null) return null;
 
         // grow low-cut cones from shell
         int nColors = 1;
