@@ -1,7 +1,7 @@
 #include "lapsolver_generators_Grid2.h"
 #include "generators.h"
 
-JNIEXPORT void JNICALL Java_lapsolver_generators_Grid2_populateC
+JNIEXPORT void JNICALL Java_lapsolver_generators_TriangleGrid2_populateC
   (JNIEnv *env, jobject cls,
    jintArray jSrc, jintArray jDst, jdoubleArray jWeight,
    jint jHeight, jint jWidth, jint jVerticalWeight)
@@ -15,7 +15,7 @@ JNIEXPORT void JNICALL Java_lapsolver_generators_Grid2_populateC
     const int width  = (int) jWidth;
     const double verticalWeight = (double) jVerticalWeight;
 
-    grid2(src, dst, weight, height, width, verticalWeight);
+    triangleGrid2(src, dst, weight, height, width);
 
     (*env)->ReleasePrimitiveArrayCritical(env, jSrc, src, 0);
     (*env)->ReleasePrimitiveArrayCritical(env, jDst, dst, 0);

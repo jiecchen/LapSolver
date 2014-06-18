@@ -1,11 +1,11 @@
 #!/bin/bash
 
-N=1000
+N=100
 T=0
 
 for I in `seq 1 $N`
 do
-    TIME=$({ time ./$1; } |& grep real | cut -dm -f2 | cut -ds -f1)
+    TIME=$({ time ./$1; } 2>&1 | grep real | cut -dm -f2 | cut -ds -f1)
     T=$(echo $T+$TIME | bc)
 done
 

@@ -182,8 +182,8 @@ public class StarDecompositionWorker {// scratch space for cut colorings
      * @param maxRadius The maximum radius of this cone.
      * @param color The color (identifier) of this cone.
      */
-    public void growCone(Graph graph, Tree shortestPathTree,
-                         int source, double maxRadius, int color) {
+    private void growCone(Graph graph, Tree shortestPathTree,
+                          int source, double maxRadius, int color) {
 
         // expand node that would cause cone to have smallest radius
         // similar to Dijkstra's algorithm
