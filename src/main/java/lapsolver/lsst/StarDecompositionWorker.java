@@ -60,12 +60,23 @@ public class StarDecompositionWorker {// scratch space for cut colorings
         // grow low-cut cones from shell
         int nColors = 1;
         ArrayList<Integer> bridgeSources = new ArrayList<>();
-        for (int aBallShell : ballShell) {
-            if (colors[aBallShell] != -1)
+        for (int coneCenter : ballShell) {
+            if (colors[coneCenter] != -1)
                 continue; // oops, another cone took this already
 
-            growCone(graph, shortestPathTree, aBallShell, Double.POSITIVE_INFINITY, nColors);
-            bridgeSources.add(aBallShell);
+            // find radius of x_i (coneCenter) in the ideal
+            int[] ideal = getIdeal(shortestPathTree, coneCenter);
+            double eccentricity = 0;
+            for (int u : ideal) {
+                eccentricity = Math.max(eccentricity, dist[u] - dist[coneCenter]);
+            }
+
+            double radiusLimit = 0.5 * (2*radius/3 - eccentricity);
+            if (radiusLimit < 0) radiusLimit = 0;
+
+            // grow the cone
+            growCone(graph, shortestPathTree, coneCenter, radiusLimit, nColors);
+            bridgeSources.add(coneCenter);
             nColors++;
         }
 
