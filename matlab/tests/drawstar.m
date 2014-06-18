@@ -20,6 +20,8 @@ function drawstar(a, x0, xy)
     
     colors = ['r', 'y', 'g', 'b', 'm', 'c'];
     
+    notcut = nnz(c==-1)
+    
     for i = 1:max(c)
         mask = c==i;
         color = colors(1+mod(i,length(colors)));

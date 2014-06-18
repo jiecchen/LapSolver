@@ -15,8 +15,12 @@ public class StarDecompositionWorker {// scratch space for cut colorings
 
     private int[] colors;
 
+    // scratch space for growCone (we need total O(n))
+    private double[] coneCost;
+
     public StarDecompositionWorker(Graph graph) {
         colors = new int[graph.nv];
+        coneCost = new double[graph.nv];
     }
 
     public static class Decomposition {
@@ -43,13 +47,14 @@ public class StarDecompositionWorker {// scratch space for cut colorings
     public EdgeList makeStarCut(Graph graph, int x0, ShortestPathTree sptInstance) {
         // initially nobody's part of the decomposition
         Arrays.fill(colors, -1);
+        Arrays.fill(coneCost, Double.POSITIVE_INFINITY);
 
         Tree shortestPathTree = sptInstance.getTree();
         double[] dist = sptInstance.getDist();
         double radius = sptInstance.getRadius();
 
         // grow low-cut ball, build bridges from shell
-        int[] ballShell = growBall(graph, dist, radius/3, 2*radius/3, 0);
+        int[] ballShell = growBall(graph, shortestPathTree, dist, radius/3, 2*radius/3, 0);
         if (ballShell == null) return null;
 
         // grow low-cut cones from shell
@@ -59,7 +64,7 @@ public class StarDecompositionWorker {// scratch space for cut colorings
             if (colors[aBallShell] != -1)
                 continue; // oops, another cone took this already
 
-            growCone(graph, shortestPathTree, aBallShell, 0.0, nColors);
+            growCone(graph, shortestPathTree, aBallShell, 10.0, nColors);
             bridgeSources.add(aBallShell);
             nColors++;
         }
@@ -79,6 +84,7 @@ public class StarDecompositionWorker {// scratch space for cut colorings
      * Find a low-cut ball of radius in the open interval (low, high)
      *
      * @param graph the containing graph
+     * @param shortestPathTree the shortest path tree of the graph
      * @param dist  a distance array from a shortest path tree
      *              the position marked 0 is considered the root
      * @param minRadius the lower bound of the target radius
@@ -86,7 +92,7 @@ public class StarDecompositionWorker {// scratch space for cut colorings
      * @param color the color of the ball (should be 0)
      * @return the set of vertices directly outside the ball (in the shortestPathTree's vertex labeling)
      */
-    private int[] growBall(Graph graph, final double[] dist,
+    private int[] growBall(Graph graph, Tree shortestPathTree, final double[] dist,
                            double minRadius, double maxRadius, int color) {
         ArrayList<Integer> order = new ArrayList<>(graph.nv);
         for (int i = 0; i < graph.nv; i++) order.add(i, i);
@@ -132,7 +138,7 @@ public class StarDecompositionWorker {// scratch space for cut colorings
 
             colors[u] = color; // mark the ball
 
-            for (int v : graph.nbrs[u])
+            for (int v : shortestPathTree.children[u])
                 if (!inCut[v])
                     inShell[v] = true; // mark the shell
         }
@@ -161,12 +167,58 @@ public class StarDecompositionWorker {// scratch space for cut colorings
      */
     public void growCone(Graph graph, Tree shortestPathTree,
                          int source, double maxRadius, int color) {
-        // start with the cone
-        int[] ideal = getIdeal(shortestPathTree, source);
-        for (int v : ideal) {
-            colors[v] = color;
+
+        // expand node that would cause cone to have smallest radius
+        // similar to Dijkstra's algorithm
+        PriorityQueue<Integer> toGrow = new PriorityQueue<>(graph.nv, new Comparator<Integer>() {
+            public int compare(Integer x, Integer y) {
+                return Double.compare(coneCost[x], coneCost[y]);
+            }
+        });
+
+        // start with ideal as cone of radius 0
+        coneCost[source] = 0;
+        toGrow.add(source);
+
+        ArrayList<int[]> ideals = new ArrayList<>();
+
+        while (!toGrow.isEmpty()) {
+            int next = toGrow.poll();
+            if (colors[next] != -1) continue;
+            if (coneCost[next] > maxRadius) break;
+
+            int[] ideal = getIdeal(shortestPathTree, next);
+            ideals.add(ideal);
+
+            for (int u : ideal) {
+                colors[u] = color;
+                coneCost[u] = coneCost[next];
+                for (int i = 0; i < graph.deg[u]; i++) {
+                    int v = graph.nbrs[u][i];
+                    double w = graph.weights[u][i];
+                    if (colors[v] != -1) continue;
+
+                    // add new vertex with priority equal to radius of cone
+                    // if we were to add it
+                    if (coneCost[v] == Double.POSITIVE_INFINITY) {
+                        toGrow.add(v);
+                    }
+                    coneCost[v] = Math.min(coneCost[v], coneCost[u] + w);
+                }
+            }
         }
 
+        // reset scratch space
+        for (int[] ideal : ideals) {
+            for (int u : ideal) {
+                coneCost[u] = Double.POSITIVE_INFINITY;
+                for (int v : graph.nbrs[u]) {
+                    coneCost[v] = Double.POSITIVE_INFINITY;
+                }
+            }
+        }
+
+        Arrays.fill(coneCost, Double.POSITIVE_INFINITY);
     }
 
     /**

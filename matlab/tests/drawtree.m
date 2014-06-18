@@ -2,6 +2,7 @@ function [t,xy] = drawtree(a, strat, xyin)
 %DRAWTREE Takes a tree strategy, and visualizes the result.
     import lapsolver.lsst.*;
     import lapsolver.algorithms.Stretch;
+    import lapsolver.*;
     
     if nargin < 3
         xy = specxy(a);
