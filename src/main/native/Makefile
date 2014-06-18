@@ -1,4 +1,4 @@
-CC=gcc-4.9
+CC=gcc
 #PROF_FLAGS=-fprofile-generate
 #PROF_FLAGS=-fprofile-use
 TARGET=../resources/lib
