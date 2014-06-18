@@ -1,11 +1,16 @@
-function [ a, xy ] = metricK( n )
-%METRICK Generates a complete graph weighted by Euclidean distance.
+function [a, xy] = metricK(n, p)
+%METRICK Generates a complete graph with L_p metric weights.
+% Default: Euclidean
     a = zeros(n,n);
     xy = rand(n,2);
     
+    if nargin < 2
+        p = 2;
+    end
+    
     for i = 1:n
        for j = 1:i-1
-          a(i,j) = 1 / sqrt( (xy(i,1)-xy(j,1))^2 + (xy(i,2)-xy(j,2))^2 );
+          a(i,j) = ( abs(xy(i,1)-xy(j,1))^p + abs(xy(i,2)-xy(j,2))^p )^(-1/p);
           a(j,i) = a(i,j);
        end
     end
