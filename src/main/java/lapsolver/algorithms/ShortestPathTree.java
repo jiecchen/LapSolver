@@ -19,6 +19,7 @@ import java.util.PriorityQueue;
 public class ShortestPathTree {
     private final double[] dist;
     private final int[] parent;
+    private final int[] parentIndex; // index i such that G.nbrs[u][i] = parent[u]
     private final double[] parentWeight;
     private final double radius;
 
@@ -30,11 +31,16 @@ public class ShortestPathTree {
         return parent;
     }
 
+    public int[] getParentIndex() {
+        return parentIndex;
+    }
+
     public double getRadius() { return radius; }
 
     public ShortestPathTree(Graph G, int source, int[] ignore) {
         dist = new double[G.nv];
         parent = new int[G.nv];
+        parentIndex = new int[G.nv];
         parentWeight = new double[G.nv];
         double radius = 0.0;
 
@@ -66,6 +72,7 @@ public class ShortestPathTree {
                             nextNodes.remove(v);
                             dist[v] = alt;
                             parentWeight[v] = G.weights[u][i];
+                            parentIndex[v] = G.backInd[u][i];
                             parent[v] = u;
                             nextNodes.add(v);
                         }
