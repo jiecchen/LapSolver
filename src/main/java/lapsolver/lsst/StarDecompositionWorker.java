@@ -64,7 +64,7 @@ public class StarDecompositionWorker {// scratch space for cut colorings
             if (colors[aBallShell] != -1)
                 continue; // oops, another cone took this already
 
-            growCone(graph, shortestPathTree, aBallShell, 10.0, nColors);
+            growCone(graph, shortestPathTree, aBallShell, Double.POSITIVE_INFINITY, nColors);
             bridgeSources.add(aBallShell);
             nColors++;
         }
@@ -106,21 +106,27 @@ public class StarDecompositionWorker {// scratch space for cut colorings
 
         boolean[] inCut = new boolean[graph.nv];
         int bestCut = -1;
-        double bestValue = Double.POSITIVE_INFINITY;
+        double bestRatio = Double.POSITIVE_INFINITY;
 
-        double cutValue = 0;
+        double cutCost = 0, cutVolume = 0;
         for (int i = 0; i < order.size() && dist[order.get(i)] < maxRadius; i++) {
             int u = order.get(i);
             inCut[u] = true;
 
             for (int j = 0; j < graph.deg[u]; j++) {
                 int v = graph.nbrs[u][j];
-                cutValue += ((inCut[v]) ? -1 : 1) * graph.weights[u][j];
+                if (inCut[v]) { // this edge is leaving the cut, entering the volume
+                    cutCost -= graph.weights[u][j];
+                    cutVolume += graph.weights[u][j];
+                }
+                else { // this edge is entering the cut
+                    cutCost += graph.weights[u][j];
+                }
             }
 
-            if (dist[u] > minRadius && cutValue < bestValue) {
+            if (dist[u] > minRadius && cutCost/cutVolume < bestRatio) {
                 bestCut = i;
-                bestValue = cutValue;
+                bestRatio = cutCost/cutVolume;
             }
         }
 
