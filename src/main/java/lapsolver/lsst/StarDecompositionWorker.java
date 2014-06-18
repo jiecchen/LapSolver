@@ -186,6 +186,9 @@ public class StarDecompositionWorker {// scratch space for cut colorings
         coneCost[source] = 0;
         toGrow.add(source);
 
+        // cone will be a union of the first cutIndex ideals
+        int cutIndex = 0, bestCut = -1;
+        double cutCost = 0, cutVolume = 0, bestRatio = 0;
         ArrayList<int[]> ideals = new ArrayList<>();
 
         while (!toGrow.isEmpty()) {
@@ -196,8 +199,40 @@ public class StarDecompositionWorker {// scratch space for cut colorings
             int[] ideal = getIdeal(shortestPathTree, next);
             ideals.add(ideal);
 
+            // use colors as scratch space to mark this ideal
+            for (int u : ideal) {
+                colors[u] = -2;
+            }
+
+            // adjust cost and volume
+            for (int u : ideal) {
+                for (int i = 0; i < graph.deg[u]; i++) {
+                    int v = graph.nbrs[u][i];
+                    double w = graph.weights[u][i];
+
+                    if (colors[v] == color) {
+                        // edge is leaving cut, entering volume
+                        cutCost -= w;
+                        cutVolume += w;
+                    }
+                    else if (colors[v] == -2) {
+                        // edge will always be in volume (avoid double-counting)
+                        if (u < v) cutVolume += w/2;
+                    }
+                    else {
+                        // edge is entering cut
+                        cutCost += w;
+                    }
+                }
+            }
+
+            // now mark the ideal as part of the cone
             for (int u : ideal) {
                 colors[u] = color;
+            }
+
+            // expand frontier
+            for (int u : ideal) {
                 coneCost[u] = coneCost[next];
                 for (int i = 0; i < graph.deg[u]; i++) {
                     int v = graph.nbrs[u][i];
@@ -212,19 +247,33 @@ public class StarDecompositionWorker {// scratch space for cut colorings
                     coneCost[v] = Math.min(coneCost[v], coneCost[u] + w);
                 }
             }
+
+            // identify best cut
+            if (bestCut == -1 || cutCost/cutVolume < bestRatio) {
+                bestCut = cutIndex;
+                bestRatio = cutCost/cutVolume;
+            }
+
+            cutIndex++;
+        }
+
+        // uncolor vertices not in best conex
+        for (int i = ideals.size()-1; i > bestCut; i--) {
+            for (int u : ideals.get(i)) {
+                colors[u] = -1;
+            }
         }
 
         // reset scratch space
         for (int[] ideal : ideals) {
             for (int u : ideal) {
+                // reset radius priorities
                 coneCost[u] = Double.POSITIVE_INFINITY;
                 for (int v : graph.nbrs[u]) {
                     coneCost[v] = Double.POSITIVE_INFINITY;
                 }
             }
         }
-
-        Arrays.fill(coneCost, Double.POSITIVE_INFINITY);
     }
 
     /**
