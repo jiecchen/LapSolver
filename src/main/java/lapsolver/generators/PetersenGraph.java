@@ -17,7 +17,7 @@ public class PetersenGraph implements GraphFactory {
      * @param k Determines the shape of the inner star. 1 <= k < n/2
      */
     public PetersenGraph(int n, int k) {
-        if (k < 1 || k >= Math.ceil((double) n / 2))
+        if (k < 1 || 2 * k >= n)
             throw new IllegalArgumentException("k must be in [1, n/2)");
 
         this.n = n;
