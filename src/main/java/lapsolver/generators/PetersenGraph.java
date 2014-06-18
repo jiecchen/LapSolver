@@ -10,7 +10,7 @@ public class PetersenGraph implements GraphFactory {
 
     /**
      * Create a generalized Petersen Graph with parameters n and k.
-     * <p/>
+     *
      * The classic Petersen Graph has n=5, k=2
      *
      * @param n The number of points on the inner star
