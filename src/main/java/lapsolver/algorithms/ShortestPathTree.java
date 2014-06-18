@@ -72,7 +72,7 @@ public class ShortestPathTree {
                             nextNodes.remove(v);
                             dist[v] = alt;
                             parentWeight[v] = G.weights[u][i];
-                            parentIndex[v] = i;
+                            parentIndex[v] = G.backInd[u][i];
                             parent[v] = u;
                             nextNodes.add(v);
                         }

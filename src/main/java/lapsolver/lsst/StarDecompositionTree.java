@@ -60,6 +60,24 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
         // expand contracted edges
         // TODO(Cyril): implement this! change weights back to original
 
+        // TODO(Cyril): uncomment this once we're worthy
+        /*
+        int[] parent = sptInstance.getParent();
+        int[] parentIndex = sptInstance.getParentIndex();
+
+        for (int u : bridges.u) {
+            int pos = u;
+            while (pos != x0) {
+                int ind = parentIndex[pos];
+
+                graph.weights[pos][ind] /= 2;
+                graph.weights[parent[pos]][graph.backInd[pos][ind]] /= 2;
+
+                pos = parent[pos];
+            }
+        }
+        */
+
         // generate induced subgraph
         Decomposition decomp = starDecompositionWorker.splitGraph(graph, nColors);
         EdgeList[] childTreeEdges = new EdgeList[nColors];
