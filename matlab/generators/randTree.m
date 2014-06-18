@@ -23,8 +23,8 @@ function a = randTree( n, excess )
         while x == y || a(x,y) ~= 0
             x = randi(n); y = randi(n);
         end
-        a(x,y) = 1;
-        a(y,x) = 1;
+        a(x,y) = rand(1,1);
+        a(y,x) = rand(1,1);
     end
     
 end
