@@ -148,7 +148,7 @@ public class GraphVertexRemoval {
     }
 
     /*
-        Checks if the graph composed by the remaining vertices is a degree 2 cycle. If it is, return all but one
+        Checks if the graph composed by the remaining vertices is a degree 2 cycle. If it is, return all but two
         of the remaining vertices.
      */
     public AnswerPair checkForDeg2Cycle() {
@@ -170,6 +170,11 @@ public class GraphVertexRemoval {
             if (updatedDeg[i] == 2)
                 last = i;
 
+        for (int i = 0; i < last; i++)
+            if (updatedDeg[i] == 2)
+                last = i;
+
+        // Add the remaining vertices to the vertex pool
         for (int i = 0; i < last; i++)
             if (updatedDeg[i] == 2)
                 ans.v[ans.n++] = i;
