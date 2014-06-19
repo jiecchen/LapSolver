@@ -23,8 +23,6 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
 
     @Override
     public Tree getTree(Graph graph) {
-        // TODO(Cyril): set beta/n contraction threshold her
-        // TODO(Cyril): randomized centre picking strategy?
         starDecompositionWorker = new StarDecompositionWorker(graph);
         EdgeList edges = getTreeEdges(graph, 0);
         Graph treeGraph = GraphUtils.getSubgraphStructure(edges, graph);

@@ -7,16 +7,14 @@ import lapsolver.algorithms.ShortestPathTree;
 
 import java.util.*;
 
-public class StarDecompositionWorker {// scratch space for cut colorings
+public class StarDecompositionWorker {
 
     public int[] getColors() {
         return colors;
     }
 
-    private int[] colors;
-
-    // scratch space for growCone (we need total O(n))
-    private double[] coneCost;
+    private int[] colors; // scratch space for cut colorings
+    private double[] coneCost; // scratch space for growCone (we need total O(n))
 
     public StarDecompositionWorker(Graph graph) {
         colors = new int[graph.nv];
@@ -71,11 +69,8 @@ public class StarDecompositionWorker {// scratch space for cut colorings
                 eccentricity = Math.max(eccentricity, dist[u] - dist[coneCenter]);
             }
 
-            double radiusLimit = 0.5 * (2*radius/3 - eccentricity);
-            if (radiusLimit < 0) radiusLimit = 0;
-
             // grow the cone
-            growCone(graph, shortestPathTree, coneCenter, radiusLimit, nColors);
+            growCone(graph, shortestPathTree, dist, coneCenter, radius/2, nColors);
             bridgeSources.add(coneCenter);
             nColors++;
         }
@@ -178,11 +173,12 @@ public class StarDecompositionWorker {// scratch space for cut colorings
      *
      * @param graph The input graph.
      * @param shortestPathTree The shortest path tree on the graph's x0.
-     * @param source The center of this cone (x1, x2, ...)
-     * @param maxRadius The maximum radius of this cone.
+     * @param dist The array of distances from x0.
+     * @param source The center of this cone (i.e. x_color, color > 0)
+     * @param maxRadius The maximum allowed eccentricity `source` in this cone.
      * @param color The color (identifier) of this cone.
      */
-    private void growCone(Graph graph, Tree shortestPathTree,
+    private void growCone(Graph graph, Tree shortestPathTree, double[] dist,
                           int source, double maxRadius, int color) {
 
         // expand node that would cause cone to have smallest radius
@@ -205,10 +201,19 @@ public class StarDecompositionWorker {// scratch space for cut colorings
         while (!toGrow.isEmpty()) {
             int next = toGrow.poll();
             if (colors[next] != -1) continue;
-            if (coneCost[next] > maxRadius) break;
 
             int[] ideal = getIdeal(shortestPathTree, next);
             ideals.add(ideal);
+
+            if (coneCost[next] > 0) {
+                // see if we've exceeded max allowed radius
+                double newRadius = 0;
+                for (int u : ideal) {
+                    double ecc = coneCost[next] + dist[u] - dist[source];
+                    newRadius = Math.max(newRadius, ecc);
+                }
+                if (newRadius > maxRadius) break;
+            }
 
             // use colors as scratch space to mark this ideal
             for (int u : ideal) {
