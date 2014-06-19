@@ -110,13 +110,13 @@ public class GraphVertexRemoval {
                             chains[newIndex++] = u;
 
                             int v = u;
-                            for (int k = 0; k < 2; k++)
+                            for (int k = 0; k < graph.deg[u]; k++)
                                 if (updatedDeg[graph.nbrs[u][k]] == 2 && removed[graph.nbrs[u][k]] == 0)
                                     v = graph.nbrs[u][k];
 
                             if (v == u) {
                                 // I must exit the chain
-                                for (int k = 0; k < 2; k++)
+                                for (int k = 0; k < graph.deg[u]; k++)
                                     if (updatedDeg[graph.nbrs[u][k]] > 2 && graph.nbrs[u][k] != i)
                                         v = graph.nbrs[u][k];
 

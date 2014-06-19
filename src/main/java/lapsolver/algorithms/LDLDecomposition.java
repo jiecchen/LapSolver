@@ -11,16 +11,13 @@ package lapsolver.algorithms;
 
 import lapsolver.Graph;
 import lapsolver.EdgeList;
-import lapsolver.util.GraphUtils;
-
-import java.util.Arrays;
 
 public class LDLDecomposition {
     public int N;
     public Graph graph;
 
     public double[] X;
-    public int[] updtDeg;
+    public int[] updatedDeg;
 
     public int Lindex = 0;
     public int Dindex = 0;
@@ -43,7 +40,7 @@ public class LDLDecomposition {
         this.graph = new Graph(G);
         this.N = graph.nv;
         this.X = new double[N];
-        this.updtDeg = new int[N];
+        this.updatedDeg = new int[N];
 
         if (N != diagValues.length) {
             throw new Error("Graph and addition matrix have different sizes");
@@ -68,7 +65,7 @@ public class LDLDecomposition {
         updateDiag();
 
         for (int i = 0; i < numSteps; i++)
-            if (updtDeg[i] == 1) {                    // Eliminate the degree one vertices
+            if (updatedDeg[i] == 1) {                       // Eliminate the degree one vertices
                 remDeg1(i);
             }
             else {                                          // Eliminate the degree two vertices
@@ -82,17 +79,33 @@ public class LDLDecomposition {
                 // these variables are initialized to 0 so I don't get any warning
                 int outerStart = 0, outerStop = 0;
 
+                // Pick outerStart and outerStop
                 if (start == stop) {
-                    outerStart = graph.nbrs[start][0];
-                    outerStop = graph.nbrs[start][1];
+                    for (int j = 0; j < graph.deg[start]; j++)
+                        if (graph.nbrs[start][j] >= numSteps) {
+                            outerStart = graph.nbrs[start][j];
+
+                            for (int k = j + 1; k < graph.deg[start]; k++)
+                                if (graph.nbrs[start][k] >= numSteps) {
+                                    outerStop = graph.nbrs[start][k];
+                                    break;
+                                }
+
+                            break;
+                        }
                 }
                 else {
-                    for (int j = 0; j < 2; j++) {
-                        if (graph.nbrs[start][j] >= numSteps)
+                    for (int j = 0; j < graph.deg[start]; j++)
+                        if (graph.nbrs[start][j] >= numSteps) {
                             outerStart = graph.nbrs[start][j];
-                        if (graph.nbrs[stop][j] >= numSteps)
+                            break;
+                        }
+
+                    for (int j = 0; j < graph.deg[stop]; j++)
+                        if (graph.nbrs[stop][j] >= numSteps) {
                             outerStop = graph.nbrs[stop][j];
-                    }
+                            break;
+                        }
                 }
 
                 removeDeg2Chain(start, stop, outerStart, outerStop);
@@ -105,9 +118,11 @@ public class LDLDecomposition {
     }
 
     public void removeDeg2Chain(int start, int stop, int outerStart, int outerStop) {
+//        System.out.println(outerStart + " > " + start + " " + stop + " < " + outerStop);
+
         // outerValue is used to compute the L values of type (outerStart, u)
         double outerValue = -1;
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < graph.deg[start]; i++)
             if (graph.nbrs[start][i] == outerStart)
                 outerValue = -1 / graph.weights[start][i];
 
@@ -123,11 +138,11 @@ public class LDLDecomposition {
             addToEdgeListL(outerStart, u, outerValue);
             addToEdgeListD(outerStart, outerStart, -newValueInLap * outerValue);
 
-            for (int i = 0; i < 2; i++) {
+            for (int i = 0; i < graph.deg[u]; i++) {
                 int v = graph.nbrs[u][i];
                 double weight = 1 / graph.weights[u][i];
 
-                if (v > u && v != outerStart) {
+                if (updatedDeg[v] > 1 && v > u && v != outerStart) {
                     X[v] = X[v] - weight * weight / X[u];
                     addToEdgeListL(v, u, -weight / X[u]);
                     addToEdgeListD(v, v, -weight * weight / X[u]);
@@ -146,7 +161,7 @@ public class LDLDecomposition {
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < graph.deg[i]; j++)
                 X[i] = X[i] + 1 / graph.weights[i][j];
-            updtDeg[i] = graph.deg[i];
+            updatedDeg[i] = graph.deg[i];
 
             addToEdgeListD(i, i, X[i]);
         }
@@ -164,7 +179,7 @@ public class LDLDecomposition {
 
                 X[v] = X[v] - weight * weight / X[u];
 
-                updtDeg[v]--;
+                updatedDeg[v]--;
             }
         }
     }
@@ -219,8 +234,9 @@ public class LDLDecomposition {
 
     // Check if two degree two vertices are neighbors
     public boolean isNeighbor(int u, int v) {
-        if (v == graph.nbrs[u][0] || v == graph.nbrs[u][1])
-            return true;
+        for (int i = 0; i < graph.deg[u]; i++)
+            if (graph.nbrs[u][i] == v)
+                return true;
         return false;
     }
 }

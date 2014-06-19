@@ -1,12 +1,13 @@
 % A crude comparisson tool between the L matrice outputed by
 % Dan's myLDL2 and Serban's LDLDecomposition.
 
-function [a,b] = compLDLmat(graph)
+function compLDLmat(graph)
     import lapsolver.algorithms.*;
     import lapsolver.util.*;
     import lapsolver.*;
 
     n = graph.nv;
+    lagraph = full(lap(g2a(graph)));
     X = rand(1,n);
     
     gvm = GraphVertexRemoval(graph);
@@ -24,5 +25,14 @@ function [a,b] = compLDLmat(graph)
    
     [danL, danD] = myLDL2(la, numRemoved);
     
-    keyboard
+    eps = 10^(-10);
+    valueL = max(max(abs(serbanL - danL)));
+    valueD = max(max(abs(serbanD - danD)));
+    
+    if valueL > eps || valueD > eps
+        fprintf('%d %d WA\n', graph.nv, graph.ne);
+        keyboard
+    else
+        fprintf('%d %d GG\n', graph.nv, graph.ne);
+    end
 end
