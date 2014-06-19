@@ -14,6 +14,7 @@ import lapsolver.EdgeList;
 import lapsolver.Graph;
 import lapsolver.Tree;
 import lapsolver.algorithms.ShortestPathTree;
+import lapsolver.util.GraphUtils;
 
 import static lapsolver.lsst.StarDecompositionWorker.Decomposition;
 
@@ -25,7 +26,9 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
         // TODO(Cyril): set beta/n contraction threshold her
         // TODO(Cyril): randomized centre picking strategy?
         starDecompositionWorker = new StarDecompositionWorker(graph);
-        return new Tree(getLowStretchTree(graph, 0));
+        EdgeList edges = getTreeEdges(graph, 0);
+        Graph treeGraph = GraphUtils.getSubgraphStructure(edges, graph);
+        return new Tree(treeGraph);
     }
 
     /**
@@ -42,7 +45,7 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
     }
 
     // generate the spanning tree (LowStretchTree in EEST05)
-    public EdgeList getLowStretchTree(Graph graph, int x0) {
+    public EdgeList getTreeEdges(Graph graph, int x0) {
         // at every level, compute the shortest path tree
         ShortestPathTree sptInstance = new ShortestPathTree(graph, x0);
 
@@ -60,8 +63,6 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
         // expand contracted edges
         // TODO(Cyril): implement this! change weights back to original
 
-        // TODO(Cyril): uncomment this once we're worthy
-        /*
         int[] parent = sptInstance.getParent();
         int[] parentIndex = sptInstance.getParentIndex();
 
@@ -76,7 +77,6 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
                 pos = parent[pos];
             }
         }
-        */
 
         // generate induced subgraph
         Decomposition decomp = starDecompositionWorker.splitGraph(graph, nColors);
@@ -86,7 +86,7 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
         // TODO(Alex): parallelize here
         for (int color = 0; color < nColors; color++) {
             int xi = decomp.newLabels[color == 0 ? x0 : bridges.v[color - 1]];
-            childTreeEdges[color] = getLowStretchTree(decomp.subgraphs[color], xi);
+            childTreeEdges[color] = getTreeEdges(decomp.subgraphs[color], xi);
         }
 
         // merge results from child calls
