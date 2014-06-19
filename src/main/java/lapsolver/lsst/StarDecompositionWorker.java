@@ -70,7 +70,7 @@ public class StarDecompositionWorker {
             }
 
             // grow the cone
-            growCone(graph, shortestPathTree, dist, coneCenter, radius/2, nColors);
+            growCone(graph, shortestPathTree, dist, coneCenter, 2*radius/3, nColors);
             bridgeSources.add(coneCenter);
             nColors++;
         }
