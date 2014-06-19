@@ -26,22 +26,18 @@ public class GraphUtils {
         int[] dst = new int[M];
         double[] weight = new double[M];
 
-        for (int i = 0; i < N; i++)
-            for (int j = 0; j < g.deg[i]; j++) {
-                if (i < g.nbrs[i][j]) {
-                    int u = i;
-                    int v = g.nbrs[i][j];
-                    double w = g.weights[i][j];
-
+        for (int u = 0; u < N; u++)
+            for (int i = 0; i < g.deg[u]; i++) {
+                int v = g.nbrs[u][i];
+                if (u < v) {
                     src[index] = posInPermutation[u];
                     dst[index] = posInPermutation[v];
-                    weight[index] = w;
+                    weight[index] = g.weights[u][i];
                     index++;
                 }
             }
 
-        Graph ans = new Graph(src, dst, weight);
-        return ans;
+        return new Graph(src, dst, weight);
     }
 
     // given a graph structure that represents a tree, turn it into a rooted tree
