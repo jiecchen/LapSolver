@@ -1,3 +1,10 @@
+/**
+ * @file StarDecompositionTree.java
+ * @author Alex Reinking <alexander.reinking@yale.edu>
+ * @date Fri Jun 13 2014
+ *
+ * Loads native libraries either from the system path, or the containing JAR file.
+ */
 package lapsolver.util;
 
 import java.io.*;
