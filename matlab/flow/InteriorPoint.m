@@ -1,97 +1,119 @@
 function x = InteriorPoint(A, b, c, lmin, T, y, ep)
-% function x = InteriorPoint(A, b, c, lmin, T, y, ep)
-% A is an nxm matrix with linearly independent rows
-% b is a length n vector
-% c is a length m vector
-% lmin > 0 is lower bound on the eigenvalues of AA'
-% T > 0 is an upper bound on the absolute values of coordinates of the feasible dual polytope
-% y is a length n vector satisfying A'y < c
-% 0 < ep < 1
-
 	n = length(b);
 	m = length(c);
 
-	[y, s, sg, z] = FindCentralPath(A, b, c, lmin, T, y);
-	s = c - A' * y;
-	sg = b' * y - z;
+	tic;
+	[y, s, s_gap, z] = FindCentralPath(A, b, c, lmin, T, y);
+	toc;
+	fprintf('FindCentralPath\n');
 
-	while sg > (ep / 3)
-		[y, s, sg, z] = Shift(A, b, c, y, sg, z);
+	tic;
+	while s_gap > (ep / 3)
+		[y, s, s_gap, z] = Shift(A, b, c, y, s_gap, z);
 	end
+	toc;
+	fprintf('Shift\n');
 
-	An = [A, -b * ones(1, m)];
-	sn = [s; sg * ones(m, 1)];
-	smin = min(sn);
-	% T = max(max(y), max(s));
-	U = max([max(max(abs(A))), max(abs(b)), max(abs(c))]);
-	ep4 = min(1, (smin / (T * U)) * (sqrt(m) / n));
+	A_new = [A, -b * ones(1, m)];
+	s_new = [s; s_gap * ones(m, 1)];
+	s_min = min(s_new);
 
-	S = diag(s);
-	Sn = diag(sn);
+	max_A = max(max(abs(A)));
+	max_b = max(abs(b));
+	max_c = max(abs(c));
+	U = max([max_A, max_b, max_c]);
 
-	% v = pcg(An * inv(Sn^2) * An', An * inv(Sn) * ones(2 * m, 1), ep4);
-	v = inv(An * inv(Sn^2) * An') * An * inv(Sn) * ones(2 * m, 1);
+	%%%
+	%% ep4 = min(1, (s_min * sqrt(m)) / (T * U * n));
+	%%%
 
-	x = (inv(S) * ones(m, 1) - inv(S^2) * A' * v) / ((m / sg) + (m / (sg^2)) * b' * v);
+	S_new_inv = sparse(diag(s_new.^(-1)));
+	S_new_inv2 = sparse(diag(s_new.^(-2)));
+
+	%%%
+	%% v = Solve (A_new * S_new_inv2 * A_new') X = A_new * S_new_inv * ones(2*m, 1)
+	%%%
+	tic;
+	v = amdSolver(A_new * S_new_inv2 * A_new', A_new * S_new_inv * ones(2*m, 1));
+	toc;
+	fprintf('amdSolver\n');
+
+
+	S_inv = sparse(diag(s.^(-1)));
+	S_inv2 = sparse(diag(s.^(-2)));
+
+	x = (S_inv * ones(m, 1) - S_inv2 * A' * v) / ((m / s_gap) + (m / s_gap^2) * b' * v);
 end
 
-function [y, s, sg, z] = Shift(A, b, c, y, sg, z)
-
+function [y, s, s_gap, z] = Shift(A, b, c, y, s_gap, z)
 	m = length(c);
 
-	z = z + sg / (10 * sqrt(m));
-	An = [A, -b * ones(1, m)];
-	cn = [c; -z * ones(m, 1)];
+	z = z + (s_gap / (10 * sqrt(m)));
+	A_new = [A, -b * ones(1, m)];
+	c_new = [c; -z * ones(m, 1)];
 
-	y = NewtonStep(An, cn, y);
+	y = NewtonStep(A_new, c_new, y);
 	s = c - A' * y;
-	sg = b' * y - z;
+	s_gap = b' * y - z;
 end
 
-function y = NewtonStep(A, c, y) 
-
+function y = NewtonStep(A, c, y)
 	m = length(c);
 
 	s = c - A' * y;
-	S = diag(s);
-	dy = inv(A * inv(S^2) * A') * -A * inv(S) * ones(m, 1);
+	S_inv = sparse(diag(s.^(-1)));
+	S_inv2 = sparse(diag(s.^(-2)));
+
+	%%%
+	%% dy = Solve (A * S_inv2 * A') X = -A * S_inv * ones(m, 1)
+	%%%
+	dy = amdSolver(A * S_inv2 * A', -A * S_inv * ones(m, 1));
+
 	y = y + dy * (1 - 1 / (20 * (sqrt(m) + 1)));
 end
 
-function [y, s, sg, z] = FindCentralPath(A, b, c, lmin, T, y)
-
+function [y, s, s_gap, z] = FindCentralPath(A, b, c, lmin, T, y)
 	m = length(c);
 
 	s = c - A' * y;
-	S = diag(s);
-	sg = m;
-	bn = A * inv(S) * ones(m, 1);
-	z = bn' * y - sg;
+	S_inv = sparse(diag(s.^(-1)));
+	s_gap = m;
 
-	% T = max(max(y), max(s));
-	bound = (40 / sqrt(lmin)) * T * m * norm(bn);
+	b_new = A * S_inv * ones(m, 1);
+	z = b_new' * y - s_gap;
 
-	while sg < bound
-		[y, s, sg, z] = Unshift(A, b, c, y, sg, z);
+	%% what should the bound be??? 
+	bound =  40 * T * m * norm(b_new) / sqrt(lmin);
+
+	while s_gap < bound
+		[y, s, s_gap, z] = Unshift(A, b_new, c, y, s_gap, z);
 	end
 
-	z = b' * y - (40 / sqrt(lmin)) * T * m * norm(b);
-	sg = b' * y - z;
+	z = b' * y - bound * norm(b) / norm(b_new);
+	s = c - A' * y;
+	s_gap = b' * y - z;
 end
 
-function [y, s, sg, z] = Unshift(A, b, c, y, sg, z)
-
+function [y, s, s_gap, z] = Unshift(A, b_new, c, y, s_gap, z)
 	m = length(c);
 
-	z = z - sg / (10 * sqrt(m));
-	An = [A, -b * ones(1, m)];
-	cn = [c; -z * ones(m, 1)];
+	z = z - s_gap / (10 * sqrt(m)); % changed from sqrt(m) to log(m)
+	A_new = [A, -b_new * ones(1, m)];
+	c_new = [c; -z * ones(m, 1)];
 
-	y = NewtonStep(An, cn, y);
+	y = NewtonStep(A_new, c_new, y);
 
-	s = c - A'* y;
-	sg = b' * y - z;
+	s = c - A' * y;
+	s_gap = b_new' * y - z;
 end
+
+
+
+
+
+
+
+
 
 
 
