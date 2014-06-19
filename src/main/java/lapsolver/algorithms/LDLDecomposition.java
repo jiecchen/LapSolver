@@ -3,8 +3,8 @@
  * @author Serban Stan <serban.stan@yale.edu>
  * @date Tue Jun 10 2014
  *
- * Given a graph and an array x (which represents the diagonal of a matrix), returns the LDL factorization (L and D) after
- * a given number of steps
+ * Given a graph and an array x (which represents the diagonal of a matrix),
+ * returns the LDL factorization (L and D) after a given number of steps
  * */
 
 package lapsolver.algorithms;
@@ -22,14 +22,11 @@ public class LDLDecomposition {
     public int Lindex = 0;
     public int Dindex = 0;
 
-    public class returnPair {
+    public class ReturnPair {
         public EdgeList L;
         public EdgeList D;
 
-        public returnPair() {
-        }
-
-        public returnPair(EdgeList A, EdgeList B) {
+        public ReturnPair(EdgeList A, EdgeList B) {
             this.L = A;
             this.D = B;
         }
@@ -46,14 +43,13 @@ public class LDLDecomposition {
             throw new Error("Graph and addition matrix have different sizes");
         }
 
-        for (int i = 0; i < N; i++)
-            this.X[i] = diagValues[i];
+        System.arraycopy(diagValues, 0, this.X, 0, N);
     }
 
     EdgeList L;
     EdgeList D;
 
-    public returnPair solve(int numSteps) {
+    public ReturnPair solve(int numSteps) {
         L = new EdgeList();
         D = new EdgeList();
 
@@ -113,8 +109,7 @@ public class LDLDecomposition {
                 i = stop;
             }
 
-        returnPair answer = new returnPair(L, D);
-        return answer;
+        return new ReturnPair(L, D);
     }
 
     public void removeDeg2Chain(int start, int stop, int outerStart, int outerStop) {
@@ -167,11 +162,10 @@ public class LDLDecomposition {
         }
     }
 
-    public void remDeg1(int k) {
-        for (int i = 0; i < graph.deg[k]; i++) {
-            int u = k;
-            int v = graph.nbrs[k][i];
-            double weight = 1 / graph.weights[k][i];
+    public void remDeg1(int u) {
+        for (int i = 0; i < graph.deg[u]; i++) {
+            int v = graph.nbrs[u][i];
+            double weight = 1 / graph.weights[u][i];
 
             if (u < v) {
                 addToEdgeListL(v, u, -weight / X[u]);
@@ -185,7 +179,8 @@ public class LDLDecomposition {
     }
 
     public void initL(int steps) {
-        // This number of declared elements is an overestimate for the actual needed memory. It has an extra O(steps) field used.
+        // This number of declared elements is an overestimate for the actual needed memory.
+        // It has an extra O(steps) field used.
         int cnt = N;
         for (int i = 0; i < steps; i++)
             cnt += graph.deg[i] + 1;
