@@ -8,6 +8,7 @@
 
 package lapsolver.util;
 
+import lapsolver.EdgeList;
 import lapsolver.Graph;
 import lapsolver.Tree;
 
@@ -128,5 +129,26 @@ public class GraphUtils {
             }
         }
         return comp;
+    }
+
+    // get a graph from an edge list (for structure) and Graph (for weights)
+    // used by low-stretch spanning trees that modify edge weights
+    public static Graph getSubgraphStructure(EdgeList edges, Graph graph) {
+        Graph graphFromEdges = new Graph(edges);
+
+        // copy weights from old graph
+        int[] adjIndex = new int[graph.nv];
+        for (int u = 0; u < graph.nv; u++) {
+            for (int i = 0; i < graph.deg[u]; i++) {
+                adjIndex[graph.nbrs[u][i]] = i;
+            }
+            for (int i = 0; i < graphFromEdges.deg[u]; i++) {
+                int v = graphFromEdges.nbrs[u][i];
+                double w = graph.weights[u][adjIndex[v]];
+                graphFromEdges.weights[u][i] = w;
+            }
+        }
+
+        return graphFromEdges;
     }
 }

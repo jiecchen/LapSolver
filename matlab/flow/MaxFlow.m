@@ -1,30 +1,82 @@
-function x = MaxFlow(A, s, t, c, m, n, ep)
-	% function x = MaxFlow(A, s, t, c, m, n, ep)
-	% a nxm directed graph A
-	% indices s and t for a max flow from s to t
-	% NOTE: there must be exactly one edge directed into t
-	% length m vector c corresponding to positive integer edge capacities
-	% m := number of edges
-	% n := number of vertices
+function x = MaxFlow(A, s, t, c, ep)
+	% function x = MaxFlow(A, s, t, c, ep)
+	% A is a graph object
+	% s and t are the beginning and end of the flow
+	% c is a length m vector of edge capacities
+	% ep is the additive error
 
-	ut = A(t, :);
-	ut = ut';
-	A(s, :) = [];
-	A(t-1, :) = [];
+	[A, c, n, m, u_t] = ProcessGraph(A, s, t, c);
 
-	U = max(c);
-	epflow = ep^2 / (64 * m^2 * n^2 * U^3);
+	U = max(c(1:m-1));
 
-	Aip = [A, zeros(n-2, m), zeros(n-2, m), eye(n-2, n-2), -1 * eye(n-2, n-2);
-		   eye(m, m), eye(m, m), -1 * eye(m, m), zeros(m, n-2), zeros(m, n-2)];
-	bip = [zeros(n-2, 1); c];
-	p = 4 * U / epflow;
-	cip = [-1 * ut; zeros(m, 1); p * ones(m, 1); p * ones(n-2, 1); p * ones(n-2, 1)];
+	%%%
+	ep_flow = ep^2 / (64 * m^2 * n^2 * U^3);
+	%%%
+	% ep_flow = ep^2;
+
+	A_new = [A, zeros(n, m), zeros(n, m), eye(n), -eye(n);
+		     eye(m), eye(m), -eye(m), zeros(m, n), zeros(m, n)];
+
+	b_new = [zeros(n, 1); c];
+
+	k = 4 * U / ep_flow;
+	height = m + 2 * n;
+	c_new = [-u_t; zeros(m, 1); k * ones(height, 1)];
+
 	lmin = 2;
-	T = 1000; % ???
-	p = -2 * U / epflow;
-	yip = [zeros(n-2, 1); p * ones(m, 1)];
+	%%%
+	T = (n * U + 1) * 4 * U / ep_flow + 1;
+	%%%
+	%T = 23;
 
-	xip = InteriorPoint(Aip, bip, cip, lmin, T, yip, ep);
-	x = xip(1:m);
+	k = -2 * U / ep_flow;
+	y_new = [zeros(n, 1); k * ones(m, 1)];
+
+	x = InteriorPoint(A_new, b_new, c_new, lmin, T, y_new, ep);
+
+	x = x(1:m);
+	x = u_t' * x;
 end
+
+function [A, c, n, m, u_t] = ProcessGraph(A, s, t, c)
+	% makes sure there is exactly one edge leading into t,
+	% changes A into an incidence matrix from a graph object
+	% modifies the capacity vector to accomodate a new edge
+	% removes the rows corresponding to s and t and adjusts n and m
+
+
+	A = a2u(A);
+	n = size(A, 1);
+	m = size(A, 2);
+
+	A = [A, zeros(n, 1)]; % add new column for edge from old t to new
+	m = m + 1;
+	A(t, m) = -1;
+
+	A(s, :) = [];
+	n = n - 1;
+
+	c = [c; m * max(c)]; % final edge into t cannot be min cut
+
+	u_t = zeros(m, 1); % zero vector with one corresponding to edge into t
+	u_t(m, 1) = 1;
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
