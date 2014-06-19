@@ -23,8 +23,9 @@ public class StarDecompositionTree implements SpanningTreeStrategy {
 
     @Override
     public Tree getTree(Graph graph) {
-        starDecompositionWorker = new StarDecompositionWorker(graph);
-        EdgeList edges = getTreeEdges(graph, 0);
+        Graph graphScratch = new Graph(graph);
+        starDecompositionWorker = new StarDecompositionWorker(graphScratch);
+        EdgeList edges = getTreeEdges(graphScratch, 0);
         Graph treeGraph = GraphUtils.getSubgraphStructure(edges, graph);
         return new Tree(treeGraph);
     }
