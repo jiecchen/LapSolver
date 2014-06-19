@@ -39,8 +39,8 @@ public class SimulPathTree implements SpanningTreeStrategy {
 
 
     public Graph edgeGrow(Graph graph) {
-        Logger logger = new Logger();
-        logger.start("SimulPathTree.log");
+//        Logger logger = new Logger();
+//        logger.start("SimulPathTree.log");
 
         ijvI = new int[graph.nv - 1];
         ijvJ = new int[graph.nv - 1];
@@ -66,9 +66,9 @@ public class SimulPathTree implements SpanningTreeStrategy {
             }
         }
 
-        for (int u = 0; u < graph.nv; u++)
-            for (int i = 0; i < graph.deg[u]; i++)
-                logger.write("(" + u + ", " + graph.nbrs[u][i] + "), " + edgeNums[u][i]);
+//        for (int u = 0; u < graph.nv; u++)
+//            for (int i = 0; i < graph.deg[u]; i++)
+//                logger.write("(" + u + ", " + graph.nbrs[u][i] + "), " + edgeNums[u][i]);
 
 
         PriorityQueue<EdgeEvent> pq = new PriorityQueue<>(graph.ne, new Comparator<EdgeEvent>() {
@@ -115,7 +115,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
                 ijvV[ijvInd] = ev.wt;
                 ijvInd++;
 
-                logger.write("(" + ev.u + ", " + ev.v + ", " + ev.wt + ")");
+//                logger.write("(" + ev.u + ", " + ev.v + ", " + ev.wt + ")");
             }
 
             // for each edge attached to u, see if gives a lower time
