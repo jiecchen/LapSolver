@@ -6,7 +6,7 @@
  * An implementation of the primal-dual algorithm of Kelner et al.
  */
 
-package lapsolver.solvers.kelner;
+package lapsolver.solvers;
 
 import java.lang.Math;
 import lapsolver.algorithms.DiscreteSampler;
@@ -16,6 +16,8 @@ import lapsolver.Graph;
 import lapsolver.Tree;
 import lapsolver.EdgeList;
 import lapsolver.lsst.SpanningTreeStrategy;
+import lapsolver.solvers.kelner.DirectFlowTree;
+import lapsolver.solvers.kelner.FlowTree;
 import lapsolver.util.TreeUtils;
 import lapsolver.solvers.TreeSolver;
 

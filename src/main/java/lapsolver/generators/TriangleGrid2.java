@@ -3,7 +3,7 @@ package lapsolver.generators;
 import lapsolver.Graph;
 import lapsolver.util.NativeLoader;
 
-public class Grid2 implements GraphFactory {
+public class TriangleGrid2 implements GraphFactory {
     static {
         NativeLoader.loadLibrary("lapsolver");
     }
@@ -19,7 +19,7 @@ public class Grid2 implements GraphFactory {
      *
      * @param dimension both height and width in vertices
      */
-    public Grid2(int dimension) {
+    public TriangleGrid2(int dimension) {
         this(dimension, dimension);
     }
 
@@ -29,7 +29,7 @@ public class Grid2 implements GraphFactory {
      * @param width  width of graph in vertices
      * @param height height of graph in vertices
      */
-    public Grid2(int height, int width) {
+    public TriangleGrid2(int height, int width) {
         this(height, width, 1);
     }
 
@@ -41,14 +41,10 @@ public class Grid2 implements GraphFactory {
      * @param height         height of graph in vertices
      * @param verticalWeight adjusted weight for vertical edges
      */
-    public Grid2(int height, int width, int verticalWeight) {
+    public TriangleGrid2(int height, int width, int verticalWeight) {
         this.width = width;
         this.height = height;
         this.verticalWeight = verticalWeight;
-    }
-
-    private int getIdx(final int i, final int j) {
-        return width * i + j;
     }
 
     /**
@@ -63,6 +59,7 @@ public class Grid2 implements GraphFactory {
 
         //number of edges, vertices, non-bottom row
         int ne = (2 * width * height) - width - height;
+        ne += (width - 1) * (height - 1);
 
         int[] src = new int[ne];
         int[] dst = new int[ne];

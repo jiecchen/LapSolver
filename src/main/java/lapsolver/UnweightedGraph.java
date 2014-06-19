@@ -141,6 +141,7 @@ public class UnweightedGraph {
 
         for (int i = 0; i < nv; i++) {
             nbrs[i] = new int[deg[i]];
+            backInd[i] = new int[deg[i]];
             tmpdeg[i] = 0;
         }
 

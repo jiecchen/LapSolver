@@ -8,9 +8,9 @@
 
 package lapsolver.util;
 
+import lapsolver.EdgeList;
 import lapsolver.Graph;
 import lapsolver.Tree;
-import lapsolver.EdgeList;
 
 public class TreeUtils {
     // return a permutation of the vertices in BFS order
@@ -43,12 +43,12 @@ public class TreeUtils {
         int stack_pos = 1, order_pos = 0;
 
         // do DFS
-        while(stack_pos > 0) {
+        while (stack_pos > 0) {
             int v = stack[--stack_pos]; // pop
             order[order_pos++] = v;
 
             // push children
-            for(int ch : tree.children[v]) {
+            for (int ch : tree.children[v]) {
                 stack[stack_pos++] = ch;
             }
         }
@@ -63,8 +63,8 @@ public class TreeUtils {
         // at any point, we have order[i]'s parent's depth
         depth[tree.root] = 0;
         for (int i = 1; i < tree.nv; i++) {
-            depth[ order[i] ] = depth[tree.parent[order[i]]]
-                              + tree.weight[order[i]];
+            depth[order[i]] = depth[tree.parent[order[i]]]
+                    + tree.weight[order[i]];
         }
 
         return depth;
@@ -85,7 +85,7 @@ public class TreeUtils {
     }
 
     // EdgeList from a spanning tree: return off-tree edges
-    public static EdgeList getOffTreeEdges (Graph graph, Tree spanningTree) {
+    public static EdgeList getOffTreeEdges(Graph graph, Tree spanningTree) {
         int ne = graph.ne - graph.nv + 1;
 
         int[] u = new int[ne];
@@ -101,7 +101,7 @@ public class TreeUtils {
 
                 // skip tree edges
                 if (spanningTree.parent[i] == dest ||
-                    spanningTree.parent[dest] == i) {
+                        spanningTree.parent[dest] == i) {
                     continue;
                 }
 
@@ -119,9 +119,8 @@ public class TreeUtils {
     }
 
     // turn a tree into an undirected graph
-    public static Graph toGraph (Tree tree) {
-        EdgeList edges = new EdgeList(tree);
-        return new Graph(edges);
+    public static Graph toGraph(Tree tree) {
+        return new Graph(new EdgeList(tree));
     }
 
 }

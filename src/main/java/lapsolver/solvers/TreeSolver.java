@@ -19,25 +19,37 @@ import lapsolver.util.TreeUtils;
 public class TreeSolver implements Solver {
     private Tree tree;
 
-    // initialize solver on a graph (just converts to a tree)
+    /**
+     * initialize solver on a graph (must contain a tree)
+     *
+     * @param graph the graph to solve
+     */
     public void init(Graph graph) {
         tree = GraphUtils.toTree(graph);
     }
 
-    // use a tree directly (not part of interface)
+    /**
+     * use a tree directly (not part of interface)
+     *
+     * @param tree the tree to solve
+     */
     public void init(Tree tree) {
         this.tree = tree;
     }
 
-    // solve for x in Lx = b
-    // calculate potentials down the tree
+    /**
+     * solve for x in Lx = b by calculating potentials down the tree
+     *
+     * @param b the right hand side of the equations
+     * @return x = L^-1 b
+     */
     public double[] solve(double[] b) {
         int[] order = TreeUtils.bfsOrder(tree);
 
         // compute currents from bottom up
         double[] flowTo = new double[tree.nv]; // total flow to v
         double[] flowUp = new double[tree.nv]; // flow along (v -> parent)
-        for (int i = tree.nv-1; i >= 1; i--) {
+        for (int i = tree.nv - 1; i >= 1; i--) {
             int v = order[i];
             int parent = tree.parent[v];
 
@@ -53,7 +65,7 @@ public class TreeSolver implements Solver {
             double len = tree.weight[v];
 
             // V = IR
-            voltages[v] = voltages[parent] - flowUp[v]*len;
+            voltages[v] = voltages[parent] - flowUp[v] * len;
         }
 
         // subtract mean voltage
@@ -69,15 +81,19 @@ public class TreeSolver implements Solver {
         return voltages;
     }
 
-    // just find the feasible flow that gives i_out = b
-    // stored as a parent list
+    /**
+     * find the feasible flow that gives i_out = b
+     *
+     * @param b the right hand side of the equations
+     * @return a parent list of potentials
+     */
     public double[] solveFlow(double[] b) {
         int[] order = TreeUtils.bfsOrder(tree);
 
         // compute currents from bottom up
         double[] flowTo = new double[tree.nv]; // total flow to v
         double[] flowUp = new double[tree.nv]; // flow along (v -> parent)
-        for (int i = tree.nv-1; i >= 1; i--) {
+        for (int i = tree.nv - 1; i >= 1; i--) {
             int v = order[i];
             int parent = tree.parent[v];
 

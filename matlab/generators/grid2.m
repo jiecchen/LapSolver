@@ -1,5 +1,5 @@
-function [a,bdry,xy] = grid2(k1,k2,ani,ani2)
-% function [a,bdry,xy] = grid2(k1,k2,ani,ani2)
+function [a,xy,bdry] = grid2(k1,k2,ani,ani2)
+% function [a,xy,bdry] = grid2(k1,k2,ani,ani2)
 %
 % a k1 x k2 grid graph
 % if k2 is not specified, k2 = k1;
@@ -36,7 +36,6 @@ tm(end,:) = 1;
 tm(:,1) = 1;
 tm(:,end) = 1;
 bdry = (tm(:) ==1);
-
 
 x = kron(ones(1,k2),[1:k1]);
 y = kron([1:k2],ones(1,k1));

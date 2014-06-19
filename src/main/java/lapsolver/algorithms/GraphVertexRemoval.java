@@ -4,7 +4,7 @@
  * @date Mon Jun 9 2014
  *
  * For an input graph graph removes degree one and degree two vertices. Returns a list of the
- * removed vertices.
+ * removed vertices and their number.
  */
 
 package lapsolver.algorithms;
@@ -17,230 +17,221 @@ import java.util.Arrays;
 public class GraphVertexRemoval {
     public Graph graph;
     public int N;
-    public int[] auxiliary;
-    public int auxiliarySize;
 
-    public GraphVertexRemoval(Graph inputG) {
-        this.graph = new Graph(inputG);
-        this.N = graph.nv;
-        this.auxiliary = new int[N];
+    public int[] removed;
+    public int[] updatedDeg;
+
+    public GraphVertexRemoval(Graph g) {
+        this.graph = g;
+        this.N = g.nv;
+        this.removed = new int[N];
+
+        this.updatedDeg = new int[N];
+        for (int i = 0; i < N; i++)
+            updatedDeg[i] = graph.deg[i];
     }
 
-    /*
-        A subclass that helps the solve function return an (array,int) pair
-     */
     public class AnswerPair {
         public int[] v;
         public int n;
 
+        public AnswerPair() {
+        }
+
         public AnswerPair(int[] elementList, int value) {
-            this.n = value;
             this.v = new int[N];
-            for (int i = 0; i < N; i++)
-                this.v[i] = elementList[i];
+            System.arraycopy(elementList, 0, this.v, 0, N);
+
+            this.n = value;
         }
     }
 
-    /*
-        This is the class's main function. It returns an array of elements representing the order of the
-        removed vertices as a prefix of a N size permutation. It also return the size of this prefix.
-     */
     public AnswerPair solve() {
-        int[] updatedDegree = new int[N];
-        for (int i = 0; i < N; i++)
-            updatedDegree[i] = graph.deg[i];
-
-        boolean[] eliminated = new boolean[N];
-
-        /*
-            Remove the degree one vertices from the graph. Reorder the vertices
-         */
-        int[] answer = new int[N];
-        int answerCnt = 0;
-
-        removeDegreeOnes(updatedDegree, eliminated);
-        int[] dfsQueue = new int[N];
-        int dfsQSize = 0;
-
-        int[] canUse = new int[N];
-        for (int i = 0; i < auxiliarySize; i++) {
-            int v = auxiliary[i];
-
-            int willAdd = 0;
-            for (int j = 0; j < graph.deg[v]; j++)
-                if (updatedDegree[graph.nbrs[v][j]] >= 2)
-                    willAdd = 1;
-            if (willAdd == 1)
-                dfsQueue[dfsQSize++] = v;
-
-            canUse[v] = 1;
+        AnswerPair deg1rem = removeDegreeOne();
+        if (deg1rem.n == N) {
+            // The given graph is a tree. Will consider one vertex left behind.
+            deg1rem.v[--deg1rem.n] = 0;
+            return constructPerm(deg1rem);
         }
-        if (dfsQSize == 0)                              // In case the tree graph is a tree
-            dfsQueue[dfsQSize++] = auxiliary[0];
 
-        answer = dfsOrdering(dfsQueue, dfsQSize, canUse);
-        answerCnt = auxiliarySize;
+        AnswerPair deg2rem = removeDegreeTwo();
 
-        /*
-            Remove the degree two vertices from the graph. Reorder these vertices as well. Concatenate with previous answer.
-         */
-        auxiliary = new int[N];
-        auxiliarySize = 0;
+        AnswerPair finalAnswer = new AnswerPair();
+        finalAnswer.n = deg1rem.n + deg2rem.n;
+        finalAnswer.v = new int[N];
 
-        removeDegreeTwos(updatedDegree, eliminated);
+        System.arraycopy(deg1rem.v, 0, finalAnswer.v, 0, deg1rem.n);
+        System.arraycopy(deg2rem.v, 0, finalAnswer.v, deg1rem.n, deg2rem.n);
+        finalAnswer = constructPerm(finalAnswer);
 
-        dfsQueue = new int[auxiliarySize];
-        canUse = new int[N];
-        for (int i = 0; i < auxiliarySize; i++)
-            canUse[auxiliary[i]] = 1;
-
-        for (int i = 0; i < auxiliarySize; i++)
-            answer[answerCnt + i] = auxiliary[i];
-        answerCnt += auxiliarySize;
-
-        AnswerPair finalAnswer = new AnswerPair(buildPermutation(answer, answerCnt), answerCnt);
         return finalAnswer;
     }
 
-    public void removeDegreeTwos(int[] updatedDegree, boolean[] eliminated) {
-        int[] cantUse = new int[N];
-        for (int i = 0; i < N; i++)
-            if (updatedDegree[i] > 2)
-                cantUse[i] = 1;
+    /*
+        Remove the degree two vertices.
+     */
+    public AnswerPair removeDegreeTwo() {
+        AnswerPair isDeg2Cycle = checkForDeg2Cycle();
+        if (isDeg2Cycle.n != -1)
+            return isDeg2Cycle;
 
-        int maxDeg = 0;
-        for (int i = 0; i < N; i++)
-            if (graph.deg[i] > maxDeg)
-                maxDeg = graph.deg[i];
+        // Will eliminate successive chains of degree two
+        AnswerPair deg2rem = removeDeg2Chains();
 
-        if (maxDeg > 2) {
-            // Case I, the given graph is not a degree two cycle
-            for (int i = 0; i < N; i++)
-                if (updatedDegree[i] > 2) {
-                    // Find the start of a degree two chain
-                    for (int j = 0; j < graph.deg[i]; j++) {
-                        int neighbor = graph.nbrs[i][j];
-
-                        if (graph.deg[neighbor] == 2 && !eliminated[neighbor]) {
-                            // Eliminate the whole chain neighbor is part of
-                            bfsDeg2Path(neighbor, updatedDegree, eliminated);
-                        }
-                    }
-                }
-        }
-        else {
-            // Case II, the given graph is a degree two cycle
-            for (int i = 0; i < N; i++)
-                if (graph.deg[i] == 2)
-                    auxiliary[auxiliarySize++] = i;
-        }
-    }
-
-    void bfsDeg2Path(int v, int[] updatedDegree, boolean[] eliminated) {
-        int[] queue = new int[N];
-        int left = 0;
-        int right = 0;
-
-        queue[right++] = v;
-        while (left < right) {
-            v = queue[left++];
-
-            eliminated[v] = true;
-            auxiliary[auxiliarySize++] = v;
-
-            for (int i = 0; i < graph.deg[v]; i++) {
-                int neighbor = graph.nbrs[v][i];
-
-                if (updatedDegree[neighbor] == 2 && !eliminated[neighbor])
-                    queue[right++] = neighbor;
-            }
-        }
-    }
-
-    // Remove all vertices of degrees 0 (in case of a tree) or 1
-    public void removeDegreeOnes(int[] updatedDegree, boolean[] eliminated) {
-        int[] queue = new int[N];
-        boolean[] inQ = new boolean[N];
-        int left = 0;
-        int right = 0;
-
-        for (int i = 0; i < N; i++)
-            if (graph.deg[i] < 2) {
-                queue[right++] = i;
-                inQ[i] = true;
-            }
-
-        while (left < right) {
-            int v = queue[left++];
-
-            eliminated[v] = true;
-            auxiliary[auxiliarySize++] = v;
-
-            for (int i = 0; i < graph.deg[v]; i++) {
-                int neighbor = graph.nbrs[v][i];
-                updatedDegree[neighbor]--;
-
-                if (updatedDegree[neighbor] < 2 && !inQ[neighbor]) {
-                    queue[right++] = neighbor;
-                    inQ[neighbor] = true;
-                }
-            }
-        }
-    }
-
-    public int[] dfsOrder;
-    public int[] dfsVisited;
-    public int dfsCount;
-
-    public int[] dfsOrdering(int[] Q, int count, int[] canUse) {
-        this.dfsOrder = new int[N];
-        this.dfsVisited = new int[N];
-        this.dfsOrder = new int[N];
-
-        for (int index = 0; index < count; index++) {
-            if (dfsVisited[Q[index]] == 0)
-                dfs(Q[index], canUse);
-        }
-
-        // Reverse the DFS ordering vector, so leafs come first
-        for (int i = 0; i < dfsCount / 2; i++) {
-            int aux = dfsOrder[i];
-            dfsOrder[i] = dfsOrder[dfsCount - 1 - i];
-            dfsOrder[dfsCount - 1 - i] = aux;
-        }
-
-        return dfsOrder;
-    }
-
-    public void dfs(int vertex, int[] canUse) {
-        if (dfsVisited[vertex] == 1)
-            return;
-
-        dfsVisited[vertex] = 1;
-        dfsOrder[dfsCount++] = vertex;
-
-        for (int i = 0; i < graph.deg[vertex]; i++)
-            if (canUse[graph.nbrs[vertex][i]] == 1)
-                dfs(graph.nbrs[vertex][i], canUse);
+        return deg2rem;
     }
 
     /*
-        Adds to vertexList the rest of the elements in range [1..N]
+        Removes the degree two vertices from the graph as chains. If both ends of the chain are connected to the same vertex
+        with degree greater than two, then return all the elements of the chain but one end.
      */
-    public int[] buildPermutation(int[] vertexList, int cnt) {
-        int[] ret = new int[N];
-        int[] use = new int[N];
+    public AnswerPair removeDeg2Chains() {
+        int[] unRemovable = new int[N];
+        for (int i = 0; i < N; i++)
+            if (updatedDeg[i] > 2)
+                unRemovable[i] = 1;
 
-        for (int i = 0; i < cnt; i++) {
-            use[vertexList[i]] = 1;
-            ret[i] = vertexList[i];
+        int[] chains = new int[N];
+        int index = 0;
+
+        for (int i = 0; i < N; i++)
+            if (unRemovable[i] == 1) {
+                for (int j = 0; j < graph.deg[i]; j++) {
+                    int u = graph.nbrs[i][j];
+
+                    int newIndex = index;
+                    if (updatedDeg[u] == 2 && removed[u] == 0) {
+                        // This is a degree two chain
+
+                        int outerStart = i;
+
+                        while (updatedDeg[u] == 2) {
+                            removed[u] = 1;
+                            chains[newIndex++] = u;
+
+                            int v = u;
+                            for (int k = 0; k < 2; k++)
+                                if (updatedDeg[graph.nbrs[u][k]] == 2 && removed[graph.nbrs[u][k]] == 0)
+                                    v = graph.nbrs[u][k];
+
+                            if (v == u) {
+                                // I must exit the chain
+                                for (int k = 0; k < 2; k++)
+                                    if (updatedDeg[graph.nbrs[u][k]] > 2 && graph.nbrs[u][k] != i)
+                                        v = graph.nbrs[u][k];
+
+                                if (v == u) {
+                                    // The chain is connected to the same exit vertex
+                                    v = i;
+                                }
+                            }
+
+                            u = v;
+                        }
+
+                        int outerStop = u;
+
+                        if (outerStart == outerStop) {
+                            // If the chain is connected to the same outer vertex at both ends, then one of its
+                            // vertices should be ignored.
+
+                            unRemovable[chains[newIndex - 1]] = 1;
+                            chains[--newIndex] = 0;
+                        }
+
+                        index = newIndex;
+                    }
+                }
+            }
+
+        return (new AnswerPair(chains, index));
+    }
+
+    /*
+        Checks if the graph composed by the remaining vertices is a degree 2 cycle. If it is, return all but two
+        of the remaining vertices.
+     */
+    public AnswerPair checkForDeg2Cycle() {
+        AnswerPair ans = new AnswerPair();
+        ans.n = -1;
+
+        int maxDeg = 0;
+        for (int i = 0; i < N; i++)
+            if (updatedDeg[i] > maxDeg)
+                maxDeg = updatedDeg[i];
+
+        if (maxDeg > 2)
+            return ans;
+
+        ans = new AnswerPair(new int[N], 0);
+
+        int last = 0;
+        for (int i = 0; i < N; i++)
+            if (updatedDeg[i] == 2)
+                last = i;
+
+        for (int i = 0; i < last; i++)
+            if (updatedDeg[i] == 2)
+                last = i;
+
+        // Add the remaining vertices to the vertex pool
+        for (int i = 0; i < last; i++)
+            if (updatedDeg[i] == 2)
+                ans.v[ans.n++] = i;
+
+        return ans;
+    }
+
+    /*
+        Remove the degree one vertices.
+     */
+    public AnswerPair removeDegreeOne() {
+        int[] bfsQueue = new int[N];
+        int bfsQSize = 0;
+        for (int i = 0; i < N; i++)
+            if (graph.deg[i] == 1) {
+                bfsQueue[bfsQSize++] = i;
+                removed[i] = 1;
+            }
+
+        return bfsRemoval(bfsQueue, bfsQSize);
+    }
+
+    public AnswerPair bfsRemoval(int[] bfsQueue, int right) {
+        int left = 0;
+        while (left < right) {
+            int u = bfsQueue[left++];
+
+            for (int i = 0; i < graph.deg[u]; i++) {
+                int v = graph.nbrs[u][i];
+                updatedDeg[v]--;
+
+                if (removed[v] == 0 && updatedDeg[v] == 1) {
+                    bfsQueue[right++] = v;
+                    removed[v] = 1;
+                }
+            }
         }
 
-        int aux = cnt;
+        return (new AnswerPair(bfsQueue, right));
+    }
+
+    public AnswerPair constructPerm(AnswerPair ap) {
+        int[] permutation = new int[N];
+        int[] use = new int[N];
+
+        for (int i = 0; i < ap.n; i++) {
+            use[ap.v[i]] = 1;
+            permutation[i] = ap.v[i];
+        }
+
+        int index = ap.n;
         for (int i = 0; i < N; i++)
             if (use[i] == 0)
-                ret[aux++] = i;
+                permutation[index++] = i;
 
-        return ret;
+        ap.v = permutation.clone();
+
+        return ap;
     }
 }

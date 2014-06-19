@@ -1,13 +1,24 @@
-function [t,xy] = drawtree(a, strat)
+function [t,xy] = drawtree(a, strat, xyin)
 %DRAWTREE Takes a tree strategy, and visualizes the result.
     import lapsolver.lsst.*;
-    xy = specxy(a);
+    import lapsolver.algorithms.Stretch;
+    import lapsolver.*;
+    
+    if nargin < 3
+        xy = specxy(a);
+    else
+        xy = xyin;
+    end
+    
     if nargin < 2
         strat = StarDecompositionTree;
     end
+    
     g = a2g(a);
-    t = strat.getTree(g);
-    t = strat.getLowStretchTree(g,0);
+    tic; t = strat.getTree(g); toc;
+    stres = Stretch.compute(g,t);
+    stretch = stres.total / g.ne
+    
     gplot(g2a(t),xy);
 end
 
