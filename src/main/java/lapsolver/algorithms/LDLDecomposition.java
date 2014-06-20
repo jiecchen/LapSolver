@@ -234,4 +234,22 @@ public class LDLDecomposition {
                 return true;
         return false;
     }
+
+    public int[] applyInvL(int[] x) {
+        int[] answer = new int[N];
+
+        for (int i = 0; i < L.ne; i++)
+            answer[L.v[i]] += L.weight[i] * x[L.v[i]];
+
+        return answer;
+    }
+
+    public int[] applyLtrans(int[] x) {
+        int[] answer = new int[N];
+
+        for (int i = 0; i < L.ne; i++)
+            answer[L.u[i]] -= L.weight[i] * x[L.u[i]];
+
+        return answer;
+    }
 }

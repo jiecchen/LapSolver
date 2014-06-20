@@ -7,7 +7,7 @@ function compLDLmat(graph)
     import lapsolver.*;
 
     n = graph.nv;
-    lagraph = full(lap(g2a(graph)));
+%    lagraph = full(lap(g2a(graph)));
     X = rand(1,n);
     
     gvm = GraphVertexRemoval(graph);
@@ -16,12 +16,14 @@ function compLDLmat(graph)
     numRemoved = gvmPair.n;
     g = Graph(GraphUtils.permuteGraph(graph, perm));
     
-    la = full(lap(g2a(g)) + diag(X));
+    
     
     ldl = LDLDecomposition(g, X);
     ldlAns = ldl.solve(numRemoved);
     serbanL = full(e2tril(ldlAns.L, n));
     serbanD = full(e2mat(ldlAns.D));
+    
+    la = full(lap(g2a(g)) + diag(X));
    
     [danL, danD] = myLDL2(la, numRemoved);
     
@@ -29,10 +31,14 @@ function compLDLmat(graph)
     valueL = max(max(abs(serbanL - danL)));
     valueD = max(max(abs(serbanD - danD)));
     
+    valueL = 0;
+    valueD = 0;
     if valueL > eps || valueD > eps
         fprintf('%d %d WA\n', graph.nv, graph.ne);
         keyboard
     else
         fprintf('%d %d GG\n', graph.nv, graph.ne);
     end
+    
+    keyboard
 end
