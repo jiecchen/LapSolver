@@ -68,10 +68,6 @@ public class Graph {
 
             dst[i] = lower;
             src[i] = upper;
-
-            if (src[i] == dst[i]) {
-                throw new Error("Self-loops are not allowed (" + i + "/" + ne + ").");
-            }
         }
 
         // compute max node auxiliarySize

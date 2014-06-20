@@ -12,6 +12,10 @@ import lapsolver.EdgeList;
 import lapsolver.Graph;
 import lapsolver.Tree;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+
 public class GraphUtils {
     public static Graph permuteGraph(Graph g, int[] perm) {
         int N = perm.length;
@@ -146,5 +150,64 @@ public class GraphUtils {
         }
 
         return graphFromEdges;
+    }
+
+    // exorcises duplicate edges and self-loops from an edge list
+    public static EdgeList sanitizeEdgeList (EdgeList edges) {
+        // make scratch space
+        final EdgeList auxEdges = new EdgeList(edges);
+        ArrayList<Integer> edgeOrder = new ArrayList<>();
+        ArrayList<Integer> edgesToKeep = new ArrayList<>();
+
+        // canonize edges so u[i] < v[i]
+        for (int i = 0; i < auxEdges.ne; i++) {
+            int lo = Math.min(auxEdges.u[i], auxEdges.v[i]);
+            int hi = Math.max(auxEdges.u[i], auxEdges.v[i]);
+            auxEdges.u[i] = lo;
+            auxEdges.v[i] = hi;
+        }
+
+        // sort edges so equivalence classes are adjacent
+        for (int i = 0; i < auxEdges.ne; i++) {
+            edgeOrder.add(i);
+        }
+        Collections.sort(edgeOrder, new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                int cmp = Integer.compare(auxEdges.u[o1], auxEdges.u[o2]);
+                if (cmp != 0) return cmp;
+                return Integer.compare(auxEdges.v[o1], auxEdges.v[o2]);
+            }
+        });
+
+        // combine parallel edges
+        int firstEqualEdge = -1;
+        for (int i = 0; i < auxEdges.ne; i++) {
+            int curIndex = edgeOrder.get(i);
+            if (auxEdges.u[curIndex] == auxEdges.v[curIndex]) continue;
+            if (firstEqualEdge == -1
+                    || auxEdges.u[edgeOrder.get(i-1)] != auxEdges.u[curIndex]
+                    || auxEdges.v[edgeOrder.get(i-1)] != auxEdges.v[curIndex]) {
+                // first time seeing this edge
+                edgesToKeep.add(curIndex);
+                firstEqualEdge = curIndex;
+            }
+            else {
+                // parallel edge
+                auxEdges.weight[firstEqualEdge] = auxEdges.weight[firstEqualEdge] + auxEdges.weight[curIndex];
+            }
+        }
+
+        // keep selected edges
+        EdgeList keptEdges = new EdgeList(edgesToKeep.size());
+        int index = 0;
+        for (int i : edgesToKeep) {
+            keptEdges.u[index] = auxEdges.u[i];
+            keptEdges.v[index] = auxEdges.v[i];
+            keptEdges.weight[index] = auxEdges.weight[i];
+            index++;
+        }
+
+        return keptEdges;
     }
 }
