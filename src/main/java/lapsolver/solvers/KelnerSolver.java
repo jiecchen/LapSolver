@@ -89,7 +89,7 @@ public class KelnerSolver implements Solver {
 
         int e = edgeSampler.next();
         double drop = flowTree.query(e);
-        double resistance = offStretch[e] * offEdges.weight[e];
+        double resistance = (offStretch[e] + 1) * offEdges.weight[e];
 
         flowTree.update(e, -drop / resistance);
     }
