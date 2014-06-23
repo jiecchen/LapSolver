@@ -12,11 +12,33 @@ import lapsolver.EdgeList;
 import lapsolver.Graph;
 import lapsolver.Tree;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.*;
 
 public class GraphUtils {
+    // return a permutation of the vertices in BFS order, starting at source
+    public static int[] bfsOrder(Graph graph, int source) {
+        int[] order = new int[graph.nv];
+        int orderPos = 0;
+        boolean[] visited = new boolean[graph.nv];
+
+        Queue<Integer> bfsQueue = new LinkedList<>();
+        bfsQueue.add(source);
+
+        while (!bfsQueue.isEmpty()) {
+            int u = bfsQueue.poll();
+            if (visited[u]) continue;
+            visited[u] = true;
+
+            order[orderPos++] = u;
+
+            for (int i = 0; i < graph.deg[u]; i++) {
+                bfsQueue.add(graph.nbrs[u][i]);
+            }
+        }
+
+        return order;
+    }
+
     public static Graph permuteGraph(Graph g, int[] perm) {
         int N = perm.length;
         int M = g.ne;
