@@ -88,12 +88,15 @@
                         <id>build-python-bindings</id>
                         <phase>install</phase>
                         <goals>
-                            <goal>java</goal>
+                            <goal>exec</goal>
                         </goals>
 
                         <configuration>
-                            <mainClass>pybinding.BindingGenerator</mainClass>
+                            <executable>java</executable>
                             <arguments>
+                                <argument>-classpath</argument>
+                                <classpath/>
+                                <argument>pybinding.BindingGenerator</argument>
                                 <argument>target/LapSolver.jar</argument>
                                 <argument>lapsolver</argument>
                                 <argument>python</argument>
