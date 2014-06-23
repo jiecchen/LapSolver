@@ -34,37 +34,31 @@ public class KMPSolver {
     public Graph reducedSparsifier;
     private SpanningTreeStrategy treeStrategy;
 
-    // edge data to be preprocessed
-    private EdgeList offEdges;
-    private double[] offStretch;
-    private DiscreteSampler edgeSampler;
-
     // initialize solver with a spanning tree strategy
     public KMPSolver(SpanningTreeStrategy treeStrategy) {
         this.treeStrategy = treeStrategy;
     }
 
-//    public static void main(String[] args) throws MatlabConnectionException, MatlabInvocationException
-//    {
-//        //Create a proxy, which we will use to control MATLAB
-//        MatlabProxyFactory factory = new MatlabProxyFactory();
-//        MatlabProxy proxy = factory.getProxy();
-//
-//        //Display 'hello world' just like when using the demo
-//        proxy.eval("disp('hello world')");
-//
-//        //Disconnect the proxy from MATLAB
-//        proxy.disconnect();
-//    }
+    public static void main(String[] args) throws MatlabConnectionException, MatlabInvocationException
+    {
+        //Create a proxy, which we will use to control MATLAB
+        MatlabProxyFactory factory = new MatlabProxyFactory();
+        MatlabProxy proxy = factory.getProxy();
+
+        //Display 'hello world' just like when using the demo
+        proxy.eval("disp('hello world')");
+
+        //Disconnect the proxy from MATLAB
+        proxy.disconnect();
+    }
 
     // initialize solver on a particular graph, and perform preprocessing
     public double[] solve(Graph graph, double b[], double err) {
         if (graph.nv < 500)
-            return matlabPCG(graph, b, err);
+            return thirdPartySolver(graph, b, err);
 
         // compute LSST, cache BFS order
         spanningTree = treeStrategy.getTree(graph);
-
 
         // build the preconditioner for the given graph
         buildPreconditioner(graph);
@@ -79,44 +73,49 @@ public class KMPSolver {
         LDLDecomposition.ReturnPair ldl = ldlElement.solve(gvr.n);
 
 
-        int[] inversePerm = new int[graph.nv];
+        int[] inversePerm = new int[gvr.n];
         for (int i = 0; i < graph.nv; i++) {
-            inversePerm[reductionPerm[i]] = i;
+            inversePerm[gvr.v[i]] = i;
         }
 
         buildRecursionGraph(graph, gvr, ldl);
 
+        return reconstructSolution(b, err, graph.nv, gvr.n, inversePerm, ldl);
+    }
 
-        // update the value of b (Ax = b) by multiplying it with L^(-1)
-        b = LDLDecomposition.applyInvL(ldl.L, graph.nv, b);
-
+    public double[] thirdPartySolver(Graph graph, double[] b, double err) {
         double[] x = new double[graph.nv];
-        System.arraycopy(b, 0, x, 0, gvr.n);
 
-        x = LDLDecomposition.applyLtransInv(ldl.L, graph.nv, x);
+        return x;
+    }
 
-        double[] smallb = new double[graph.nv - gvr.n];
-        System.arraycopy(b, graph.nv - gvr.n, smallb, 0, smallb.length);
+    public double[] reconstructSolution(double[] b, double err, int currentN, int smallN, int[] invPerm, LDLDecomposition.ReturnPair ldl) {
+        b = LDLDecomposition.applyInvL(ldl.L, currentN, b);
+
+        double[] x = new double[currentN];
+        System.arraycopy(b, 0, x, 0, smallN);
+
+        x = LDLDecomposition.applyLtransInv(ldl.L, currentN, x);
+
+        double[] smallb = new double[currentN - smallN];
+        System.arraycopy(b, currentN - smallN, smallb, 0, smallb.length);
 
         double[] KMPx = solve(reducedSparsifier, smallb, err);
-        System.arraycopy(KMPx, 0, x, graph.nv - gvr.n, KMPx.length);
+        System.arraycopy(KMPx, 0, x, currentN - smallN, KMPx.length);
 
-        double[] answer = new double[graph.nv];
+        double[] answer = new double[currentN];
         for (int i = 0; i < x.length; i++)
-            answer[inversePerm[i]] = x[i];
+            answer[invPerm[i]] = x[i];
 
         return answer;
     }
 
-    public double[] matlabPCG(Graph graph, double[] b, double err) {
-
-    }
-
     public void buildPreconditioner(Graph graph) {
+        EdgeList offEdges;
+
         // get off-tree edges, find stretches
         offEdges = TreeUtils.getOffTreeEdges(graph, spanningTree);
         Stretch.StretchResult stretch = Stretch.compute(graph, spanningTree, offEdges);
-        offStretch = stretch.allStretches;
 
         // blow up graph by 4 * avgstretch * log(n)
         double k = 4. * stretch.total / offEdges.ne * Math.log(graph.nv);
