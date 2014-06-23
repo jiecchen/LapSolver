@@ -32,7 +32,6 @@ public class KMPSolver {
     public Graph reweightedGraph;
     public Graph sparsifier;
     public Graph reducedSparsifier;
-    public int[] reductionPerm, reductionPermInverse;
     private SpanningTreeStrategy treeStrategy;
 
     // edge data to be preprocessed
@@ -45,32 +44,23 @@ public class KMPSolver {
         this.treeStrategy = treeStrategy;
     }
 
-    public static void main(String[] args) throws MatlabConnectionException, MatlabInvocationException
-    {
-        //Create a proxy, which we will use to control MATLAB
-        MatlabProxyFactory factory = new MatlabProxyFactory();
-        MatlabProxy proxy = factory.getProxy();
-
-        //Display 'hello world' just like when using the demo
-        proxy.eval("disp('hello world')");
-
-        //Disconnect the proxy from MATLAB
-        proxy.disconnect();
-    }
+//    public static void main(String[] args) throws MatlabConnectionException, MatlabInvocationException
+//    {
+//        //Create a proxy, which we will use to control MATLAB
+//        MatlabProxyFactory factory = new MatlabProxyFactory();
+//        MatlabProxy proxy = factory.getProxy();
+//
+//        //Display 'hello world' just like when using the demo
+//        proxy.eval("disp('hello world')");
+//
+//        //Disconnect the proxy from MATLAB
+//        proxy.disconnect();
+//    }
 
     // initialize solver on a particular graph, and perform preprocessing
     public double[] solve(Graph graph, double b[], double err) {
-        if (graph.nv < 500) {
-            try {
-                KMPSolver.main(new String[0]);
-            } catch (MatlabConnectionException e) {
-                e.printStackTrace();
-            } catch (MatlabInvocationException e) {
-                e.printStackTrace();
-            }
-
-
-        }
+        if (graph.nv < 500)
+            return matlabPCG(graph, b, err);
 
         // compute LSST, cache BFS order
         spanningTree = treeStrategy.getTree(graph);
@@ -88,10 +78,10 @@ public class KMPSolver {
         LDLDecomposition ldlElement = new LDLDecomposition(permSparsifier, new double[permSparsifier.nv]);
         LDLDecomposition.ReturnPair ldl = ldlElement.solve(gvr.n);
 
-        reductionPerm = gvr.v;
-        reductionPermInverse = new int[graph.nv];
+
+        int[] inversePerm = new int[graph.nv];
         for (int i = 0; i < graph.nv; i++) {
-            reductionPermInverse[reductionPerm[i]] = i;
+            inversePerm[reductionPerm[i]] = i;
         }
 
         buildRecursionGraph(graph, gvr, ldl);
@@ -113,9 +103,13 @@ public class KMPSolver {
 
         double[] answer = new double[graph.nv];
         for (int i = 0; i < x.length; i++)
-            answer[reductionPermInverse[i]] = x[i];
+            answer[inversePerm[i]] = x[i];
 
         return answer;
+    }
+
+    public double[] matlabPCG(Graph graph, double[] b, double err) {
+
     }
 
     public void buildPreconditioner(Graph graph) {
