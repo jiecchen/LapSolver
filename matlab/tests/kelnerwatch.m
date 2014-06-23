@@ -4,7 +4,7 @@ function [x, errs] = kelnerwatch( a, b, iters )
 %errs = kelnerwatch(grid2(100,100),randb(10000),10000);
 %semilogy(errs)
     import lapsolver.lsst.SimulPathTree;
-    import lapsolver.solvers.kelner.KelnerSolver;
+    import lapsolver.solvers.KelnerSolver;
     import lapsolver.algorithms.Stretch;
 
     g = a2g(a);
