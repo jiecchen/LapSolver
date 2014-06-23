@@ -18,6 +18,7 @@ import lapsolver.EdgeList;
 import lapsolver.lsst.SpanningTreeStrategy;
 import lapsolver.solvers.kelner.DirectFlowTree;
 import lapsolver.solvers.kelner.FlowTree;
+import lapsolver.solvers.kelner.KelnerFlowTree;
 import lapsolver.util.TreeUtils;
 import lapsolver.solvers.TreeSolver;
 
@@ -57,7 +58,7 @@ public class KelnerSolver implements Solver {
         treeSolver.init(spanningTree);
 
         // initialize the cycle query data structure
-        flowTree = new DirectFlowTree(spanningTree, offEdges);
+        flowTree = new KelnerFlowTree(spanningTree, offEdges);
     }
 
     // solve for x in Lx = b, with default parameters
@@ -89,7 +90,7 @@ public class KelnerSolver implements Solver {
 
         int e = edgeSampler.next();
         double drop = flowTree.query(e);
-        double resistance = offStretch[e] * offEdges.weight[e];
+        double resistance = (offStretch[e] + 1) * offEdges.weight[e];
 
         flowTree.update(e, -drop / resistance);
     }
