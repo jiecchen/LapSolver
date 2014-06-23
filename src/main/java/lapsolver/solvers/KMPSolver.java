@@ -76,7 +76,13 @@ public class KMPSolver {
 
         x = LDLDecomposition.applyLtransInv(ldl.L, graph.nv, x);
 
-        double[] KMPx = solve(reducedSparsifier);
+        double[] smallb = new double[graph.nv - gvr.n];
+        for (int i = 0; i < graph.nv - gvr.n; i++)
+            smallb[i] = b[i + graph.nv - gvr.n];
+
+        double[] KMPx = solve(reducedSparsifier, smallb, err);
+        for (int i = 0; i < KMPx.length; i++)
+            x[i + graph.nv - gvr.n] = KMPx[i];
 
         double[] answer = new double[graph.nv];
         for (int i = 0; i < x.length; i++)
