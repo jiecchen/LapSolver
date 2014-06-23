@@ -17,14 +17,12 @@ import lapsolver.algorithms.GraphVertexRemoval;
 import lapsolver.algorithms.LDLDecomposition;
 import lapsolver.algorithms.Stretch;
 import lapsolver.lsst.SpanningTreeStrategy;
-import lapsolver.solvers.kelner.DirectFlowTree;
 import lapsolver.util.GraphUtils;
 import lapsolver.util.TreeUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
-public class KMPSolver implements Solver {
+public class KMPSolver {
     public Tree spanningTree;
     public Graph reweightedGraph;
     public Graph sparsifier;
@@ -43,11 +41,51 @@ public class KMPSolver implements Solver {
     }
 
     // initialize solver on a particular graph, and perform preprocessing
-    @Override
-    public void init(Graph graph) {
+    public double[] solve(Graph graph, double b[], double err) {
         // compute LSST, cache BFS order
         spanningTree = treeStrategy.getTree(graph);
 
+
+        // build the preconditioner for the given graph
+        buildPreconditioner(graph);
+
+
+        // create the graph that will be used in the recursion (laplacian given by D matrix)
+        GraphVertexRemoval gvrElement = new GraphVertexRemoval(sparsifier);
+        GraphVertexRemoval.AnswerPair gvr = gvrElement.solve();
+
+        Graph permSparsifier = GraphUtils.permuteGraph(sparsifier, gvr.v);
+        LDLDecomposition ldlElement = new LDLDecomposition(permSparsifier, new double[permSparsifier.nv]);
+        LDLDecomposition.ReturnPair ldl = ldlElement.solve(gvr.n);
+
+        reductionPerm = gvr.v;
+        reductionPermInverse = new int[graph.nv];
+        for (int i = 0; i < graph.nv; i++) {
+            reductionPermInverse[reductionPerm[i]] = i;
+        }
+
+        buildRecursionGraph(graph, gvr, ldl);
+
+
+        // update the value of b (Ax = b) by multiplying it with L^(-1)
+        b = LDLDecomposition.applyInvL(ldl.L, graph.nv, b);
+
+        double[] x = new double[graph.nv];
+        for (int i = 0; i < gvr.n; i++)
+            x[i] = b[i];
+
+        x = LDLDecomposition.applyLtransInv(ldl.L, graph.nv, x);
+
+        double[] KMPx = solve(reducedSparsifier);
+
+        double[] answer = new double[graph.nv];
+        for (int i = 0; i < x.length; i++)
+            answer[reductionPermInverse[i]] = x[i];
+
+        return answer;
+    }
+
+    public void buildPreconditioner(Graph graph) {
         // get off-tree edges, find stretches
         offEdges = TreeUtils.getOffTreeEdges(graph, spanningTree);
         Stretch.StretchResult stretch = Stretch.compute(graph, spanningTree, offEdges);
@@ -67,7 +105,7 @@ public class KMPSolver implements Solver {
         }
 
         // sample the edges
-        ArrayList<Integer> edgesToAdd = new ArrayList<>();
+        ArrayList<Integer> edgesToAdd = new ArrayList<Integer>();
         for (int i = 0; i < offEdges.ne; i++) {
             if (Math.random() < p[i]) {
                 // with probability p[i], take edge i
@@ -98,40 +136,6 @@ public class KMPSolver implements Solver {
 
         // build sparsified graph
         sparsifier = new Graph(sparsifierEdges);
-
-        // get permutation that removes degree 1 and 2 vertices
-        GraphVertexRemoval gvrElement = new GraphVertexRemoval(sparsifier);
-        GraphVertexRemoval.AnswerPair gvr = gvrElement.solve();
-
-        reductionPerm = gvr.v;
-        reductionPermInverse = new int[graph.nv];
-        for (int i = 0; i < graph.nv; i++) {
-            reductionPermInverse[reductionPerm[i]] = i;
-        }
-
-        Graph permSparsifier = GraphUtils.permuteGraph(sparsifier, gvr.v);
-        LDLDecomposition ldlElement = new LDLDecomposition(permSparsifier, new double[permSparsifier.nv]);
-        LDLDecomposition.ReturnPair ldl = ldlElement.solve(gvr.n);
-
-        ldl.D = GraphUtils.sanitizeEdgeList(ldl.D);
-        EdgeList reducedSparsifierEdges = new EdgeList(ldl.D.ne);
-        index = 0;
-        for (int i = 0; i < ldl.D.ne; i++) {
-            if (ldl.D.u[i] >= gvr.n && ldl.D.v[i] >= gvr.n) {
-                reducedSparsifierEdges.u[index] = ldl.D.u[i] - gvr.n;
-                reducedSparsifierEdges.v[index] = ldl.D.v[i] - gvr.n;
-                reducedSparsifierEdges.weight[index] = 1 / ldl.D.weight[i];
-                index++;
-            }
-        }
-
-        reducedSparsifier = new Graph(reducedSparsifierEdges);
-    }
-
-    // solve for x in Lx = b, with default parameters
-    @Override
-    public double[] solve(double[] b) {
-        return null;
     }
 
     // given graph and tree, blow up edge weights (not lengths!!) of tree edges in G
@@ -151,4 +155,19 @@ public class KMPSolver implements Solver {
         return auxGraph;
     }
 
+    public void buildRecursionGraph(Graph graph, GraphVertexRemoval.AnswerPair gvr, LDLDecomposition.ReturnPair ldl) {
+        ldl.D = GraphUtils.sanitizeEdgeList(ldl.D);
+        EdgeList reducedSparsifierEdges = new EdgeList(ldl.D.ne);
+        int index = 0;
+        for (int i = 0; i < ldl.D.ne; i++) {
+            if (ldl.D.u[i] >= gvr.n && ldl.D.v[i] >= gvr.n) {
+                reducedSparsifierEdges.u[index] = ldl.D.u[i] - gvr.n;
+                reducedSparsifierEdges.v[index] = ldl.D.v[i] - gvr.n;
+                reducedSparsifierEdges.weight[index] = 1 / ldl.D.weight[i];
+                index++;
+            }
+        }
+
+        reducedSparsifier = new Graph(reducedSparsifierEdges);
+    }
 }
