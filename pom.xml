@@ -27,11 +27,13 @@
             <version>4.8.2</version>
             <scope>test</scope>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>com.google.guava</groupId>-->
-        <!--<artifactId>guava</artifactId>-->
-        <!--<version>17.0</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>matlabcontrol</groupId>
+            <artifactId>matlabcontrol</artifactId>
+            <version>4.1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/deps/matlabcontrol-4.1.0.jar</systemPath>
+        </dependency>
     </dependencies>
 
     <build>

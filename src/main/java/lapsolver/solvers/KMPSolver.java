@@ -20,6 +20,11 @@ import lapsolver.lsst.SpanningTreeStrategy;
 import lapsolver.util.GraphUtils;
 import lapsolver.util.TreeUtils;
 
+import matlabcontrol.MatlabConnectionException;
+import matlabcontrol.MatlabInvocationException;
+import matlabcontrol.MatlabProxy;
+import matlabcontrol.MatlabProxyFactory;
+
 import java.util.ArrayList;
 
 public class KMPSolver {
@@ -40,8 +45,33 @@ public class KMPSolver {
         this.treeStrategy = treeStrategy;
     }
 
+    public static void main(String[] args) throws MatlabConnectionException, MatlabInvocationException
+    {
+        //Create a proxy, which we will use to control MATLAB
+        MatlabProxyFactory factory = new MatlabProxyFactory();
+        MatlabProxy proxy = factory.getProxy();
+
+        //Display 'hello world' just like when using the demo
+        proxy.eval("disp('hello world')");
+
+        //Disconnect the proxy from MATLAB
+        proxy.disconnect();
+    }
+
     // initialize solver on a particular graph, and perform preprocessing
     public double[] solve(Graph graph, double b[], double err) {
+        if (graph.nv < 500) {
+            try {
+                KMPSolver.main(new String[0]);
+            } catch (MatlabConnectionException e) {
+                e.printStackTrace();
+            } catch (MatlabInvocationException e) {
+                e.printStackTrace();
+            }
+
+
+        }
+
         // compute LSST, cache BFS order
         spanningTree = treeStrategy.getTree(graph);
 
@@ -71,18 +101,15 @@ public class KMPSolver {
         b = LDLDecomposition.applyInvL(ldl.L, graph.nv, b);
 
         double[] x = new double[graph.nv];
-        for (int i = 0; i < gvr.n; i++)
-            x[i] = b[i];
+        System.arraycopy(b, 0, x, 0, gvr.n);
 
         x = LDLDecomposition.applyLtransInv(ldl.L, graph.nv, x);
 
         double[] smallb = new double[graph.nv - gvr.n];
-        for (int i = 0; i < graph.nv - gvr.n; i++)
-            smallb[i] = b[i + graph.nv - gvr.n];
+        System.arraycopy(b, graph.nv - gvr.n, smallb, 0, smallb.length);
 
         double[] KMPx = solve(reducedSparsifier, smallb, err);
-        for (int i = 0; i < KMPx.length; i++)
-            x[i + graph.nv - gvr.n] = KMPx[i];
+        System.arraycopy(KMPx, 0, x, graph.nv - gvr.n, KMPx.length);
 
         double[] answer = new double[graph.nv];
         for (int i = 0; i < x.length; i++)

@@ -244,15 +244,6 @@ public class LDLDecomposition {
         return answer;
     }
 
-    public static double[] applyLtrans(EdgeList L, int N, double[] x) {
-        double[] answer = new double[N];
-
-        for (int i = 0; i < L.ne; i++)
-            answer[L.u[i]] -= L.weight[i] * x[L.u[i]];
-
-        return answer;
-    }
-
     public static double[] applyLtransInv(EdgeList L, int N, double[] x) {
         double[] answer = new double[N];
 
