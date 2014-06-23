@@ -4,6 +4,8 @@ package lapsolver.solvers;
 import lapsolver.Graph;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -15,7 +17,8 @@ import java.util.concurrent.*;
 public class ConcurrentSolver implements Solver {
     private final int nThreads;
     private long timeout;
-    private Solver[] solvers;
+    private ArrayList<Solver> solvers;
+    private Graph graph = null;
 
     public ConcurrentSolver(Solver[] solvers) {
         this(solvers, Integer.MAX_VALUE);
@@ -23,14 +26,13 @@ public class ConcurrentSolver implements Solver {
 
     public ConcurrentSolver(Solver[] solvers, long timeout) {
         this.timeout = timeout;
-        this.solvers = solvers;
+        this.solvers = new ArrayList<>(Arrays.asList(solvers));
         nThreads = Math.min(Runtime.getRuntime().availableProcessors(), solvers.length);
     }
 
     @Override
     public void init(final Graph graph) {
-        for (Solver solver : solvers)
-            solver.init(graph);
+        this.graph = graph;
     }
 
     @Override
@@ -38,14 +40,21 @@ public class ConcurrentSolver implements Solver {
         ExecutorService executor = Executors.newFixedThreadPool(nThreads);
 
         List<Callable<double[]>> runnableSolvers = new ArrayList<>();
+        HashSet<String> names = new HashSet<>();
 
         for (final Solver solver : solvers) {
-            if (solver.getClass() == this.getClass())
-                throw new RuntimeException("Undefined behavior for recursive invocation");
+            int i = 2;
+            String className = solver.getClass().getName();
+            String name = className;
+            while (names.contains(name)) {
+                name = className + i++;
+            }
+            names.add(name);
 
-            runnableSolvers.add(new Callable<double[]>() {
+            runnableSolvers.add(new Task<double[]>(name) {
                 @Override
-                public double[] call() throws Exception {
+                public double[] run() {
+                    solver.init(graph);
                     return solver.solve(b);
                 }
             });
@@ -62,10 +71,29 @@ public class ConcurrentSolver implements Solver {
             e.printStackTrace();
         } catch (TimeoutException e) {
             System.err.println("[error] ConcurrentSolver: none of the solvers finished in time");
-            e.printStackTrace();
         } finally {
-            executor.shutdown();
+            executor.shutdownNow();
         }
         return result;
+    }
+
+    private abstract class Task<V> implements Callable<V> {
+        private String name;
+
+        protected Task(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public V call() throws Exception {
+            V result = run();
+            if (Thread.interrupted()) {
+                return null;
+            }
+            System.out.println("[info] Task " + name + " finished");
+            return result;
+        }
+
+        public abstract V run();
     }
 }
