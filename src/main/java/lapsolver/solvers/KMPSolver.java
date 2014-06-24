@@ -79,8 +79,6 @@ public class KMPSolver {
 
         x = LDLDecomposition.applyLTransInv(ldl.L, x);
 
-        System.out.println(Arrays.toString(applyPerm(inversePerm, x)));
-
         return applyPerm(inversePerm, x);
     }
 
@@ -156,7 +154,7 @@ public class KMPSolver {
             if (ldl.D.u[i] >= gvr.numRemoved && ldl.D.v[i] >= gvr.numRemoved) {
                 reducedSparsifierEdges.u[index] = ldl.D.u[i] - gvr.numRemoved;
                 reducedSparsifierEdges.v[index] = ldl.D.v[i] - gvr.numRemoved;
-                reducedSparsifierEdges.weight[index] = 1 / ldl.D.weight[i];
+                reducedSparsifierEdges.weight[index] =  ldl.D.weight[i];
                 index++;
             }
         }
@@ -199,7 +197,7 @@ public class KMPSolver {
 
         //Send the laplacian to MATLAB
         MatlabTypeConverter processor = new MatlabTypeConverter(proxy);
-        processor.setNumericArray("internal_L", new MatlabNumericArray(lap, null));
+        processor.setNumericArray("internal_Lap", new MatlabNumericArray(lap, null));
         proxy.setVariable("internal_b", b);
 
 
@@ -209,7 +207,7 @@ public class KMPSolver {
         proxy.eval("internal_x = pcg(internal_L, internal_b', internal_tol, internal_maxit);");*/
 
 
-        proxy.eval("internal_x = pinv(internal_L) * internal_b';");
+        proxy.eval("internal_x = pinv(internal_Lap) * internal_b';");
 
         x = (double[]) proxy.getVariable("internal_x");
 
