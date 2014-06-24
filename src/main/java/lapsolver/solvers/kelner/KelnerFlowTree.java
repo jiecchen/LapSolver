@@ -75,7 +75,7 @@ public class KelnerFlowTree extends FlowTree {
         public SeparatorNode[] children;
         public int[] component; // component id for each vertex
         public int[] relabel; // names of vertices in substructures
-        public double[] height; // length of root -> LCA(v, separator) path
+        public double[] height; // length of root -> LCA(permutation, separator) path
 
         // contents at each substructure
         public double drop;

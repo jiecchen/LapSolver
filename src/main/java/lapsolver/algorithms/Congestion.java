@@ -34,7 +34,7 @@ public class Congestion {
         for (int i = 0; i < graph.nv; i++) {
             for (int j = 0; j < graph.nbrs[i].length; j++) {
                 if (i < graph.nbrs[i][j]) { // Do only for ordered pairs
-                    // A (u,v) edge with LCA and Cost
+                    // A (u,permutation) edge with LCA and Cost
 
                     int v = graph.nbrs[i][j];
                     int LCA = lcaEdgeValues[index];

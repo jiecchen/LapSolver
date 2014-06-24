@@ -235,21 +235,28 @@ public class LDLDecomposition {
         return false;
     }
 
-    public static double[] applyInvL(EdgeList L, int N, double[] x) {
-        double[] answer = new double[N];
+    public static double[] applyInvL(EdgeList L, double[] x) {
+        double[] answer = new double[x.length];
 
-        for (int i = 0; i < L.ne; i++)
-            answer[L.v[i]] += L.weight[i] * x[L.v[i]];
+        for (int i = 0; i < L.ne; i++) {
+            if (L.u[i] != L.v[i])
+                answer[L.u[i]] -= L.weight[i] * x[L.v[i]];
+            else
+                answer[L.u[i]] += L.weight[i] * x[L.v[i]];
+        }
 
         return answer;
     }
 
-    public static double[] applyLtransInv(EdgeList L, int N, double[] x) {
-        double[] answer = new double[N];
+    public static double[] applyLTransInv(EdgeList L, double[] x) {
+        double[] answer = new double[x.length];
 
-        for (int i = 0; i < L.ne; i++)
-            answer[L.u[i]] += L.weight[i] * x[L.u[i]];
-
+        for (int i = 0; i < L.ne; i++) {
+            if (L.v[i] != L.u[i])
+                answer[L.v[i]] -= L.weight[i] * x[L.u[i]];
+            else
+                answer[L.v[i]] += L.weight[i] * x[L.u[i]];
+        }
         return answer;
     }
 }

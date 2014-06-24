@@ -16,8 +16,8 @@
  * Matlab must do all the conversions.
  *
  * To create in matlab, use
- * [i,j,v] = find(tril(T))
- * graph = Graph(i-1,j-1,v)
+ * [i,j,permutation] = find(tril(T))
+ * graph = Graph(i-1,j-1,permutation)
  *
  * Elementary methods: dfs, components, bfsWalk, 
  *

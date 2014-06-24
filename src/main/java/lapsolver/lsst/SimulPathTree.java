@@ -104,7 +104,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
             int u = ev.u;
             int v = ev.v;
 
-            // logger.write(ev.time + ", (" + u + ", " + v + "), " + ev.rate);
+            // logger.write(ev.time + ", (" + u + ", " + permutation + "), " + ev.rate);
 
             // if in different comps, add that edge
             if (uf.find(u) != uf.find(v)) {
@@ -115,7 +115,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
                 ijvV[ijvInd] = ev.wt;
                 ijvInd++;
 
-//                logger.write("(" + ev.u + ", " + ev.v + ", " + ev.wt + ")");
+//                logger.write("(" + ev.u + ", " + ev.permutation + ", " + ev.wt + ")");
             }
 
             // for each edge attached to u, see if gives a lower time
@@ -136,7 +136,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
                 }
             }
 
-            // for each edge attached to v, see if gives a lower time
+            // for each edge attached to permutation, see if gives a lower time
             for (int i = 0; i < graph.deg[v]; i++) {
                 int e = edgeNums[v][i];
                 double wt = graph.weights[v][i];
@@ -208,12 +208,12 @@ public class SimulPathTree implements SpanningTreeStrategy {
 	// load up the pq with events for every vertex
 	for (int u = 0; u < graph.nv; u++) {
 	    for (int i = 0; i < graph.deg[u]; i++) {
-		int v = graph.nbrs[u][i];
+		int permutation = graph.nbrs[u][i];
 		double t = rates[u] * graph.weights[u][i];
 
-		if (rates[u] < leastRate[v]) {
-		    leastRate[v] = rates[u];
-		    NodeEvent ev = new NodeEvent(v, u, t, rates[u]);
+		if (rates[u] < leastRate[permutation]) {
+		    leastRate[permutation] = rates[u];
+		    NodeEvent ev = new NodeEvent(permutation, u, t, rates[u]);
 		    pq.add(ev);
 		    
 		}
@@ -229,24 +229,24 @@ public class SimulPathTree implements SpanningTreeStrategy {
 
 	    // for each nbr of u, try to place it
 	    for (int i = 0; i < graph.deg[u]; i++) {
-		int v = graph.nbrs[u][i];
+		int permutation = graph.nbrs[u][i];
 		double wt = graph.weights[u][i];
 
 		// if in different comps, add that edge
-		if (uf.find(u) != uf.find(v)) {
-		    uf.union(u,v);
+		if (uf.find(u) != uf.find(permutation)) {
+		    uf.union(u,permutation);
 
 		    ijvI[ijvInd] = u;
-		    ijvJ[ijvInd] = v;
+		    ijvJ[ijvInd] = permutation;
 		    ijvV[ijvInd] = wt;
 		    ijvInd++;
 		}
 
 		double t = ev.time + ev.rate * wt;
 
-		if (rates[u] < leastRate[v]) {
-		    leastRate[v] = rates[u];
-		    NodeEvent ev2 = new NodeEvent(v, u, t, rates[u]);
+		if (rates[u] < leastRate[permutation]) {
+		    leastRate[permutation] = rates[u];
+		    NodeEvent ev2 = new NodeEvent(permutation, u, t, rates[u]);
 		    pq.add(ev2);
 		}
 

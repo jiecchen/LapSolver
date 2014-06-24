@@ -9,12 +9,12 @@ public class PetersenGraph implements GraphFactory {
     private int k;
 
     /**
-     * Create a generalized Petersen Graph with parameters n and k.
+     * Create a generalized Petersen Graph with parameters numRemoved and k.
      *
-     * The classic Petersen Graph has n=5, k=2
+     * The classic Petersen Graph has numRemoved=5, k=2
      *
      * @param n The number of points on the inner star
-     * @param k Determines the shape of the inner star. 1 <= k < n/2
+     * @param k Determines the shape of the inner star. 1 <= k < numRemoved/2
      */
     public PetersenGraph(int n, int k) {
         if (k < 1 || 2 * k >= n)

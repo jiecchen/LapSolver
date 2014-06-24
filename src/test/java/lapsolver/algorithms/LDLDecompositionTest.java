@@ -27,8 +27,8 @@ public class LDLDecompositionTest {
         }
 
         GraphVertexRemoval.AnswerPair gvmPair = new GraphVertexRemoval(graph).solve();
-        int[] perm = gvmPair.v;
-        int numRemoved = gvmPair.n;
+        int[] perm = gvmPair.permutation;
+        int numRemoved = gvmPair.numRemoved;
 
         Graph g = new Graph(GraphUtils.permuteGraph(graph, perm));
         LDLDecomposition ldl = new LDLDecomposition(g, X);

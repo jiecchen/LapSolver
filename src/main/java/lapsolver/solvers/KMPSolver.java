@@ -12,7 +12,6 @@ package lapsolver.solvers;
 import lapsolver.EdgeList;
 import lapsolver.Graph;
 import lapsolver.Tree;
-import lapsolver.algorithms.DiscreteSampler;
 import lapsolver.algorithms.GraphVertexRemoval;
 import lapsolver.algorithms.LDLDecomposition;
 import lapsolver.algorithms.Stretch;
@@ -20,117 +19,106 @@ import lapsolver.lsst.SpanningTreeStrategy;
 import lapsolver.util.GraphUtils;
 import lapsolver.util.TreeUtils;
 
-import matlabcontrol.MatlabConnectionException;
-import matlabcontrol.MatlabInvocationException;
-import matlabcontrol.MatlabProxy;
-import matlabcontrol.MatlabProxyFactory;
+import matlabcontrol.*;
+import matlabcontrol.extensions.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class KMPSolver {
     public Tree spanningTree;
     public Graph reweightedGraph;
     public Graph sparsifier;
-    public Graph reducedSparsifier;
+    // public Graph reducedSparsifier;
     private SpanningTreeStrategy treeStrategy;
 
-    // initialize solver with a spanning tree strategy
+    public double tol;
+    public int maxit;
+
+    //Initialize solver with a spanning tree strategy
     public KMPSolver(SpanningTreeStrategy treeStrategy) {
         this.treeStrategy = treeStrategy;
     }
 
-    public static void main(String[] args) throws MatlabConnectionException, MatlabInvocationException
-    {
-        //Create a proxy, which we will use to control MATLAB
-        MatlabProxyFactory factory = new MatlabProxyFactory();
-        MatlabProxy proxy = factory.getProxy();
+    //Initialize solver on a particular graph, and perform preprocessing
+    public double[] solve(Graph graph, double b[], double tol, int maxit) {
+        this.tol = tol;
+        this.maxit = maxit;
 
-        //Display 'hello world' just like when using the demo
-        proxy.eval("disp('hello world')");
-
-        //Disconnect the proxy from MATLAB
-        proxy.disconnect();
-    }
-
-    // initialize solver on a particular graph, and perform preprocessing
-    public double[] solve(Graph graph, double b[], double err) {
         if (graph.nv < 500)
-            return thirdPartySolver(graph, b, err);
+            return runMain(graph, b);
 
-        // compute LSST, cache BFS order
+        //Compute LSST, cache BFS order
         spanningTree = treeStrategy.getTree(graph);
 
-        // build the preconditioner for the given graph
+        //Build the preconditioner for the given graph
         buildPreconditioner(graph);
 
 
-        // create the graph that will be used in the recursion (laplacian given by D matrix)
+        //Create the graph that will be used in the recursion (laplacian given by D matrix)
         GraphVertexRemoval gvrElement = new GraphVertexRemoval(sparsifier);
         GraphVertexRemoval.AnswerPair gvr = gvrElement.solve();
 
-        Graph permSparsifier = GraphUtils.permuteGraph(sparsifier, gvr.v);
+        b = applyPerm(gvr.permutation, b);
+
+        Graph permSparsifier = GraphUtils.permuteGraph(sparsifier, gvr.permutation);
         LDLDecomposition ldlElement = new LDLDecomposition(permSparsifier, new double[permSparsifier.nv]);
-        LDLDecomposition.ReturnPair ldl = ldlElement.solve(gvr.n);
+        LDLDecomposition.ReturnPair ldl = ldlElement.solve(gvr.numRemoved);
 
 
-        int[] inversePerm = new int[gvr.n];
-        for (int i = 0; i < graph.nv; i++) {
-            inversePerm[gvr.v[i]] = i;
-        }
+        int[] inversePerm = new int[graph.nv];
+        for (int i = 0; i < graph.nv; i++)
+            inversePerm[gvr.permutation[i]] = i;
 
-        buildRecursionGraph(graph, gvr, ldl);
+        Graph reducedSparsifier = buildRecursionGraph(graph, gvr, ldl);
 
-        return reconstructSolution(b, err, graph.nv, gvr.n, inversePerm, ldl);
-    }
-
-    public double[] thirdPartySolver(Graph graph, double[] b, double err) {
         double[] x = new double[graph.nv];
+        System.arraycopy(b, 0, x, 0, gvr.numRemoved);
 
-        return x;
+        double[] smallb = new double[graph.nv - gvr.numRemoved];
+        System.arraycopy(b, gvr.numRemoved, smallb, 0, smallb.length);
+
+        double[] KMPx = solve(reducedSparsifier, smallb, tol, maxit);
+        System.arraycopy(KMPx, 0, x, gvr.numRemoved, KMPx.length);
+
+        x = LDLDecomposition.applyLTransInv(ldl.L, x);
+
+        System.out.println(Arrays.toString(applyPerm(inversePerm, x)));
+
+        return applyPerm(inversePerm, x);
     }
 
-    public double[] reconstructSolution(double[] b, double err, int currentN, int smallN, int[] invPerm, LDLDecomposition.ReturnPair ldl) {
-        b = LDLDecomposition.applyInvL(ldl.L, currentN, b);
+    public static double[] applyPerm (int[] perm, double[] x) {
+        double[] answer = new double[perm.length];
 
-        double[] x = new double[currentN];
-        System.arraycopy(b, 0, x, 0, smallN);
-
-        x = LDLDecomposition.applyLtransInv(ldl.L, currentN, x);
-
-        double[] smallb = new double[currentN - smallN];
-        System.arraycopy(b, currentN - smallN, smallb, 0, smallb.length);
-
-        double[] KMPx = solve(reducedSparsifier, smallb, err);
-        System.arraycopy(KMPx, 0, x, currentN - smallN, KMPx.length);
-
-        double[] answer = new double[currentN];
         for (int i = 0; i < x.length; i++)
-            answer[invPerm[i]] = x[i];
+            answer[perm[i]] = x[i];
 
         return answer;
     }
 
+    //Construct a preconditioner for graph
     public void buildPreconditioner(Graph graph) {
         EdgeList offEdges;
 
-        // get off-tree edges, find stretches
+        //Get off-tree edges, find stretches
         offEdges = TreeUtils.getOffTreeEdges(graph, spanningTree);
         Stretch.StretchResult stretch = Stretch.compute(graph, spanningTree, offEdges);
 
-        // blow up graph by 4 * avgstretch * log(n)
+        //Blow up graph by 4 * avgstretch * log(numRemoved)
         double k = 4. * stretch.total / offEdges.ne * Math.log(graph.nv);
         reweightedGraph = blowUpTreeEdges(graph, spanningTree, k);
 
-        // expect to grab q = O(m / log(m)) edges
+        //Expect to grab q = O(m / log(m)) edges
         double q = 4. * graph.ne / Math.log(graph.ne);
 
-        // assign p_e = stretch(e) / (total stretch)
+        //Assign p_e = stretch(e) / (total stretch)
         double[] p = stretch.allStretches.clone();
         for (int i = 0; i < offEdges.ne; i++) {
             p[i] = q * p[i] / stretch.total;
         }
 
-        // sample the edges
+        //Sample the edges
         ArrayList<Integer> edgesToAdd = new ArrayList<Integer>();
         for (int i = 0; i < offEdges.ne; i++) {
             if (Math.random() < p[i]) {
@@ -139,11 +127,11 @@ public class KMPSolver {
             }
         }
 
-        // generate EdgeList
+        //Generate EdgeList
         EdgeList sparsifierEdges = new EdgeList(graph.nv - 1 + edgesToAdd.size());
         int index = 0;
 
-        // add tree edges
+        //Add tree edges
         for (int u = 0; u < graph.nv; u++) {
             if (u == spanningTree.root) continue;
             sparsifierEdges.u[index] = u;
@@ -152,7 +140,7 @@ public class KMPSolver {
             index++;
         }
 
-        // add off-tree edges
+        //Add off-tree edges
         for (int i : edgesToAdd) {
             sparsifierEdges.u[index] = offEdges.u[i];
             sparsifierEdges.v[index] = offEdges.v[i];
@@ -160,11 +148,11 @@ public class KMPSolver {
             index++;
         }
 
-        // build sparsified graph
+        //Build sparsified graph
         sparsifier = new Graph(sparsifierEdges);
     }
 
-    // given graph and tree, blow up edge weights (not lengths!!) of tree edges in G
+    //Given graph and tree, blow up edge weights (not lengths!!) of tree edges in G
     public Graph blowUpTreeEdges(Graph graph, Tree spanningTree, double k) {
         Graph auxGraph = new Graph(graph);
 
@@ -181,19 +169,73 @@ public class KMPSolver {
         return auxGraph;
     }
 
-    public void buildRecursionGraph(Graph graph, GraphVertexRemoval.AnswerPair gvr, LDLDecomposition.ReturnPair ldl) {
+    //Construct the graph for the next step of the recursion
+    public Graph buildRecursionGraph(Graph graph, GraphVertexRemoval.AnswerPair gvr, LDLDecomposition.ReturnPair ldl) {
         ldl.D = GraphUtils.sanitizeEdgeList(ldl.D);
         EdgeList reducedSparsifierEdges = new EdgeList(ldl.D.ne);
         int index = 0;
         for (int i = 0; i < ldl.D.ne; i++) {
-            if (ldl.D.u[i] >= gvr.n && ldl.D.v[i] >= gvr.n) {
-                reducedSparsifierEdges.u[index] = ldl.D.u[i] - gvr.n;
-                reducedSparsifierEdges.v[index] = ldl.D.v[i] - gvr.n;
+            if (ldl.D.u[i] >= gvr.numRemoved && ldl.D.v[i] >= gvr.numRemoved) {
+                reducedSparsifierEdges.u[index] = ldl.D.u[i] - gvr.numRemoved;
+                reducedSparsifierEdges.v[index] = ldl.D.v[i] - gvr.numRemoved;
                 reducedSparsifierEdges.weight[index] = 1 / ldl.D.weight[i];
                 index++;
             }
         }
 
-        reducedSparsifier = new Graph(reducedSparsifierEdges);
+        return new Graph(reducedSparsifierEdges);
+    }
+
+    //Construct the graph laplacian and call the pcg solver
+    public double[] runMain(Graph graph, double[] b) {
+        double[][] lap = new double[graph.nv][graph.nv];
+        for (int i = 0; i < graph.nv; i++) {
+            for (int j = 0; j < graph.deg[i]; j++) {
+                lap[i][graph.nbrs[i][j]] -= graph.weights[i][j];
+                lap[i][i] += graph.weights[i][j] / 2;
+                lap[graph.nbrs[i][j]][graph.nbrs[i][j]] += graph.weights[i][j] / 2;
+            }
+        }
+
+        try {
+            return main(lap, b, tol, maxit);
+        } catch (MatlabConnectionException e) {
+            e.printStackTrace();
+        } catch (MatlabInvocationException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    //Call pcg in matlab from java
+    public static double[] main(double[][] lap, double[] b, double tol, int maxit) throws MatlabConnectionException, MatlabInvocationException
+    {
+        double[] x = new double[b.length];
+
+        //Create a proxy, which we will use to control MATLAB
+        MatlabProxyFactory factory = new MatlabProxyFactory();
+        MatlabProxy proxy = factory.getProxy();
+
+        //Send the laplacian to MATLAB
+        MatlabTypeConverter processor = new MatlabTypeConverter(proxy);
+        processor.setNumericArray("internal_L", new MatlabNumericArray(lap, null));
+        proxy.setVariable("internal_b", b);
+
+        /*
+        proxy.setVariable("internal_x", x);
+        proxy.setVariable("internal_tol", tol);
+        proxy.setVariable("internal_maxit", maxit);
+        proxy.eval("internal_x = pcg(internal_L, internal_b', internal_tol, internal_maxit);");
+        */
+
+        proxy.eval("internal_x = pinv(internal_L) * internal_b';");
+
+        x = (double[]) proxy.getVariable("internal_x");
+
+        //Disconnect the proxy from MATLAB
+        proxy.disconnect();
+
+        return x;
     }
 }

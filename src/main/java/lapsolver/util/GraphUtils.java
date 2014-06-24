@@ -181,7 +181,7 @@ public class GraphUtils {
         ArrayList<Integer> edgeOrder = new ArrayList<>();
         ArrayList<Integer> edgesToKeep = new ArrayList<>();
 
-        // canonize edges so u[i] < v[i]
+        // canonize edges so u[i] < permutation[i]
         for (int i = 0; i < auxEdges.ne; i++) {
             int lo = Math.min(auxEdges.u[i], auxEdges.v[i]);
             int hi = Math.max(auxEdges.u[i], auxEdges.v[i]);

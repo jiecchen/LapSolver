@@ -11,9 +11,6 @@ package lapsolver.algorithms;
 
 import lapsolver.Graph;
 
-import java.lang.reflect.Array;
-import java.util.Arrays;
-
 public class GraphVertexRemoval {
     public Graph graph;
     public int N;
@@ -32,36 +29,36 @@ public class GraphVertexRemoval {
     }
 
     public class AnswerPair {
-        public int[] v;
-        public int n;
+        public int[] permutation;
+        public int numRemoved;
 
         public AnswerPair() {
         }
 
         public AnswerPair(int[] elementList, int value) {
-            this.v = new int[N];
-            System.arraycopy(elementList, 0, this.v, 0, N);
+            this.permutation = new int[N];
+            System.arraycopy(elementList, 0, this.permutation, 0, N);
 
-            this.n = value;
+            this.numRemoved = value;
         }
     }
 
     public AnswerPair solve() {
         AnswerPair deg1rem = removeDegreeOne();
-        if (deg1rem.n == N) {
+        if (deg1rem.numRemoved == N) {
             // The given graph is a tree. Will consider one vertex left behind.
-            deg1rem.v[--deg1rem.n] = 0;
+            deg1rem.permutation[--deg1rem.numRemoved] = 0;
             return constructPerm(deg1rem);
         }
 
         AnswerPair deg2rem = removeDegreeTwo();
 
         AnswerPair finalAnswer = new AnswerPair();
-        finalAnswer.n = deg1rem.n + deg2rem.n;
-        finalAnswer.v = new int[N];
+        finalAnswer.numRemoved = deg1rem.numRemoved + deg2rem.numRemoved;
+        finalAnswer.permutation = new int[N];
 
-        System.arraycopy(deg1rem.v, 0, finalAnswer.v, 0, deg1rem.n);
-        System.arraycopy(deg2rem.v, 0, finalAnswer.v, deg1rem.n, deg2rem.n);
+        System.arraycopy(deg1rem.permutation, 0, finalAnswer.permutation, 0, deg1rem.numRemoved);
+        System.arraycopy(deg2rem.permutation, 0, finalAnswer.permutation, deg1rem.numRemoved, deg2rem.numRemoved);
         finalAnswer = constructPerm(finalAnswer);
 
         return finalAnswer;
@@ -72,7 +69,7 @@ public class GraphVertexRemoval {
      */
     public AnswerPair removeDegreeTwo() {
         AnswerPair isDeg2Cycle = checkForDeg2Cycle();
-        if (isDeg2Cycle.n != -1)
+        if (isDeg2Cycle.numRemoved != -1)
             return isDeg2Cycle;
 
         // Will eliminate successive chains of degree two
@@ -153,7 +150,7 @@ public class GraphVertexRemoval {
      */
     public AnswerPair checkForDeg2Cycle() {
         AnswerPair ans = new AnswerPair();
-        ans.n = -1;
+        ans.numRemoved = -1;
 
         int maxDeg = 0;
         for (int i = 0; i < N; i++)
@@ -177,7 +174,7 @@ public class GraphVertexRemoval {
         // Add the remaining vertices to the vertex pool
         for (int i = 0; i < last; i++)
             if (updatedDeg[i] == 2)
-                ans.v[ans.n++] = i;
+                ans.permutation[ans.numRemoved++] = i;
 
         return ans;
     }
@@ -220,17 +217,17 @@ public class GraphVertexRemoval {
         int[] permutation = new int[N];
         int[] use = new int[N];
 
-        for (int i = 0; i < ap.n; i++) {
-            use[ap.v[i]] = 1;
-            permutation[i] = ap.v[i];
+        for (int i = 0; i < ap.numRemoved; i++) {
+            use[ap.permutation[i]] = 1;
+            permutation[i] = ap.permutation[i];
         }
 
-        int index = ap.n;
+        int index = ap.numRemoved;
         for (int i = 0; i < N; i++)
             if (use[i] == 0)
                 permutation[index++] = i;
 
-        ap.v = permutation.clone();
+        ap.permutation = permutation.clone();
 
         return ap;
     }

@@ -14,7 +14,7 @@ public class StarDecompositionWorker {
     }
 
     private int[] colors; // scratch space for cut colorings
-    private double[] coneCost; // scratch space for growCone (we need total O(n))
+    private double[] coneCost; // scratch space for growCone (we need total O(numRemoved))
 
     public StarDecompositionWorker(Graph graph) {
         colors = new int[graph.nv];
@@ -324,10 +324,10 @@ public class StarDecompositionWorker {
     // split graph into induced subgraphs with same color
 
     // if you pass in arrays of length graph.nv, I write back:
-    //     originalLabels, such that originalLabels[k][v] is the name in
-    //          parent graph of vertex v in subgraph k
+    //     originalLabels, such that originalLabels[k][permutation] is the name in
+    //          parent graph of vertex permutation in subgraph k
     //     newLabels, such that newLabels[i] is the name of
-    //          vertex v in its subgraph
+    //          vertex permutation in its subgraph
     public Decomposition splitGraph(Graph graph, int nColors) {
         // compute relabeling
         int[][] relabelUp = new int[nColors][];

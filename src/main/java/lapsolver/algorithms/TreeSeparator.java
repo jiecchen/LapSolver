@@ -6,7 +6,7 @@
  * Find a tree separator, a vertex whose deletion splits the tree with N vertices
  * into components with at most N/2 vertices.
  *
- * Complexity: O(n)
+ * Complexity: O(numRemoved)
  */
 
 package lapsolver.algorithms;

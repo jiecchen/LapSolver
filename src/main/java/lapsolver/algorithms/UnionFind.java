@@ -35,7 +35,7 @@ public class UnionFind {
         }
     }
 
-    // name of component that contains vertex v
+    // name of component that contains vertex permutation
     public int find(int v) {
         int find_stack_pos = 0;
 
@@ -53,9 +53,9 @@ public class UnionFind {
         return v;
     }
 
-    // merge the components with vertices u and v
+    // merge the components with vertices u and permutation
     public void union(int u, int v) {
-        int ru = find(u), rv = find(v); // go to roots of u and v
+        int ru = find(u), rv = find(v); // go to roots of u and permutation
         if(ru != rv) ptr[ru] = rv; // attach if different
     }
 }

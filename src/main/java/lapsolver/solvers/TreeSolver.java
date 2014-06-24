@@ -47,8 +47,8 @@ public class TreeSolver implements Solver {
         int[] order = TreeUtils.bfsOrder(tree);
 
         // compute currents from bottom up
-        double[] flowTo = new double[tree.nv]; // total flow to v
-        double[] flowUp = new double[tree.nv]; // flow along (v -> parent)
+        double[] flowTo = new double[tree.nv]; // total flow to permutation
+        double[] flowUp = new double[tree.nv]; // flow along (permutation -> parent)
         for (int i = tree.nv - 1; i >= 1; i--) {
             int v = order[i];
             int parent = tree.parent[v];
@@ -91,8 +91,8 @@ public class TreeSolver implements Solver {
         int[] order = TreeUtils.bfsOrder(tree);
 
         // compute currents from bottom up
-        double[] flowTo = new double[tree.nv]; // total flow to v
-        double[] flowUp = new double[tree.nv]; // flow along (v -> parent)
+        double[] flowTo = new double[tree.nv]; // total flow to permutation
+        double[] flowUp = new double[tree.nv]; // flow along (permutation -> parent)
         for (int i = tree.nv - 1; i >= 1; i--) {
             int v = order[i];
             int parent = tree.parent[v];

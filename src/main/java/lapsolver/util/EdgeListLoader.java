@@ -33,7 +33,7 @@ public class EdgeListLoader {
                 String[] values = line.split("\\s*" + Pattern.quote(delimiter) + "\\s*");
 
                 if (values.length != 3)
-                    throw new RuntimeException("Error: need exactly three values for edge list entry (u,v,w)");
+                    throw new RuntimeException("Error: need exactly three values for edge list entry (u,permutation,w)");
 
                 arU.add((int) Double.parseDouble(values[0]));
                 arV.add((int) Double.parseDouble(values[1]));

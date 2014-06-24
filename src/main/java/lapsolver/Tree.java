@@ -19,9 +19,9 @@ import lapsolver.util.TreeUtils;
 public class Tree {
     public int nv;    // number of vertices (ne = nv-1)
     public int root;  // auxiliarySize of root of tree
-    public int[] parent;     // parent[v] = id of v's parent, parent[root] = root
-    public double[] weight;  // weight[v] = edge weight of (v, parent[v])
-    public int[][] children; // children[v][0..nChildren[v]-1] = indices of children
+    public int[] parent;     // parent[permutation] = id of permutation's parent, parent[root] = root
+    public double[] weight;  // weight[permutation] = edge weight of (permutation, parent[permutation])
+    public int[][] children; // children[permutation][0..nChildren[permutation]-1] = indices of children
 
     // tree from parent array and weights
     public Tree(int[] parent, double[] weight) {

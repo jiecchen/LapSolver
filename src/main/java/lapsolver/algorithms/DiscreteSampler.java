@@ -4,7 +4,7 @@
  * @author Cyril Zhang <cyril.zhang@yale.edu>
  * @date Thu Jun 5 2014
  *
- * Sample from a discrete distribution in O(1) time with O(n) preprocessing,
+ * Sample from a discrete distribution in O(1) time with O(numRemoved) preprocessing,
  * using the alias method.
  *
  * Adapted from: http://www.keithschwarz.com/darts-dice-coins/
@@ -26,7 +26,7 @@ public final class DiscreteSampler {
      * hand back outcomes based on the probability distribution.
      * <p>
      * Given as input a list of probabilities corresponding to outcomes 0, 1,
-     * ..., n - 1, this constructor creates the probability and alias tables
+     * ..., numRemoved - 1, this constructor creates the probability and alias tables
      * needed to efficiently sample from this distribution.
      *
      * @param probabilities The list of probabilities.
@@ -40,7 +40,7 @@ public final class DiscreteSampler {
      * hand back outcomes based on the probability distribution.
      * <p>
      * Given as input a list of probabilities corresponding to outcomes 0, 1,
-     * ..., n - 1, along with the random number generator that should be used
+     * ..., numRemoved - 1, along with the random number generator that should be used
      * as the underlying generator, this constructor creates the probability
      * and alias tables needed to efficiently sample from this distribution.
      *

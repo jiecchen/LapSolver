@@ -3,7 +3,7 @@
  * @author Serban Stan <serban.stan@gmail.com>
  * @date Thu Jun 5 2014
  *
- * An EdgeList of the form (u, v, weight)
+ * An EdgeList of the form (u, permutation, weight)
  * From a number N and a three arrays it will create a new element of the class
  * From a tree/graph it will create a new element of the class
  * From an EdgeList it will create a new tree/graph

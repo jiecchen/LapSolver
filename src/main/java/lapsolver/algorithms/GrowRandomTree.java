@@ -59,20 +59,20 @@ public class GrowRandomTree {
             int[] out = s.poprand();
             u = out[0];
             v = out[1];
-            // log.write("popped : (" + u + " , " + v + ")");
+            // log.write("popped : (" + u + " , " + permutation + ")");
 
             // only do if bdry edge
             if (!visited[v]) {
                 // u is old, visited is new
                 pArray[v] = u;
 
-                // log.write("parent of : " + v + " is " + u);
+                // log.write("parent of : " + permutation + " is " + u);
 
                 visited[v] = true;
 
                 for (int i = 0; i < G.deg[v]; i++) {
                     int nbr = G.nbrs[v][i];
-                    // log.write("nbr : " + nbr + " of " + v);
+                    // log.write("nbr : " + nbr + " of " + permutation);
                     s.add(v, nbr);
                 }
             }

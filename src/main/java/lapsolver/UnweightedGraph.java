@@ -15,8 +15,8 @@
  * Matlab must do all the conversions.
  *
  * To create in matlab, use
- * [i,j,v] = find(tril(T))
- * graph = Graph(i-1,j-1,v)
+ * [i,j,permutation] = find(tril(T))
+ * graph = Graph(i-1,j-1,permutation)
  *
  * Elementary methods: dfs, components, bfsWalk, 
  *
@@ -307,7 +307,7 @@ public class UnweightedGraph {
 
         // form link lists for every degree, by ints
         // -1 if empty
-        // list[v] is the next item after v
+        // list[permutation] is the next item after permutation
         int[] list = new int[nv];
         for (int i = 0; i < nv; i++) {
             list[i] = -1;
