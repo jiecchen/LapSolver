@@ -26,10 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class KMPSolver {
-    public Tree spanningTree;
     public Graph reweightedGraph;
-    public Graph sparsifier;
-    // public Graph reducedSparsifier;
     private SpanningTreeStrategy treeStrategy;
 
     public double tol;
@@ -41,30 +38,26 @@ public class KMPSolver {
     }
 
     //Initialize solver on a particular graph, and perform preprocessing
-    public double[] solve(Graph graph, double b[], double tol, int maxit) {
+    public double[] solve(Graph graph, double b[], double tol, int maxit, double[] addDiag) {
         this.tol = tol;
         this.maxit = maxit;
 
         if (graph.nv < 500)
-            return runMain(graph, b);
-
-        //Compute LSST, cache BFS order
-        spanningTree = treeStrategy.getTree(graph);
+            return runMain(graph, b, addDiag);
 
         //Build the preconditioner for the given graph
-        buildPreconditioner(graph);
-
+        Graph sparsifier = buildPreconditioner(graph, treeStrategy.getTree(graph));
 
         //Create the graph that will be used in the recursion (laplacian given by D matrix)
         GraphVertexRemoval gvrElement = new GraphVertexRemoval(sparsifier);
         GraphVertexRemoval.AnswerPair gvr = gvrElement.solve();
 
         b = applyPerm(gvr.permutation, b);
-
+        addDiag = applyPerm(gvr.permutation, addDiag);
         Graph permSparsifier = GraphUtils.permuteGraph(sparsifier, gvr.permutation);
-        LDLDecomposition ldlElement = new LDLDecomposition(permSparsifier, new double[permSparsifier.nv]);
-        LDLDecomposition.ReturnPair ldl = ldlElement.solve(gvr.numRemoved);
 
+        LDLDecomposition ldlElement = new LDLDecomposition(permSparsifier, addDiag);
+        LDLDecomposition.ReturnPair ldl = ldlElement.solve(gvr.numRemoved);
 
         int[] inversePerm = new int[graph.nv];
         for (int i = 0; i < graph.nv; i++)
@@ -78,7 +71,10 @@ public class KMPSolver {
         double[] smallb = new double[graph.nv - gvr.numRemoved];
         System.arraycopy(b, gvr.numRemoved, smallb, 0, smallb.length);
 
-        double[] KMPx = solve(reducedSparsifier, smallb, tol, maxit);
+        double[] smallAddDiag = new double[graph.nv - gvr.numRemoved];
+        System.arraycopy(addDiag, gvr.numRemoved, smallAddDiag, 0, smallAddDiag.length);
+
+        double[] KMPx = solve(reducedSparsifier, smallb, tol, maxit, smallAddDiag);
         System.arraycopy(KMPx, 0, x, gvr.numRemoved, KMPx.length);
 
         x = LDLDecomposition.applyLTransInv(ldl.L, x);
@@ -98,7 +94,7 @@ public class KMPSolver {
     }
 
     //Construct a preconditioner for graph
-    public void buildPreconditioner(Graph graph) {
+    public Graph buildPreconditioner(Graph graph, Tree spanningTree) {
         EdgeList offEdges;
 
         //Get off-tree edges, find stretches
@@ -107,10 +103,9 @@ public class KMPSolver {
 
         //Blow up graph by 4 * avgstretch * log(numRemoved)
         double k = 4. * stretch.total / offEdges.ne * Math.log(graph.nv);
-        reweightedGraph = blowUpTreeEdges(graph, spanningTree, k);
 
         //Expect to grab q = O(m / log(m)) edges
-        double q = 4. * graph.ne / Math.log(graph.ne);
+        double q = 10. * graph.ne / Math.log(graph.ne);
 
         //Assign p_e = stretch(e) / (total stretch)
         double[] p = stretch.allStretches.clone();
@@ -136,7 +131,7 @@ public class KMPSolver {
             if (u == spanningTree.root) continue;
             sparsifierEdges.u[index] = u;
             sparsifierEdges.v[index] = spanningTree.parent[u];
-            sparsifierEdges.weight[index] = spanningTree.weight[u];
+            sparsifierEdges.weight[index] = k * spanningTree.weight[u];
             index++;
         }
 
@@ -149,24 +144,7 @@ public class KMPSolver {
         }
 
         //Build sparsified graph
-        sparsifier = new Graph(sparsifierEdges);
-    }
-
-    //Given graph and tree, blow up edge weights (not lengths!!) of tree edges in G
-    public Graph blowUpTreeEdges(Graph graph, Tree spanningTree, double k) {
-        Graph auxGraph = new Graph(graph);
-
-        for (int u = 0; u < auxGraph.nv; u++) {
-            for (int i = 0; i < auxGraph.deg[u]; i++) {
-                int v = auxGraph.nbrs[u][i];
-
-                if (spanningTree.parent[u] == v || spanningTree.parent[v] == u) {
-                    auxGraph.weights[u][i] /= k;
-                }
-            }
-        }
-
-        return auxGraph;
+        return new Graph(sparsifierEdges);
     }
 
     //Construct the graph for the next step of the recursion
@@ -187,7 +165,7 @@ public class KMPSolver {
     }
 
     //Construct the graph laplacian and call the pcg solver
-    public double[] runMain(Graph graph, double[] b) {
+    public double[] runMain(Graph graph, double[] b, double[] diag) {
         double[][] lap = new double[graph.nv][graph.nv];
         for (int i = 0; i < graph.nv; i++) {
             for (int j = 0; j < graph.deg[i]; j++) {
@@ -196,6 +174,8 @@ public class KMPSolver {
                 lap[graph.nbrs[i][j]][graph.nbrs[i][j]] += graph.weights[i][j] / 2;
             }
         }
+        for (int i = 0; i < diag.length; i++)
+            lap[i][i] += diag[i];
 
         try {
             return main(lap, b, tol, maxit);
@@ -222,12 +202,12 @@ public class KMPSolver {
         processor.setNumericArray("internal_L", new MatlabNumericArray(lap, null));
         proxy.setVariable("internal_b", b);
 
-        /*
-        proxy.setVariable("internal_x", x);
+
+/*        proxy.setVariable("internal_x", x);
         proxy.setVariable("internal_tol", tol);
         proxy.setVariable("internal_maxit", maxit);
-        proxy.eval("internal_x = pcg(internal_L, internal_b', internal_tol, internal_maxit);");
-        */
+        proxy.eval("internal_x = pcg(internal_L, internal_b', internal_tol, internal_maxit);");*/
+
 
         proxy.eval("internal_x = pinv(internal_L) * internal_b';");
 
