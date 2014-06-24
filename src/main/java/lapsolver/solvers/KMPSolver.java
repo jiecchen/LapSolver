@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class KMPSolver {
-    public Graph reweightedGraph;
     private SpanningTreeStrategy treeStrategy;
 
     public double tol;
@@ -42,7 +41,7 @@ public class KMPSolver {
         this.tol = tol;
         this.maxit = maxit;
 
-        if (graph.nv < 500)
+        if (graph.nv < 2)
             return runMain(graph, b, addDiag);
 
         //Build the preconditioner for the given graph
@@ -55,13 +54,19 @@ public class KMPSolver {
         b = applyPerm(gvr.permutation, b);
         addDiag = applyPerm(gvr.permutation, addDiag);
         Graph permSparsifier = GraphUtils.permuteGraph(sparsifier, gvr.permutation);
+//
+//        for (int i = 0; i < sparsifier.nv; i++)
+//            for (int j = 0; j < sparsifier.deg[i]; j++)
+//                System.out.println(i + " " + sparsifier.nbrs[i][j] + " " + sparsifier.weights[i][j]);
+//
+//        System.out.println("*****");
+//
+//        for (int i = 0; i < permSparsifier.nv; i++)
+//            for (int j = 0; j < permSparsifier.deg[i]; j++)
+//                System.out.println(i + " " + permSparsifier.nbrs[i][j] + " " + permSparsifier.weights[i][j]);
 
         LDLDecomposition ldlElement = new LDLDecomposition(permSparsifier, addDiag);
         LDLDecomposition.ReturnPair ldl = ldlElement.solve(gvr.numRemoved);
-
-        int[] inversePerm = new int[graph.nv];
-        for (int i = 0; i < graph.nv; i++)
-            inversePerm[gvr.permutation[i]] = i;
 
         Graph reducedSparsifier = buildRecursionGraph(graph, gvr, ldl);
 
@@ -77,8 +82,20 @@ public class KMPSolver {
         double[] KMPx = solve(reducedSparsifier, smallb, tol, maxit, smallAddDiag);
         System.arraycopy(KMPx, 0, x, gvr.numRemoved, KMPx.length);
 
+//        System.out.println(Arrays.toString(x));
+//
+//        System.out.println(ldl.L.ne);
+//        for (int i = 0; i < ldl.L.ne; i++)
+//            System.out.println(ldl.L.u[i] + " " + ldl.L.v[i] + " " + ldl.L.weight[i]);
+
         x = LDLDecomposition.applyLTransInv(ldl.L, x);
 
+//        System.out.println(Arrays.toString(x));
+
+
+        int[] inversePerm = new int[graph.nv];
+        for (int i = 0; i < graph.nv; i++)
+            inversePerm[gvr.permutation[i]] = i;
         return applyPerm(inversePerm, x);
     }
 
@@ -100,16 +117,15 @@ public class KMPSolver {
         Stretch.StretchResult stretch = Stretch.compute(graph, spanningTree, offEdges);
 
         //Blow up graph by 4 * avgstretch * log(numRemoved)
-        double k = 4. * stretch.total / offEdges.ne * Math.log(graph.nv);
+        double k = 4. * stretch.total / (offEdges.ne + 1) * (Math.log(graph.nv) + 1) + 1;
 
         //Expect to grab q = O(m / log(m)) edges
         double q = 10. * graph.ne / Math.log(graph.ne);
 
         //Assign p_e = stretch(e) / (total stretch)
         double[] p = stretch.allStretches.clone();
-        for (int i = 0; i < offEdges.ne; i++) {
+        for (int i = 0; i < offEdges.ne; i++)
             p[i] = q * p[i] / stretch.total;
-        }
 
         //Sample the edges
         ArrayList<Integer> edgesToAdd = new ArrayList<Integer>();
@@ -200,12 +216,10 @@ public class KMPSolver {
         processor.setNumericArray("internal_Lap", new MatlabNumericArray(lap, null));
         proxy.setVariable("internal_b", b);
 
-
-/*        proxy.setVariable("internal_x", x);
-        proxy.setVariable("internal_tol", tol);
-        proxy.setVariable("internal_maxit", maxit);
-        proxy.eval("internal_x = pcg(internal_L, internal_b', internal_tol, internal_maxit);");*/
-
+//        proxy.setVariable("internal_x", x);
+//        proxy.setVariable("internal_tol", tol);
+//        proxy.setVariable("internal_maxit", maxit);
+//        proxy.eval("internal_x = pcg(internal_Lap, internal_b', internal_tol, internal_maxit);");
 
         proxy.eval("internal_x = pinv(internal_Lap) * internal_b';");
 
