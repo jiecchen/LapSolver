@@ -68,6 +68,8 @@ public class KMPSolver {
         LDLDecomposition ldlElement = new LDLDecomposition(permSparsifier, addDiag);
         LDLDecomposition.ReturnPair ldl = ldlElement.solve(gvr.numRemoved);
 
+        b = LDLDecomposition.applyInvL(ldl.L, b);
+
         Graph reducedSparsifier = buildRecursionGraph(graph, gvr, ldl);
 
         double[] x = new double[graph.nv];
@@ -91,7 +93,6 @@ public class KMPSolver {
         x = LDLDecomposition.applyLTransInv(ldl.L, x);
 
 //        System.out.println(Arrays.toString(x));
-
 
         int[] inversePerm = new int[graph.nv];
         for (int i = 0; i < graph.nv; i++)
