@@ -41,7 +41,7 @@ public class KMPSolver {
         this.tol = tol;
         this.maxit = maxit;
 
-        if (graph.nv < 2)
+        if (graph.nv < 5)
             return runMain(graph, b, addDiag);
 
         //Build the preconditioner for the given graph
@@ -130,14 +130,20 @@ public class KMPSolver {
 
         //Blow up graph by 4 * avgstretch * log(numRemoved)
         double k = 4. * stretch.total / (offEdges.ne + 1) * (Math.log(graph.nv) + 1) + 1;
+        Graph blownUpGraph = blowUpTreeEdges(graph, spanningTree, k);
 
-        //Expect to grab q = O(m / log(m)) edges
+        // find stretches in blown-up graph
+        Stretch.StretchResult blownUpStretch = Stretch.compute(blownUpGraph, spanningTree, offEdges);
+
+        // Expect to grab q = O(m / log(m)) edges
         double q = 10. * graph.ne / Math.log(graph.ne);
 
         //Assign p_e = stretch(e) / (total stretch)
-        double[] p = stretch.allStretches.clone();
-        for (int i = 0; i < offEdges.ne; i++)
-            p[i] = q * p[i] / stretch.total;
+        double[] p = blownUpStretch.allStretches.clone();
+        for (int i = 0; i < offEdges.ne; i++) {
+            p[i] = q * p[i] / blownUpStretch.total;
+            if (p[i] > 1) p[i] = 1;
+        }
 
         //Sample the edges
         ArrayList<Integer> edgesToAdd = new ArrayList<Integer>();
@@ -157,7 +163,7 @@ public class KMPSolver {
             if (u == spanningTree.root) continue;
             sparsifierEdges.u[index] = u;
             sparsifierEdges.v[index] = spanningTree.parent[u];
-            sparsifierEdges.weight[index] = k * spanningTree.weight[u];
+            sparsifierEdges.weight[index] = spanningTree.weight[u];
             index++;
         }
 
@@ -165,7 +171,7 @@ public class KMPSolver {
         for (int i : edgesToAdd) {
             sparsifierEdges.u[index] = offEdges.u[i];
             sparsifierEdges.v[index] = offEdges.v[i];
-            sparsifierEdges.weight[index] = offEdges.weight[i];
+            sparsifierEdges.weight[index] = offEdges.weight[i] / p[i];
             index++;
         }
 
@@ -212,6 +218,23 @@ public class KMPSolver {
         }
 
         return null;
+    }
+
+    // given graph and tree, blow up edge weights (not lengths!!) of tree edges in G
+    public static Graph blowUpTreeEdges(Graph graph, Tree spanningTree, double k) {
+        Graph auxGraph = new Graph(graph);
+
+        for (int u = 0; u < auxGraph.nv; u++) {
+            for (int i = 0; i < auxGraph.deg[u]; i++) {
+                int v = auxGraph.nbrs[u][i];
+
+                if (spanningTree.parent[u] == v || spanningTree.parent[v] == u) {
+                    auxGraph.weights[u][i] /= k;
+                }
+            }
+        }
+
+        return auxGraph;
     }
 
     //Call pcg in matlab from java
