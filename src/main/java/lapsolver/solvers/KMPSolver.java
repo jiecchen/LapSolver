@@ -70,10 +70,21 @@ public class KMPSolver {
 
         b = LDLDecomposition.applyInvL(ldl.L, b);
 
+        // grab diagonal elements from D matrix
+        double[] diagD = new double[graph.nv];
+        for (int i = 0; i < ldl.D.ne; i++) {
+            if (ldl.D.u[i] == ldl.D.v[i]) {
+                diagD[ldl.D.u[i]] += ldl.D.weight[i];
+            }
+        }
+
         Graph reducedSparsifier = buildRecursionGraph(graph, gvr, ldl);
 
+        // for eliminated vertices, x[i] = b[i]/D[i,i]
         double[] x = new double[graph.nv];
-        System.arraycopy(b, 0, x, 0, gvr.numRemoved);
+        for (int i = 0; i < gvr.numRemoved; i++) {
+            x[i] = b[i] / diagD[i];
+        }
 
         double[] smallb = new double[graph.nv - gvr.numRemoved];
         System.arraycopy(b, gvr.numRemoved, smallb, 0, smallb.length);
