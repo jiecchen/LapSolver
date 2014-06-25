@@ -36,6 +36,9 @@ public class KMPSolver {
         this.treeStrategy = treeStrategy;
     }
 
+    public EdgeList LL;
+    public EdgeList DD;
+
     //Initialize solver on a particular graph, and perform preprocessing
     public double[] solve(Graph graph, double b[], double tol, int maxit, double[] addDiag) {
         this.tol = tol;
@@ -46,6 +49,7 @@ public class KMPSolver {
 
         //Build the preconditioner for the given graph
         Graph sparsifier = buildPreconditioner(graph, treeStrategy.getTree(graph));
+        sparsifier = new Graph(graph);
 
         //Create the graph that will be used in the recursion (laplacian given by D matrix)
         GraphVertexRemoval gvrElement = new GraphVertexRemoval(sparsifier);
@@ -58,11 +62,15 @@ public class KMPSolver {
         LDLDecomposition ldlElement = new LDLDecomposition(permSparsifier, addDiag);
         LDLDecomposition.ReturnPair ldl = ldlElement.solve(gvr.numRemoved);
 
-//        System.out.println(Arrays.toString(b));
+        System.out.println(Arrays.toString(gvr.permutation));
+        LL = new EdgeList(ldl.L);
+        DD = new EdgeList(ldl.D);
+
+        System.out.println(Arrays.toString(b));
 
         b = LDLDecomposition.applyInvL(ldl.L, b);
 
-//        System.out.println(Arrays.toString(b));
+        System.out.println(Arrays.toString(b));
 
         // grab diagonal elements from D matrix
         double[] diagD = new double[graph.nv];
@@ -89,25 +97,12 @@ public class KMPSolver {
         double[] KMPx = solve(reducedSparsifier, smallb, tol, maxit, smallAddDiag);
         System.arraycopy(KMPx, 0, x, gvr.numRemoved, KMPx.length);
 
-//        System.out.println(Arrays.toString(x));
-//        System.out.println(Arrays.toString(b));
-//        System.out.println(Arrays.toString(diagD));
-
         x = LDLDecomposition.applyLTransInv(ldl.L, x);
 
         int[] inversePerm = new int[graph.nv];
-
-//        System.out.println(Arrays.toString(gvr.permutation));
-
-        for (int i = 0; i < graph.nv; i++) {
+        for (int i = 0; i < graph.nv; i++)
             inversePerm[gvr.permutation[i]] = i;
-            System.out.println(inversePerm[gvr.permutation[i]] + " " + gvr.permutation[inversePerm[i]]);
-        }
-//
-//        System.out.println(Arrays.toString(inversePerm));
 
-
-        System.out.println(Arrays.toString(x));
         return applyPerm(inversePerm, x);
     }
 
@@ -179,6 +174,23 @@ public class KMPSolver {
         return new Graph(sparsifierEdges);
     }
 
+    // given graph and tree, blow up edge weights (not lengths!!) of tree edges in G
+    public static Graph blowUpTreeEdges(Graph graph, Tree spanningTree, double k) {
+        Graph auxGraph = new Graph(graph);
+
+        for (int u = 0; u < auxGraph.nv; u++) {
+            for (int i = 0; i < auxGraph.deg[u]; i++) {
+                int v = auxGraph.nbrs[u][i];
+
+                if (spanningTree.parent[u] == v || spanningTree.parent[v] == u) {
+                    auxGraph.weights[u][i] /= k;
+                }
+            }
+        }
+
+        return auxGraph;
+    }
+
     //Construct the graph for the next step of the recursion
     public Graph buildRecursionGraph(Graph graph, GraphVertexRemoval.AnswerPair gvr, LDLDecomposition.ReturnPair ldl) {
         ldl.D = GraphUtils.sanitizeEdgeList(ldl.D);
@@ -218,23 +230,6 @@ public class KMPSolver {
         }
 
         return null;
-    }
-
-    // given graph and tree, blow up edge weights (not lengths!!) of tree edges in G
-    public static Graph blowUpTreeEdges(Graph graph, Tree spanningTree, double k) {
-        Graph auxGraph = new Graph(graph);
-
-        for (int u = 0; u < auxGraph.nv; u++) {
-            for (int i = 0; i < auxGraph.deg[u]; i++) {
-                int v = auxGraph.nbrs[u][i];
-
-                if (spanningTree.parent[u] == v || spanningTree.parent[v] == u) {
-                    auxGraph.weights[u][i] /= k;
-                }
-            }
-        }
-
-        return auxGraph;
     }
 
     //Call pcg in matlab from java

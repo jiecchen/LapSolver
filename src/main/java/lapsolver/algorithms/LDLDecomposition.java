@@ -235,6 +235,9 @@ public class LDLDecomposition {
         return false;
     }
 
+    /*
+        TODO: do smart multiplying by L inverse
+     */
     public static double[] applyInvL(EdgeList L, double[] x) {
         double[] answer = new double[x.length];
 
