@@ -12,8 +12,8 @@ function compLDLmat(graph)
     
     gvm = GraphVertexRemoval(graph);
     gvmPair = gvm.solve();
-    perm = gvmPair.v;
-    numRemoved = gvmPair.n;
+    perm = gvmPair.permutation;
+    numRemoved = gvmPair.numRemoved;
     g = Graph(GraphUtils.permuteGraph(graph, perm));
     
     

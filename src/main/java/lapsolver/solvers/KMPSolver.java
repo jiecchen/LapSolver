@@ -54,21 +54,15 @@ public class KMPSolver {
         b = applyPerm(gvr.permutation, b);
         addDiag = applyPerm(gvr.permutation, addDiag);
         Graph permSparsifier = GraphUtils.permuteGraph(sparsifier, gvr.permutation);
-//
-//        for (int i = 0; i < sparsifier.nv; i++)
-//            for (int j = 0; j < sparsifier.deg[i]; j++)
-//                System.out.println(i + " " + sparsifier.nbrs[i][j] + " " + sparsifier.weights[i][j]);
-//
-//        System.out.println("*****");
-//
-//        for (int i = 0; i < permSparsifier.nv; i++)
-//            for (int j = 0; j < permSparsifier.deg[i]; j++)
-//                System.out.println(i + " " + permSparsifier.nbrs[i][j] + " " + permSparsifier.weights[i][j]);
 
         LDLDecomposition ldlElement = new LDLDecomposition(permSparsifier, addDiag);
         LDLDecomposition.ReturnPair ldl = ldlElement.solve(gvr.numRemoved);
 
+//        System.out.println(Arrays.toString(b));
+
         b = LDLDecomposition.applyInvL(ldl.L, b);
+
+//        System.out.println(Arrays.toString(b));
 
         // grab diagonal elements from D matrix
         double[] diagD = new double[graph.nv];
@@ -96,18 +90,24 @@ public class KMPSolver {
         System.arraycopy(KMPx, 0, x, gvr.numRemoved, KMPx.length);
 
 //        System.out.println(Arrays.toString(x));
-//
-//        System.out.println(ldl.L.ne);
-//        for (int i = 0; i < ldl.L.ne; i++)
-//            System.out.println(ldl.L.u[i] + " " + ldl.L.v[i] + " " + ldl.L.weight[i]);
+//        System.out.println(Arrays.toString(b));
+//        System.out.println(Arrays.toString(diagD));
 
         x = LDLDecomposition.applyLTransInv(ldl.L, x);
 
-//        System.out.println(Arrays.toString(x));
-
         int[] inversePerm = new int[graph.nv];
-        for (int i = 0; i < graph.nv; i++)
+
+//        System.out.println(Arrays.toString(gvr.permutation));
+
+        for (int i = 0; i < graph.nv; i++) {
             inversePerm[gvr.permutation[i]] = i;
+            System.out.println(inversePerm[gvr.permutation[i]] + " " + gvr.permutation[inversePerm[i]]);
+        }
+//
+//        System.out.println(Arrays.toString(inversePerm));
+
+
+        System.out.println(Arrays.toString(x));
         return applyPerm(inversePerm, x);
     }
 
@@ -115,7 +115,7 @@ public class KMPSolver {
         double[] answer = new double[perm.length];
 
         for (int i = 0; i < x.length; i++)
-            answer[perm[i]] = x[i];
+            answer[i] = x[perm[i]];
 
         return answer;
     }
@@ -188,7 +188,7 @@ public class KMPSolver {
             if (ldl.D.u[i] >= gvr.numRemoved && ldl.D.v[i] >= gvr.numRemoved) {
                 reducedSparsifierEdges.u[index] = ldl.D.u[i] - gvr.numRemoved;
                 reducedSparsifierEdges.v[index] = ldl.D.v[i] - gvr.numRemoved;
-                reducedSparsifierEdges.weight[index] =  ldl.D.weight[i];
+                reducedSparsifierEdges.weight[index] = ldl.D.weight[i];
                 index++;
             }
         }
