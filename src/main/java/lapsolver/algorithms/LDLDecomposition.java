@@ -11,6 +11,7 @@ package lapsolver.algorithms;
 
 import lapsolver.Graph;
 import lapsolver.EdgeList;
+import lapsolver.util.GraphUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,7 +39,7 @@ public class LDLDecomposition {
 
     // Constructor for making full LDL factorization with graph and addition matrix
     public LDLDecomposition(Graph G, double[] diagValues) {
-        this.graph = new Graph(G);
+        this.graph = GraphUtils.changeToMatrixEntries(new Graph(G));
         this.N = graph.nv;
         this.X = new double[N];
         this.updatedDeg = new int[N];
@@ -123,7 +124,7 @@ public class LDLDecomposition {
         double outerValue = -1;
         for (int i = 0; i < graph.deg[start]; i++)
             if (graph.nbrs[start][i] == outerStart)
-                outerValue = -1 / graph.weights[start][i];
+                outerValue = -graph.weights[start][i];
 
         // newValueInLap is used to mimic the update of the laplacian matrix
         double newValueInLap = outerValue;
@@ -139,7 +140,7 @@ public class LDLDecomposition {
 
             for (int i = 0; i < graph.deg[u]; i++) {
                 int v = graph.nbrs[u][i];
-                double weight = 1 / graph.weights[u][i];
+                double weight = graph.weights[u][i];
 
                 if (updatedDeg[v] > 1 && v > u && v != outerStart) {
                     X[v] = X[v] - weight * weight / X[u];
@@ -159,7 +160,7 @@ public class LDLDecomposition {
     public void updateDiag() {
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < graph.deg[i]; j++)
-                X[i] = X[i] + 1 / graph.weights[i][j];
+                X[i] = X[i] + graph.weights[i][j];
             updatedDeg[i] = graph.deg[i];
 
             addToEdgeListD(i, i, X[i]);
@@ -169,7 +170,7 @@ public class LDLDecomposition {
     public void remDeg1(int u) {
         for (int i = 0; i < graph.deg[u]; i++) {
             int v = graph.nbrs[u][i];
-            double weight = 1 / graph.weights[u][i];
+            double weight = graph.weights[u][i];
 
             if (u < v) {
                 addToEdgeListL(v, u, -weight / X[u]);
@@ -212,8 +213,8 @@ public class LDLDecomposition {
         for (int i = steps; i < N; i++)
             for (int j = 0; j < graph.deg[i]; j++)
                 if (graph.nbrs[i][j] > i) {
-                    addToEdgeListD(i, graph.nbrs[i][j], -1 / graph.weights[i][j]);
-                    addToEdgeListD(graph.nbrs[i][j], i, -1 / graph.weights[i][j]);
+                    addToEdgeListD(i, graph.nbrs[i][j], -graph.weights[i][j]);
+                    addToEdgeListD(graph.nbrs[i][j], i, -graph.weights[i][j]);
                 }
     }
 

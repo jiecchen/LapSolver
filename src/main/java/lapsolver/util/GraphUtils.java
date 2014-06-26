@@ -224,4 +224,12 @@ public class GraphUtils {
 
         return keptEdges;
     }
+
+    public static Graph changeToMatrixEntries(Graph graph) {
+        for (int i = 0; i < graph.nv; i++)
+            for (int j = 0; j < graph.deg[i]; j++)
+                graph.weights[i][j] = 1 / graph.weights[i][j];
+
+        return graph;
+    }
 }
