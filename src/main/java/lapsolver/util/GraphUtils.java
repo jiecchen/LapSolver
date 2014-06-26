@@ -181,14 +181,6 @@ public class GraphUtils {
         ArrayList<Integer> edgeOrder = new ArrayList<>();
         ArrayList<Integer> edgesToKeep = new ArrayList<>();
 
-        // canonize edges so u[i] < permutation[i]
-        for (int i = 0; i < auxEdges.ne; i++) {
-            int lo = Math.min(auxEdges.u[i], auxEdges.v[i]);
-            int hi = Math.max(auxEdges.u[i], auxEdges.v[i]);
-            auxEdges.u[i] = lo;
-            auxEdges.v[i] = hi;
-        }
-
         // sort edges so equivalence classes are adjacent
         for (int i = 0; i < auxEdges.ne; i++) {
             edgeOrder.add(i);
