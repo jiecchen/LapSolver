@@ -1,7 +1,6 @@
-package lapsolver;
+package lapsolver.util.matlab;
 
 import matlabcontrol.MatlabConnectionException;
-import matlabcontrol.MatlabInvocationException;
 import matlabcontrol.MatlabProxy;
 import matlabcontrol.MatlabProxyFactory;
 

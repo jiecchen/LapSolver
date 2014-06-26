@@ -1,5 +1,6 @@
 package lapsolver;
 
+import lapsolver.util.matlab.MatlabConnectionManager;
 import matlabcontrol.MatlabProxy;
 import org.junit.Test;
 import org.junit.Assert;
