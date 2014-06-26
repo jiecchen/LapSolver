@@ -68,7 +68,7 @@ public class KMPSolver {
 
         System.out.println(Arrays.toString(b));
 
-        b = LDLDecomposition.applyInvL(ldl.L, b);
+        b = LDLDecomposition.applyLInv(ldl.L, b);
 
         System.out.println(Arrays.toString(b));
 

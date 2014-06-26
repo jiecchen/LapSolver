@@ -12,6 +12,10 @@ package lapsolver.algorithms;
 import lapsolver.Graph;
 import lapsolver.EdgeList;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+
 public class LDLDecomposition {
     public int N;
     public Graph graph;
@@ -238,28 +242,59 @@ public class LDLDecomposition {
     /*
         TODO: do smart multiplying by L inverse
      */
-    public static double[] applyInvL(EdgeList L, double[] x) {
-        double[] answer = new double[x.length];
+    public static class Operation {
+        public int u;
+        public int v;
+        public double weight;
 
-        for (int i = 0; i < L.ne; i++) {
-            if (L.u[i] != L.v[i])
-                answer[L.u[i]] -= L.weight[i] * x[L.v[i]];
-            else
-                answer[L.u[i]] += L.weight[i] * x[L.v[i]];
+        public Operation(int u, int v, double weight) {
+            this.u = u;
+            this.v = v;
+            this.weight = weight;
+        }
+    }
+
+    public static double[] applyLInv(EdgeList L, double[] x) {
+        ArrayList<Operation> operations = new ArrayList<>();
+        for (int i = 0; i < L.ne; i++)
+            operations.add(new Operation(L.u[i], L.v[i], L.weight[i]));
+        Collections.sort(operations, new Comparator<Operation>() {
+            @Override
+            public int compare(Operation o1, Operation o2) {
+                int vCmp = Integer.compare(o1.v, o2.v);
+                if (vCmp != 0) return vCmp;
+                return Integer.compare(o1.u, o2.u);
+            }
+        });
+
+        for (Operation op : operations) {
+            if (op.u != op.v) {
+                x[op.u] -= op.weight * x[op.v];
+            }
         }
 
-        return answer;
+        return x;
     }
 
     public static double[] applyLTransInv(EdgeList L, double[] x) {
-        double[] answer = new double[x.length];
+        ArrayList<Operation> operations = new ArrayList<>();
+        for (int i = 0; i < L.ne; i++)
+            operations.add(new Operation(L.u[i], L.v[i], L.weight[i]));
+        Collections.sort(operations, new Comparator<Operation>() {
+            @Override
+            public int compare(Operation o1, Operation o2) {
+                int vCmp = Integer.compare(o2.v, o1.v);
+                if (vCmp != 0) return vCmp;
+                return Integer.compare(o2.u, o1.u);
+            }
+        });
 
-        for (int i = 0; i < L.ne; i++) {
-            if (L.v[i] != L.u[i])
-                answer[L.v[i]] -= L.weight[i] * x[L.u[i]];
-            else
-                answer[L.v[i]] += L.weight[i] * x[L.u[i]];
+        for (Operation op : operations) {
+            if (op.u != op.v) {
+                x[op.v] -= op.weight * x[op.u];
+            }
         }
-        return answer;
+
+        return x;
     }
 }
