@@ -44,12 +44,13 @@ public class KMPSolver {
         this.tol = tol;
         this.maxit = maxit;
 
-        if (graph.nv < 5)
+        System.out.println(graph.nv);
+
+        if (graph.nv < 500)
             return runMain(graph, b, addDiag);
 
         //Build the preconditioner for the given graph
         Graph sparsifier = buildPreconditioner(graph, treeStrategy.getTree(graph));
-        sparsifier = new Graph(graph);
 
         //Create the graph that will be used in the recursion (laplacian given by D matrix)
         GraphVertexRemoval gvrElement = new GraphVertexRemoval(sparsifier);
@@ -62,15 +63,10 @@ public class KMPSolver {
         LDLDecomposition ldlElement = new LDLDecomposition(permSparsifier, addDiag);
         LDLDecomposition.ReturnPair ldl = ldlElement.solve(gvr.numRemoved);
 
-        System.out.println(Arrays.toString(gvr.permutation));
         LL = new EdgeList(ldl.L);
         DD = new EdgeList(ldl.D);
 
-        System.out.println(Arrays.toString(b));
-
         b = LDLDecomposition.applyLInv(ldl.L, b);
-
-        System.out.println(Arrays.toString(b));
 
         // grab diagonal elements from D matrix
         double[] diagD = new double[graph.nv];
@@ -218,6 +214,7 @@ public class KMPSolver {
                 lap[graph.nbrs[i][j]][graph.nbrs[i][j]] += graph.weights[i][j] / 2;
             }
         }
+
         for (int i = 0; i < diag.length; i++)
             lap[i][i] += diag[i];
 
