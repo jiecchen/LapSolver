@@ -239,9 +239,6 @@ public class LDLDecomposition {
         return false;
     }
 
-    /*
-        TODO: do smart multiplying by L inverse
-     */
     public static class Operation {
         public int u;
         public int v;

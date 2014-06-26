@@ -11,6 +11,8 @@ package lapsolver.algorithms;
 
 import lapsolver.Graph;
 
+import java.util.Arrays;
+
 public class GraphVertexRemoval {
     public Graph graph;
     public int N;
@@ -167,9 +169,11 @@ public class GraphVertexRemoval {
             if (updatedDeg[i] == 2)
                 last = i;
 
-        for (int i = 0; i < last; i++)
-            if (updatedDeg[i] == 2)
+        for (int i = last - 1; i >= 0; i--)
+            if (updatedDeg[i] == 2) {
                 last = i;
+                break;
+            }
 
         // Add the remaining vertices to the vertex pool
         for (int i = 0; i < last; i++)
