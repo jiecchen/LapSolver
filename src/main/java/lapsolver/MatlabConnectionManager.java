@@ -10,7 +10,6 @@ import matlabcontrol.MatlabProxyFactory;
  */
 public class MatlabConnectionManager {
     private static MatlabProxy proxy = null;
-    private static MatlabConnectionManager instance = null;
 
     static {
         try {
@@ -30,17 +29,7 @@ public class MatlabConnectionManager {
         }
     };
 
-    private MatlabConnectionManager() {
-    }
-
-    public static MatlabConnectionManager getInstance() {
-        if (instance == null) {
-            instance = new MatlabConnectionManager();
-        }
-        return instance;
-    }
-
-    public MatlabProxy getProxy() {
+    public static MatlabProxy getProxy() {
         return proxy;
     }
 }

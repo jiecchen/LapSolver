@@ -7,7 +7,7 @@ import org.junit.Assert;
 public class MatlabConnectionManagerTest {
     @Test
     public void testTestConnection() throws Exception {
-        MatlabProxy proxy = MatlabConnectionManager.getInstance().getProxy();
+        MatlabProxy proxy = MatlabConnectionManager.getProxy();
         proxy.setVariable("a", 10);
         proxy.eval("a = a + 6");
         double a = ((double[]) proxy.getVariable("a"))[0];
