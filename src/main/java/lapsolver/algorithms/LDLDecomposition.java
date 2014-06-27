@@ -124,7 +124,7 @@ public class LDLDecomposition {
         double outerValue = -1;
         for (int i = 0; i < graph.deg[start]; i++)
             if (graph.nbrs[start][i] == outerStart)
-                outerValue = -graph.weights[start][i];
+                outerValue = -1 / graph.weights[start][i];
 
         // newValueInLap is used to mimic the update of the laplacian matrix
         double newValueInLap = outerValue;

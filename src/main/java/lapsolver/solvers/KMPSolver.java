@@ -39,11 +39,11 @@ public class KMPSolver {
 
     //Initialize solver on a particular graph, and perform preprocessing
     public double[] solve(Graph graph, double b[], int level, double[] addDiag) {
-        System.out.println(graph.nv);
+        System.out.println(graph.nv + " " + graph.ne);
         innerGraph = graph;
 
-        // if (graph.nv < 500)
-        if (level >= 1)
+        if (graph.nv < 500)
+        // if (level >= 1)
             return runMain(graph, b, addDiag);
 
         //Build the preconditioner for the given graph
@@ -52,10 +52,13 @@ public class KMPSolver {
         //Create the graph that will be used in the recursion (laplacian given by D matrix)
         GraphVertexRemoval gvrElement = new GraphVertexRemoval(sparsifier);
         GraphVertexRemoval.AnswerPair gvr = gvrElement.solve();
+
+        /*
         gvr.numRemoved = 0;
         for (int i = 0; i < gvr.permutation.length; i++) {
             gvr.permutation[i] = i;
         }
+        */
 
         b = applyPerm(gvr.permutation, b);
         addDiag = applyPerm(gvr.permutation, addDiag);
@@ -68,6 +71,10 @@ public class KMPSolver {
         DD = new EdgeList(ldl.D);
 
         b = LDLDecomposition.applyLInv(ldl.L, b);
+
+        for (int i = 0; i < ldl.D.ne; i++) {
+            ldl.D.weight[i] = 1 / ldl.D.weight[i];
+        }
 
         // grab diagonal elements from D matrix
         double[] diagD = new double[graph.nv];
@@ -137,9 +144,11 @@ public class KMPSolver {
             if (p[i] > 1) p[i] = 1;
         }
 
+        /*
         for (int i = 0; i < offEdges.ne; i++) {
             p[i] = 0.9;
         }
+        */
 
         //Sample the edges
         ArrayList<Integer> edgesToAdd = new ArrayList<Integer>();
@@ -195,16 +204,23 @@ public class KMPSolver {
     //Construct the graph for the next step of the recursion
     public static Graph buildRecursionGraph(Graph graph, GraphVertexRemoval.AnswerPair gvr, LDLDecomposition.ReturnPair ldl) {
         ldl.D = GraphUtils.sanitizeEdgeList(ldl.D);
-        EdgeList reducedSparsifierEdges = new EdgeList(ldl.D.ne);
+        ArrayList<Integer> edgesToAdd = new ArrayList<>();
+
         int index = 0;
         for (int i = 0; i < ldl.D.ne; i++) {
             if (ldl.D.u[i] >= ldl.D.v[i]) continue;
             if (ldl.D.u[i] >= gvr.numRemoved && ldl.D.v[i] >= gvr.numRemoved) {
-                reducedSparsifierEdges.u[index] = ldl.D.u[i] - gvr.numRemoved;
-                reducedSparsifierEdges.v[index] = ldl.D.v[i] - gvr.numRemoved;
-                reducedSparsifierEdges.weight[index] = -ldl.D.weight[i];
-                index++;
+                edgesToAdd.add(i);
             }
+        }
+
+        EdgeList reducedSparsifierEdges = new EdgeList(edgesToAdd.size());
+
+        for (int i : edgesToAdd) {
+            reducedSparsifierEdges.u[index] = ldl.D.u[i] - gvr.numRemoved;
+            reducedSparsifierEdges.v[index] = ldl.D.v[i] - gvr.numRemoved;
+            reducedSparsifierEdges.weight[index] = -ldl.D.weight[i];
+            index++;
         }
 
         return new Graph(reducedSparsifierEdges);
