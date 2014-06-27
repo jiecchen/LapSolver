@@ -18,10 +18,9 @@ import lapsolver.algorithms.Stretch;
 import lapsolver.lsst.SpanningTreeStrategy;
 import lapsolver.util.GraphUtils;
 import lapsolver.util.TreeUtils;
-import matlabcontrol.MatlabConnectionException;
+import lapsolver.util.matlab.MatlabConnectionManager;
 import matlabcontrol.MatlabInvocationException;
 import matlabcontrol.MatlabProxy;
-import matlabcontrol.MatlabProxyFactory;
 import matlabcontrol.extensions.MatlabNumericArray;
 import matlabcontrol.extensions.MatlabTypeConverter;
 
@@ -29,6 +28,7 @@ import java.util.ArrayList;
 
 import static lapsolver.algorithms.GraphVertexRemoval.AnswerPair;
 import static lapsolver.algorithms.LDLDecomposition.ReturnPair;
+import static lapsolver.algorithms.Stretch.StretchResult;
 
 public class KMPSolver {
     private SpanningTreeStrategy treeStrategy;
@@ -48,8 +48,8 @@ public class KMPSolver {
         innerGraph = graph;
 
         if (graph.nv < 500)
-        // if (level >= 1)
-            return runMain(graph, b, addDiag);
+            // if (level >= 1)
+            return solveBaseCase(graph, b, addDiag);
 
         //Build the preconditioner for the given graph
         Graph sparsifier = buildPreconditioner(graph, treeStrategy.getTree(graph));
@@ -103,7 +103,7 @@ public class KMPSolver {
         double[] smallAddDiag = new double[graph.nv - gvr.numRemoved];
         System.arraycopy(addDiag, gvr.numRemoved, smallAddDiag, 0, smallAddDiag.length);
 
-        double[] KMPx = solve(reducedSparsifier, smallb, level+1, smallAddDiag);
+        double[] KMPx = solve(reducedSparsifier, smallb, level + 1, smallAddDiag);
         System.arraycopy(KMPx, 0, x, gvr.numRemoved, KMPx.length);
 
         x = LDLDecomposition.applyLTransInv(ldl.L, x);
@@ -115,7 +115,7 @@ public class KMPSolver {
         return applyPerm(inversePerm, x);
     }
 
-    public static double[] applyPerm (int[] perm, double[] x) {
+    public static double[] applyPerm(int[] perm, double[] x) {
         double[] answer = new double[perm.length];
 
         for (int i = 0; i < x.length; i++)
@@ -130,14 +130,14 @@ public class KMPSolver {
 
         //Get off-tree edges, find stretches
         offEdges = TreeUtils.getOffTreeEdges(graph, spanningTree);
-        Stretch.StretchResult stretch = Stretch.compute(graph, spanningTree, offEdges);
+        StretchResult stretch = Stretch.compute(graph, spanningTree, offEdges);
 
         //Blow up graph by 4 * avgstretch * log(numRemoved)
         double k = 4. * stretch.total / (offEdges.ne + 1) * (Math.log(graph.nv) + 1) + 1;
         Graph blownUpGraph = blowUpTreeEdges(graph, spanningTree, k);
 
         // find stretches in blown-up graph
-        Stretch.StretchResult blownUpStretch = Stretch.compute(blownUpGraph, spanningTree, offEdges);
+        StretchResult blownUpStretch = Stretch.compute(blownUpGraph, spanningTree, offEdges);
 
         // Expect to grab q = O(m / log(m)) edges
         double q = 10. * graph.ne / Math.log(graph.ne);
@@ -156,7 +156,7 @@ public class KMPSolver {
         */
 
         //Sample the edges
-        ArrayList<Integer> edgesToAdd = new ArrayList<Integer>();
+        ArrayList<Integer> edgesToAdd = new ArrayList<>();
         for (int i = 0; i < offEdges.ne; i++) {
             if (Math.random() < p[i]) {
                 // with probability p[i], take edge i
@@ -232,7 +232,7 @@ public class KMPSolver {
     }
 
     //Construct the graph laplacian and call the pcg solver
-    public double[] runMain(Graph graph, double[] b, double[] diag) {
+    public double[] solveBaseCase(Graph graph, double[] b, double[] diag) {
         double[][] lap = new double[graph.nv][graph.nv];
         for (int i = 0; i < graph.nv; i++) {
             for (int j = 0; j < graph.deg[i]; j++) {
@@ -245,9 +245,20 @@ public class KMPSolver {
             lap[i][i] += diag[i];
 
         try {
-            return main(lap, b);
-        } catch (MatlabConnectionException e) {
-            e.printStackTrace();
+            //Create a proxy, which we will use to control MATLAB
+            MatlabProxy proxy = MatlabConnectionManager.getProxy();
+
+            //Send the laplacian to MATLAB
+            MatlabTypeConverter processor = new MatlabTypeConverter(proxy);
+            processor.setNumericArray("internal_Lap", new MatlabNumericArray(lap, null));
+            proxy.setVariable("internal_b", b);
+
+//        proxy.setVariable("internal_x", x);
+//        proxy.setVariable("internal_tol", 0.0001);
+//        proxy.setVariable("internal_maxit", 10000);
+//        proxy.eval("internal_x = pcg(internal_Lap, internal_b', internal_tol, internal_maxit);");
+
+            return (double[]) proxy.getVariable("internal_x");
         } catch (MatlabInvocationException e) {
             e.printStackTrace();
         }
@@ -255,32 +266,4 @@ public class KMPSolver {
         return null;
     }
 
-    //Call pcg in matlab from java
-    public static double[] main(double[][] lap, double[] b) throws MatlabConnectionException, MatlabInvocationException
-    {
-        double[] x = new double[b.length];
-
-        //Create a proxy, which we will use to control MATLAB
-        MatlabProxyFactory factory = new MatlabProxyFactory();
-        MatlabProxy proxy = factory.getProxy();
-
-        //Send the laplacian to MATLAB
-        MatlabTypeConverter processor = new MatlabTypeConverter(proxy);
-        processor.setNumericArray("internal_Lap", new MatlabNumericArray(lap, null));
-        proxy.setVariable("internal_b", b);
-
-//        proxy.setVariable("internal_x", x);
-//        proxy.setVariable("internal_tol", 0.0001);
-//        proxy.setVariable("internal_maxit", 10000);
-//        proxy.eval("internal_x = pcg(internal_Lap, internal_b', internal_tol, internal_maxit);");
-
-        proxy.eval("internal_x = pinv(internal_Lap) * internal_b';");
-
-        x = (double[]) proxy.getVariable("internal_x");
-
-        //Disconnect the proxy from MATLAB
-        proxy.disconnect();
-
-        return x;
-    }
 }
