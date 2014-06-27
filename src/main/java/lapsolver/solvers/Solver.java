@@ -11,7 +11,10 @@ package lapsolver.solvers;
 import lapsolver.Graph;
 
 public interface Solver {
-    // initialize solver on a particular graph, and perform preprocessing
+    /**
+     * Initialize solver on a particular graph, and perform preprocessing.
+     * @param graph The input graph (weights are conductances).
+     */
     public void init(Graph graph);
 
     // solve for x in Lx = b

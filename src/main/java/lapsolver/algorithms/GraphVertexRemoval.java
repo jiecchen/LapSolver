@@ -18,6 +18,9 @@ public class GraphVertexRemoval {
     public final int[] removed;
     public final int[] updatedDeg;
 
+    /**
+     * @param g The input graph (weights are either conductances or resistances).
+     */
     public GraphVertexRemoval(Graph g) {
         this.graph = g;
         this.N = g.nv;

@@ -18,6 +18,12 @@ public class Petal {
         return charVec;
     }
 
+    /**
+     * @param graph The input graph (weights are resistances).
+     * @param x0 The center of the petal.
+     * @param target The target of the petal.
+     * @param radius The radius of the petal.
+     */
     public Petal (Graph graph, int x0, int target, double radius) {
         ShortestPathTree tree_x0 = new ShortestPathTree(graph, x0);
         double[] dist_x0 = tree_x0.getDist();

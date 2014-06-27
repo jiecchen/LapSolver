@@ -37,15 +37,19 @@ public class LDLDecomposition {
         }
     }
 
-    // Constructor for making full LDL factorization with graph and addition matrix
+    /**
+     * Constructor for making full LDL factorization with graph and addition matrix
+     * @param G The input graph (weights are conductances).
+     * @param diagValues Excess diagonal entries (weights are conductances).
+     */
     public LDLDecomposition(Graph G, double[] diagValues) {
-        this.graph = GraphUtils.changeToMatrixEntries(new Graph(G));
+        this.graph = G;
         this.N = graph.nv;
         this.X = new double[N];
         this.updatedDeg = new int[N];
 
         if (N != diagValues.length) {
-            throw new Error("Graph and addition matrix have different sizes");
+            throw new IllegalArgumentException("Graph and addition matrix have different sizes");
         }
 
         System.arraycopy(diagValues, 0, this.X, 0, N);
@@ -54,6 +58,11 @@ public class LDLDecomposition {
     EdgeList L;
     EdgeList D;
 
+    /**
+     *
+     * @param numSteps The number of Cholesky factorization steps.
+     * @return A pair of edge lists for L and D (weights are conductances).
+     */
     public ReturnPair solve(int numSteps) {
         L = new EdgeList();
         D = new EdgeList();

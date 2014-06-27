@@ -15,6 +15,11 @@ import lapsolver.Tree;
 import lapsolver.util.TreeUtils;
 
 public class Congestion {
+    /**
+     * @param graph The input graph (weights are resistances).
+     * @param spanningTree A spanning tree of the graph (weights are resistances).
+     * @return
+     */
     public static Tree compute(Graph graph, Tree spanningTree) {
         double[] vertexWeights = computeVertexWeights(spanningTree, graph);
         return computeCongestionTree(spanningTree, vertexWeights);

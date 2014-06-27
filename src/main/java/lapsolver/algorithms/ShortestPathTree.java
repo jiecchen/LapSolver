@@ -37,6 +37,11 @@ public class ShortestPathTree {
 
     public double getRadius() { return radius; }
 
+    /**
+     * @param G The input graph (weights are resistances).
+     * @param source The source (root) of the shortest path tree.
+     * @param ignore A vector to ignore vertices (set to non-(-1) to ignore)
+     */
     public ShortestPathTree(Graph G, int source, int[] ignore) {
         dist = new double[G.nv];
         parent = new int[G.nv];
@@ -91,7 +96,7 @@ public class ShortestPathTree {
     /**
      * Construct a shortest-path tree for a given graph and source node
      *
-     * @param G      the input graph
+     * @param G      the input graph (weights are resistances).
      * @param source the starting node
      */
     public ShortestPathTree(Graph G, int source) {

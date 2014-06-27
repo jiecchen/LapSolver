@@ -13,5 +13,10 @@ import lapsolver.Tree;
 import lapsolver.Graph;
 
 public interface SpanningTreeStrategy {
+    /**
+     *
+     * @param graph
+     * @return
+     */
     public Tree getTree(Graph graph);
 }

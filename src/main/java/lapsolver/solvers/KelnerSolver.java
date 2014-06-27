@@ -19,10 +19,12 @@ import lapsolver.lsst.SpanningTreeStrategy;
 import lapsolver.solvers.kelner.DirectFlowTree;
 import lapsolver.solvers.kelner.FlowTree;
 import lapsolver.solvers.kelner.KelnerFlowTree;
+import lapsolver.util.GraphUtils;
 import lapsolver.util.TreeUtils;
 import lapsolver.solvers.TreeSolver;
 
 public class KelnerSolver implements Solver {
+    public Graph graph;
     public Tree spanningTree;
     private SpanningTreeStrategy treeStrategy;
     private FlowTree flowTree;
@@ -44,13 +46,16 @@ public class KelnerSolver implements Solver {
     // initialize solver on a particular graph, and perform preprocessing
     @Override
     public void init(Graph graph) {
+        this.graph = new Graph(graph);
+        GraphUtils.reciprocateWeights(this.graph);
+
         // compute LSST, cache BFS order
-        spanningTree = treeStrategy.getTree(graph);
+        spanningTree = treeStrategy.getTree(this.graph);
         order = TreeUtils.bfsOrder(spanningTree);
 
         // get off-tree edges, find stretches, initialize sampler
-        offEdges = TreeUtils.getOffTreeEdges(graph, spanningTree);
-        offStretch = Stretch.compute(graph, spanningTree, offEdges).allStretches;
+        offEdges = TreeUtils.getOffTreeEdges(this.graph, spanningTree);
+        offStretch = Stretch.compute(this.graph, spanningTree, offEdges).allStretches;
         edgeSampler = new DiscreteSampler(offStretch);
 
         // initialize feasible flow finder for spanning tree

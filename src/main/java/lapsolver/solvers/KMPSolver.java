@@ -76,10 +76,6 @@ public class KMPSolver {
 
         b = LDLDecomposition.applyLInv(ldl.L, b);
 
-        for (int i = 0; i < ldl.D.ne; i++) {
-            ldl.D.weight[i] = 1 / ldl.D.weight[i];
-        }
-
         // grab diagonal elements from D matrix
         double[] diagD = new double[graph.nv];
         for (int i = 0; i < ldl.D.ne; i++) {

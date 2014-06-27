@@ -13,7 +13,13 @@ import lapsolver.Graph;
 import lapsolver.EdgeList;
 
 public class Stretch {
-    // compute stretches for a list of edges
+    /**
+     * compute stretches for a list of edges
+     * @param graph The input graph (weights are resistances).
+     * @param spanningTree A spanning tree of the graph (weights are resistances).
+     * @param edges The set of edges of which to take the stretch (weights are resistances).
+     * @return An array of stretches for each edge, paired with the total stretch.
+     */
     public static StretchResult compute(Graph graph, Tree spanningTree, EdgeList edges) {
         // get tree path lengths
         TreePath tp = new TreePath(spanningTree);

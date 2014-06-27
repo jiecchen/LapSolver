@@ -8,7 +8,7 @@ function g = a2g(a, datastruct)
     end
     
     [ai,aj,av] = find(tril(a));
-    edges = EdgeList(ai-1, aj-1, 1./av);
+    edges = EdgeList(ai-1, aj-1, av);
     
     if strcmp(datastruct, 'graph')
         g = Graph(edges);

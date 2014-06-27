@@ -17,7 +17,11 @@ import lapsolver.util.TreeUtils;
 import java.util.Arrays;
 
 public class TreeSeparator {
-    // Find a tree separator.
+    /**
+     * Finds a tree separator.
+     * @param tree The input tree (weights are conductances or resistances).
+     * @return The index of a separator.
+     */
     public static int find (Tree tree) {
         int[] order = TreeUtils.dfsOrder(tree);
         int[] sizes = new int[tree.nv]; // subtree sizes

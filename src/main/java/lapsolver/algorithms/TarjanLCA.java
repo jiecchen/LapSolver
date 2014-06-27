@@ -24,7 +24,10 @@ public class TarjanLCA {
     private final int[][] queries;
     private final int[][] queryIndices;
 
-    // initialize state
+    /**
+     * Initialize the scratch space needed for the algorithm.
+     * @param tree The input tree (weights are conductances or resistances).
+     */
     public TarjanLCA (Tree tree) {
         this.tree = tree;
 

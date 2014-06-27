@@ -23,7 +23,10 @@ public class TreePath {
     private final Tree tree;
     public double depth[];
 
-    // constructor: do precomputations
+    /**
+     * Initialize the data structure with tree depths.
+     * @param tree The input tree (weights are resistances).
+     */
     public TreePath (Tree tree) {
         this.tree = tree;
         depth = new double[tree.nv];

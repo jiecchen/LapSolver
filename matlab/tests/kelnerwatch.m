@@ -9,18 +9,16 @@ function [x, errs] = kelnerwatch( a, b, iters )
 
     g = a2g(a);
     
-    strat = SimulPathTree;
-    solver = KelnerSolver(strat);
+    solver = KelnerSolver(SimulPathTree);
     solver.init(g);
     solver.solve_init(b);
-    
-    stretch = Stretch.compute(g, solver.spanningTree).total
-    
+
+    la = lap(a);
     errs = zeros(1,iters);
     for i = 1:iters
         solver.solve_iter;
         x = solver.solve_return;
-        errs(i) = norm(lap(a)*x - b);
+        errs(i) = norm(la*x - b);
     end
 end
 

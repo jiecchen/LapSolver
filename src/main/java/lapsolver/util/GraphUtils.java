@@ -198,7 +198,6 @@ public class GraphUtils {
         int firstEqualEdge = -1;
         for (int i = 0; i < auxEdges.ne; i++) {
             int curIndex = edgeOrder.get(i);
-            if (auxEdges.u[curIndex] == auxEdges.v[curIndex]) continue;
             if (firstEqualEdge == -1
                     || auxEdges.u[edgeOrder.get(i-1)] != auxEdges.u[curIndex]
                     || auxEdges.v[edgeOrder.get(i-1)] != auxEdges.v[curIndex]) {
@@ -225,11 +224,11 @@ public class GraphUtils {
         return keptEdges;
     }
 
-    public static Graph changeToMatrixEntries(Graph graph) {
-        for (int i = 0; i < graph.nv; i++)
-            for (int j = 0; j < graph.deg[i]; j++)
+    public static void reciprocateWeights(Graph graph) {
+        for (int i = 0; i < graph.nv; i++) {
+            for (int j = 0; j < graph.deg[i]; j++) {
                 graph.weights[i][j] = 1 / graph.weights[i][j];
-
-        return graph;
+            }
+        }
     }
 }

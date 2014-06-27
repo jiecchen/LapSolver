@@ -22,6 +22,11 @@ public class Cone {
         return coneDist;
     }
 
+    /**
+     * @param graph The input graph (weights are resistances).
+     * @param x0 The center of the cone.
+     * @param x The target of the cone.
+     */
     public Cone (Graph graph, int x0, int x) {
         ShortestPathTree tree_x0 = new ShortestPathTree(graph, x0);
         ShortestPathTree tree_x = new ShortestPathTree(graph, x);
