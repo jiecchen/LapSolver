@@ -47,8 +47,7 @@ public class KMPSolver {
         System.out.println(graph.nv + " " + graph.ne);
         innerGraph = graph;
 
-        if (graph.nv < 500)
-            // if (level >= 1)
+        if (graph.nv < 500 || level == 0)
             return solveBaseCase(graph, b, addDiag);
 
         //Build the preconditioner for the given graph
@@ -58,12 +57,12 @@ public class KMPSolver {
         GraphVertexRemoval gvrElement = new GraphVertexRemoval(sparsifier);
         AnswerPair gvr = gvrElement.solve();
 
-        /*
+/*
         gvr.numRemoved = 0;
         for (int i = 0; i < gvr.permutation.length; i++) {
             gvr.permutation[i] = i;
         }
-        */
+*/
 
         b = applyPerm(gvr.permutation, b);
         addDiag = applyPerm(gvr.permutation, addDiag);
@@ -103,7 +102,7 @@ public class KMPSolver {
         double[] smallAddDiag = new double[graph.nv - gvr.numRemoved];
         System.arraycopy(addDiag, gvr.numRemoved, smallAddDiag, 0, smallAddDiag.length);
 
-        double[] KMPx = solve(reducedSparsifier, smallb, level + 1, smallAddDiag);
+        double[] KMPx = solve(reducedSparsifier, smallb, level - 1, smallAddDiag);
         System.arraycopy(KMPx, 0, x, gvr.numRemoved, KMPx.length);
 
         x = LDLDecomposition.applyLTransInv(ldl.L, x);
@@ -258,7 +257,7 @@ public class KMPSolver {
 //        proxy.setVariable("internal_maxit", 10000);
 //        proxy.eval("internal_x = pcg(internal_Lap, internal_b', internal_tol, internal_maxit);");
 
-            proxy.eval("internal_x = pinv(internal_Lap) * internal_b'");
+            proxy.eval("internal_x = pinv(internal_Lap) * internal_b';");
 
             return (double[]) proxy.getVariable("internal_x");
         } catch (MatlabInvocationException e) {
