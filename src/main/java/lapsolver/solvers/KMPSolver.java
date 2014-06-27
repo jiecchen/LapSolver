@@ -258,6 +258,8 @@ public class KMPSolver {
 //        proxy.setVariable("internal_maxit", 10000);
 //        proxy.eval("internal_x = pcg(internal_Lap, internal_b', internal_tol, internal_maxit);");
 
+            proxy.eval("internal_x = pinv(internal_Lap) * internal_b'");
+
             return (double[]) proxy.getVariable("internal_x");
         } catch (MatlabInvocationException e) {
             e.printStackTrace();
