@@ -11,23 +11,19 @@ package lapsolver.algorithms;
 
 import lapsolver.Graph;
 
-import java.util.Arrays;
-
 public class GraphVertexRemoval {
-    public Graph graph;
-    public int N;
+    public final Graph graph;
+    public final int N;
 
-    public int[] removed;
-    public int[] updatedDeg;
+    public final int[] removed;
+    public final int[] updatedDeg;
 
     public GraphVertexRemoval(Graph g) {
         this.graph = g;
         this.N = g.nv;
         this.removed = new int[N];
 
-        this.updatedDeg = new int[N];
-        for (int i = 0; i < N; i++)
-            updatedDeg[i] = graph.deg[i];
+        this.updatedDeg = graph.deg.clone();
     }
 
     public class AnswerPair {
@@ -38,9 +34,7 @@ public class GraphVertexRemoval {
         }
 
         public AnswerPair(int[] elementList, int value) {
-            this.permutation = new int[N];
-            System.arraycopy(elementList, 0, this.permutation, 0, N);
-
+            this.permutation = elementList.clone();
             this.numRemoved = value;
         }
     }
@@ -66,8 +60,8 @@ public class GraphVertexRemoval {
         return finalAnswer;
     }
 
-    /*
-        Remove the degree two vertices.
+    /**
+     * Remove the degree two vertices.
      */
     public AnswerPair removeDegreeTwo() {
         AnswerPair isDeg2Cycle = checkForDeg2Cycle();
@@ -75,14 +69,15 @@ public class GraphVertexRemoval {
             return isDeg2Cycle;
 
         // Will eliminate successive chains of degree two
-        AnswerPair deg2rem = removeDeg2Chains();
-
-        return deg2rem;
+        return removeDeg2Chains();
     }
 
-    /*
-        Removes the degree two vertices from the graph as chains. If both ends of the chain are connected to the same vertex
-        with degree greater than two, then return all the elements of the chain but one end.
+    /**
+     * Removes the degree two vertices from the graph as chains.
+     * If both ends of the chain are connected to the same vertex with degree greater than two,
+     * then return all the elements of the chain but one end.
+     *
+     * @return the elements of the chain
      */
     public AnswerPair removeDeg2Chains() {
         int[] unRemovable = new int[N];
@@ -101,8 +96,6 @@ public class GraphVertexRemoval {
                     int newIndex = index;
                     if (updatedDeg[u] == 2 && removed[u] == 0) {
                         // This is a degree two chain
-
-                        int outerStart = i;
 
                         while (updatedDeg[u] == 2) {
                             removed[u] = 1;
@@ -128,9 +121,7 @@ public class GraphVertexRemoval {
                             u = v;
                         }
 
-                        int outerStop = u;
-
-                        if (outerStart == outerStop) {
+                        if (u == i) {
                             // If the chain is connected to the same outer vertex at both ends, then one of its
                             // vertices should be ignored.
 
@@ -143,12 +134,12 @@ public class GraphVertexRemoval {
                 }
             }
 
-        return (new AnswerPair(chains, index));
+        return new AnswerPair(chains, index);
     }
 
-    /*
-        Checks if the graph composed by the remaining vertices is a degree 2 cycle. If it is, return all but two
-        of the remaining vertices.
+    /**
+     * Checks if the graph composed by the remaining vertices is a degree 2 cycle.
+     * @return all but two of the remaining vertices, if it is
      */
     public AnswerPair checkForDeg2Cycle() {
         AnswerPair ans = new AnswerPair();
@@ -183,8 +174,9 @@ public class GraphVertexRemoval {
         return ans;
     }
 
-    /*
-        Remove the degree one vertices.
+    /**
+     * Remove the degree one vertices
+     * @return
      */
     public AnswerPair removeDegreeOne() {
         int[] bfsQueue = new int[N];
@@ -214,7 +206,7 @@ public class GraphVertexRemoval {
             }
         }
 
-        return (new AnswerPair(bfsQueue, right));
+        return new AnswerPair(bfsQueue, right);
     }
 
     public AnswerPair constructPerm(AnswerPair ap) {
