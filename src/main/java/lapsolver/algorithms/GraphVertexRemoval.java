@@ -26,7 +26,7 @@ public class GraphVertexRemoval {
         this.updatedDeg = graph.deg.clone();
     }
 
-    public class AnswerPair {
+    public static class AnswerPair {
         public int[] permutation;
         public int numRemoved;
 

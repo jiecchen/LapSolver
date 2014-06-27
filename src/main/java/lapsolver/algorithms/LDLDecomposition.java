@@ -27,7 +27,7 @@ public class LDLDecomposition {
     public int Lindex = 0;
     public int Dindex = 0;
 
-    public class ReturnPair {
+    public static class ReturnPair {
         public EdgeList L;
         public EdgeList D;
 

@@ -18,12 +18,17 @@ import lapsolver.algorithms.Stretch;
 import lapsolver.lsst.SpanningTreeStrategy;
 import lapsolver.util.GraphUtils;
 import lapsolver.util.TreeUtils;
-
-import matlabcontrol.*;
-import matlabcontrol.extensions.*;
+import matlabcontrol.MatlabConnectionException;
+import matlabcontrol.MatlabInvocationException;
+import matlabcontrol.MatlabProxy;
+import matlabcontrol.MatlabProxyFactory;
+import matlabcontrol.extensions.MatlabNumericArray;
+import matlabcontrol.extensions.MatlabTypeConverter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+
+import static lapsolver.algorithms.GraphVertexRemoval.AnswerPair;
+import static lapsolver.algorithms.LDLDecomposition.ReturnPair;
 
 public class KMPSolver {
     private SpanningTreeStrategy treeStrategy;
@@ -51,7 +56,7 @@ public class KMPSolver {
 
         //Create the graph that will be used in the recursion (laplacian given by D matrix)
         GraphVertexRemoval gvrElement = new GraphVertexRemoval(sparsifier);
-        GraphVertexRemoval.AnswerPair gvr = gvrElement.solve();
+        AnswerPair gvr = gvrElement.solve();
 
         /*
         gvr.numRemoved = 0;
@@ -65,7 +70,7 @@ public class KMPSolver {
         Graph permSparsifier = GraphUtils.permuteGraph(sparsifier, gvr.permutation);
 
         LDLDecomposition ldlElement = new LDLDecomposition(permSparsifier, addDiag);
-        LDLDecomposition.ReturnPair ldl = ldlElement.solve(gvr.numRemoved);
+        ReturnPair ldl = ldlElement.solve(gvr.numRemoved);
 
         LL = new EdgeList(ldl.L);
         DD = new EdgeList(ldl.D);
@@ -202,7 +207,7 @@ public class KMPSolver {
     }
 
     //Construct the graph for the next step of the recursion
-    public static Graph buildRecursionGraph(Graph graph, GraphVertexRemoval.AnswerPair gvr, LDLDecomposition.ReturnPair ldl) {
+    public static Graph buildRecursionGraph(Graph graph, AnswerPair gvr, ReturnPair ldl) {
         ldl.D = GraphUtils.sanitizeEdgeList(ldl.D);
         ArrayList<Integer> edgesToAdd = new ArrayList<>();
 
