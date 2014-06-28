@@ -44,7 +44,7 @@ public class TarjanLCA {
     // preprocess, solve, return answers
     public int[] solve (int[] a, int[] b) {
         if (a.length != b.length) {
-            throw new Error("LCA query arrays should have same length");
+            throw new IllegalArgumentException("LCA query arrays should have same length");
         }
         int nq = a.length;
         int[] answer = new int[nq];

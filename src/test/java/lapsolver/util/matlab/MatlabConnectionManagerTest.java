@@ -1,4 +1,4 @@
-package lapsolver;
+package lapsolver.util.matlab;
 
 import lapsolver.util.matlab.MatlabConnectionManager;
 import matlabcontrol.MatlabProxy;
