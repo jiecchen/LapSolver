@@ -35,6 +35,8 @@ public class KelnerFlowTree extends FlowTree {
 
     // initialize the structure with some flows
     public void setTreeFlows(double[] treeFlows) {
+        clearFlows(rootStructure);
+
         int[] order = TreeUtils.dfsOrder(tree);
         double[] flowTo = new double[tree.nv];
 
@@ -65,6 +67,16 @@ public class KelnerFlowTree extends FlowTree {
         }
 
         return flowUp;
+    }
+
+    // set all flows to 0
+    private void clearFlows(SeparatorNode node) {
+        node.drop = 0;
+        node.ext = 0;
+
+        for (SeparatorNode child : node.children) {
+            clearFlows(child);
+        }
     }
 
     // recursively defined data structure

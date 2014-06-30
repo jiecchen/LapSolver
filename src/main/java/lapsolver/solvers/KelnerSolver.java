@@ -9,6 +9,7 @@
 package lapsolver.solvers;
 
 import java.lang.Math;
+
 import lapsolver.algorithms.DiscreteSampler;
 import lapsolver.algorithms.Stretch;
 import lapsolver.solvers.Solver;
@@ -33,6 +34,7 @@ public class KelnerSolver implements Solver {
     // edge data to be preprocessed
     private EdgeList offEdges;
     private double[] offStretch;
+    private double totalStretch;
     private DiscreteSampler edgeSampler;
 
     // algorithm state
@@ -55,7 +57,9 @@ public class KelnerSolver implements Solver {
 
         // get off-tree edges, find stretches, initialize sampler
         offEdges = TreeUtils.getOffTreeEdges(this.graph, spanningTree);
-        offStretch = Stretch.compute(this.graph, spanningTree, offEdges).allStretches;
+        Stretch.StretchResult stretchResult = Stretch.compute(this.graph, spanningTree, offEdges);
+        offStretch = stretchResult.allStretches;
+        totalStretch = stretchResult.total + graph.ne;
         edgeSampler = new DiscreteSampler(offStretch);
 
         // initialize feasible flow finder for spanning tree
@@ -63,13 +67,15 @@ public class KelnerSolver implements Solver {
         treeSolver.init(spanningTree);
 
         // initialize the cycle query data structure
-        flowTree = new KelnerFlowTree(spanningTree, offEdges);
+        flowTree = new DirectFlowTree(spanningTree, offEdges);
     }
 
     // solve for x in Lx = b, with default parameters
     @Override
     public double[] solve(double[] b) {
-        return solve (b, spanningTree.nv + offEdges.ne);
+        int iters = (int) Math.ceil(totalStretch * Math.log(totalStretch));
+        System.out.println("KelnerSolver: " + iters + " iterations");
+        return solve (b, iters);
     }
 
     // solve for x in Lx = b, with number of iterations
