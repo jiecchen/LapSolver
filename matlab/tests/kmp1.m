@@ -7,7 +7,7 @@ function [x, err] = kmp1(a, b)
     D = zeros(1,length(a));
     la = lap(a) + diag(D);
     kmp = KMPSolver(StarDecompositionTree);
-    x = kmp.solve(g,b,1,D);
+    x = kmp.solve(g,b,100,D);
     err = norm(la*x - b);
 end
 
