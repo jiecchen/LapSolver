@@ -25,6 +25,7 @@ import matlabcontrol.extensions.MatlabNumericArray;
 import matlabcontrol.extensions.MatlabTypeConverter;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import static lapsolver.algorithms.GraphVertexRemoval.AnswerPair;
 import static lapsolver.algorithms.LDLDecomposition.ReturnPair;
@@ -84,7 +85,7 @@ public class KMPSolver {
             }
         }
 
-        Graph reducedSparsifier = buildRecursionGraph(graph, gvr, ldl);
+        Graph reducedSparsifier = buildReducedSparsifier(graph, gvr, ldl);
 
         // for eliminated vertices, x[i] = b[i]/D[i,i]
         double[] x = new double[graph.nv];
@@ -125,14 +126,19 @@ public class KMPSolver {
 
         //Get off-tree edges, find stretches
         offEdges = TreeUtils.getOffTreeEdges(graph, spanningTree);
+
+        GraphUtils.reciprocateWeights(graph);
         StretchResult stretch = Stretch.compute(graph, spanningTree, offEdges);
+        GraphUtils.reciprocateWeights(graph);
 
         //Blow up graph by 4 * avgstretch * log(numRemoved)
         double k = 4. * stretch.total / (offEdges.ne + 1) * (Math.log(graph.nv) + 1) + 1;
         Graph blownUpGraph = blowUpTreeEdges(graph, spanningTree, k);
 
         // find stretches in blown-up graph
+        GraphUtils.reciprocateWeights(blownUpGraph);
         StretchResult blownUpStretch = Stretch.compute(blownUpGraph, spanningTree, offEdges);
+        GraphUtils.reciprocateWeights(blownUpGraph);
 
         // Expect to grab q = O(m / log(m)) edges
         double q = 10. * graph.ne / Math.log(graph.ne);
@@ -180,6 +186,8 @@ public class KMPSolver {
             index++;
         }
 
+        checkSparsifier(graph, new Graph(sparsifierEdges));
+
         //Build sparsified graph
         return new Graph(sparsifierEdges);
     }
@@ -202,7 +210,7 @@ public class KMPSolver {
     }
 
     //Construct the graph for the next step of the recursion
-    public static Graph buildRecursionGraph(Graph graph, AnswerPair gvr, ReturnPair ldl) {
+    public static Graph buildReducedSparsifier(Graph graph, AnswerPair gvr, ReturnPair ldl) {
         ldl.D = GraphUtils.sanitizeEdgeList(ldl.D);
         ArrayList<Integer> edgesToAdd = new ArrayList<>();
 
@@ -263,4 +271,40 @@ public class KMPSolver {
         return null;
     }
 
+    public static void checkSparsifier(Graph G, Graph H) {
+        int count = 0;
+
+        for (int iter = 0; iter < 100; iter++) {
+            double[] x = new double[G.nv];
+            for (int i = 0; i < x.length; i++) {
+                Random r = new Random();
+                x[i] = 10 * r.nextDouble();
+            }
+
+            double xLgx = 0;
+            for (int i = 0; i < G.nv; i++)
+                for (int j = 0; j < G.deg[i]; j++) {
+                    int u = i;
+                    int v = G.nbrs[i][j];
+                    double w = G.weights[i][j];
+
+                    xLgx = xLgx + (x[u] - x[v]) * (x[u] - x[v]) * w;
+                }
+
+            double xLhx = 0;
+            for (int i = 0; i < H.nv; i++)
+                for (int j = 0; j < H.deg[i]; j++) {
+                    int u = i;
+                    int v = H.nbrs[i][j];
+                    double w = H.weights[i][j];
+
+                    xLhx = xLhx + (x[u] - x[v]) * (x[u] - x[v]) * w;
+                }
+
+            //System.out.println(xLgx + " " + xLhx);
+            if (xLhx > xLgx)
+                count++;
+        }
+        System.out.println(count);
+    }
 }
