@@ -15,7 +15,7 @@ function a = randTree( n, excess )
     end
     
     a = sparse(ai,aj,ak,n,n);
-    a = a + a';
+    a = (a + a') * rand(1,1);
     
     % construct off-tree edges
     for i = 1:excess

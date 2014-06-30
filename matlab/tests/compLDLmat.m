@@ -35,7 +35,6 @@ function compLDLmat(graph)
     valueD = 0;
     if valueL > eps || valueD > eps
         fprintf('%d %d WA\n', graph.nv, graph.ne);
-        keyboard
     else
         fprintf('%d %d GG\n', graph.nv, graph.ne);
     end
