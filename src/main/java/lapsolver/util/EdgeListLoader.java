@@ -1,5 +1,5 @@
 /**
- * @file StarDecompositionTree.java
+ * @file EdgeListLoader.java
  * @author Alex Reinking <alexander.reinking@yale.edu>
  * @date Thu Jun 19 2014
  *
@@ -17,11 +17,11 @@ import java.util.regex.Pattern;
 
 public class EdgeListLoader {
 
-    public EdgeList loadFromCSV(String fileName) throws IOException {
+    public static EdgeList loadFromCSV(String fileName) throws IOException {
         return loadFromCSV(fileName, ",");
     }
 
-    public EdgeList loadFromCSV(String fileName, String delimiter) throws IOException {
+    public static EdgeList loadFromCSV(String fileName, String delimiter) throws IOException {
         ArrayList<Integer> arU = new ArrayList<>();
         ArrayList<Integer> arV = new ArrayList<>();
         ArrayList<Double> arW = new ArrayList<>();

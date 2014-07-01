@@ -7,14 +7,15 @@ import lapsolver.util.GraphUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static lapsolver.algorithms.GraphVertexRemoval.AnswerPair;
+import static lapsolver.algorithms.LDLDecomposition.ReturnPair;
 
 public class LDLDecompositionTest {
     EdgeList testCaseEdges;
 
     @Before
     public void setUp() throws Exception {
-        testCaseEdges = new EdgeListLoader().loadFromCSV("ldltest.csv");
+        testCaseEdges = EdgeListLoader.loadFromCSV("ldltest.csv");
     }
 
     @Test
@@ -26,12 +27,12 @@ public class LDLDecompositionTest {
             X[i] = Math.random();
         }
 
-        GraphVertexRemoval.AnswerPair gvmPair = new GraphVertexRemoval(graph).solve();
+        AnswerPair gvmPair = new GraphVertexRemoval(graph).solve();
         int[] perm = gvmPair.permutation;
         int numRemoved = gvmPair.numRemoved;
 
         Graph g = new Graph(GraphUtils.permuteGraph(graph, perm));
         LDLDecomposition ldl = new LDLDecomposition(g, X);
-        LDLDecomposition.ReturnPair result = ldl.solve(numRemoved);
+        ReturnPair result = ldl.solve(numRemoved);
     }
 }

@@ -4,7 +4,7 @@
 % called by init function
 
 clear java
-javaaddpath target/LapSolver.jar
+javaaddpath target/LapSolver-full.jar
 javaaddpath deps/matlabcontrol-4.1.0.jar
 import lapsolver.*;
 import lapsolver.algorithms.*;

@@ -9,9 +9,8 @@
 
 package lapsolver.algorithms;
 
-import lapsolver.Graph;
 import lapsolver.EdgeList;
-import lapsolver.util.GraphUtils;
+import lapsolver.Graph;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,7 +38,8 @@ public class LDLDecomposition {
 
     /**
      * Constructor for making full LDL factorization with graph and addition matrix
-     * @param G The input graph (weights are conductances).
+     *
+     * @param G          The input graph (weights are conductances).
      * @param diagValues Excess diagonal entries (weights are conductances).
      */
     public LDLDecomposition(Graph G, double[] diagValues) {
@@ -59,7 +59,6 @@ public class LDLDecomposition {
     EdgeList D;
 
     /**
-     *
      * @param numSteps The number of Cholesky factorization steps.
      * @return A pair of edge lists for L and D (weights are conductances).
      */
@@ -77,8 +76,7 @@ public class LDLDecomposition {
         for (int i = 0; i < numSteps; i++)
             if (updatedDeg[i] == 1) {                       // Eliminate the degree one vertices
                 remDeg1(i);
-            }
-            else {                                          // Eliminate the degree two vertices
+            } else {                                          // Eliminate the degree two vertices
                 // Will eliminate a chain starting at 'start' and ending at 'stop'
                 int start = i;
                 int stop = i;
@@ -103,8 +101,7 @@ public class LDLDecomposition {
 
                             break;
                         }
-                }
-                else {
+                } else {
                     for (int j = 0; j < graph.deg[start]; j++)
                         if (graph.nbrs[start][j] >= numSteps) {
                             outerStart = graph.nbrs[start][j];

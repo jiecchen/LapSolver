@@ -74,7 +74,7 @@ public class UnweightedGraph {
      * [src,dst] = find(tril(T)),
      * so, each entry of src should be larger than corresponding entry of dst
      */
-    public void setGraph(int [] src, int [] dst) {
+    public void setGraph(int[] src, int[] dst) {
         int len = src.length; // the length of i
 
         dfs = null;
@@ -269,22 +269,13 @@ public class UnweightedGraph {
     }
 
     public int[] treeToArray() {
-
         dfs();
 
-        int[] pArray = new int[nv];
-
-        // set all others to parent
-        System.arraycopy(parent, 0, pArray, 0, nv);
-
-        // set root to itself
-        pArray[dfs[0]] = dfs[0];
+        int[] pArray = parent.clone();
+        pArray[dfs[0]] = dfs[0]; // set root to itself
 
         return pArray;
-
     }
-
-    
     
     /* if the graph is a tree,
        this turns it into a parent array
