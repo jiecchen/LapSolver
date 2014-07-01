@@ -74,6 +74,8 @@ public class KelnerSolver implements Solver {
     @Override
     public double[] solve(double[] b) {
         int iters = (int) Math.ceil(totalStretch * Math.log(totalStretch));
+
+        iters = 100000;
         System.out.println("KelnerSolver: " + iters + " iterations");
         return solve (b, iters);
     }
