@@ -70,6 +70,17 @@ public class TreeUtils {
         return depth;
     }
 
+    public static Tree permuteTree(Tree tree, int[] perm) {
+        final int N = perm.length;
+        int invPerm[] = new int[N];
+        int newParent[] = new int[N];
+        for (int i = 0; i < N; i++)
+            invPerm[perm[i]] = i;
+        for (int i = 0; i < N; i++)
+            newParent[invPerm[i]] = invPerm[tree.parent[i]];
+        return new Tree(newParent);
+    }
+
     // return depths, given a tree (does the BFS too)
     public static double[] getDepths(Tree tree) {
         return depthFromTreeOrder(tree, bfsOrder(tree));
