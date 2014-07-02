@@ -15,7 +15,7 @@ import lapsolver.util.GraphUtils;
 
 import java.util.Arrays;
 
-public class IncrementalSolver implements Solver {
+public class IncrementalSolver extends Solver {
     public Graph graph;
 
     public Solver solver; // The underlying solver.
@@ -30,9 +30,9 @@ public class IncrementalSolver implements Solver {
     }
 
     @Override
-    public void init(Graph graph) {
+    public void init(Graph graph, double[] d) {
         this.graph = graph;
-        solver.init(graph);
+        solver.init(graph, d);
     }
 
     @Override

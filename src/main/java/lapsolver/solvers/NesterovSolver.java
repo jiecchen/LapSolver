@@ -22,7 +22,7 @@ import lapsolver.solvers.kelner.FlowTree;
 import lapsolver.util.TreeUtils;
 import lapsolver.solvers.TreeSolver;
 
-public class NesterovSolver implements Solver {
+public class NesterovSolver extends Solver {
     public Tree spanningTree;
     private SpanningTreeStrategy treeStrategy;
     private FlowTree flowTree;
@@ -43,7 +43,11 @@ public class NesterovSolver implements Solver {
 
     // initialize solver on a particular graph, and perform preprocessing
     @Override
-    public void init(Graph graph) {
+    public void init(Graph graph, double[] d) {
+        if (d != null) {
+            throw new IllegalArgumentException("Kelner solver only solves singular Laplacian systems");
+        }
+
         // compute LSST, cache BFS order
         spanningTree = treeStrategy.getTree(graph);
         order = TreeUtils.bfsOrder(spanningTree);

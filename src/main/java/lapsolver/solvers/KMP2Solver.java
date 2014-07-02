@@ -22,7 +22,7 @@ import static lapsolver.algorithms.GraphVertexRemoval.AnswerPair;
 import static lapsolver.algorithms.LDLDecomposition.ReturnPair;
 import static lapsolver.algorithms.Stretch.StretchResult;
 
-public class KMP2Solver implements Solver {
+public class KMP2Solver extends Solver {
     private static final double Cs = 4.0;
     private static final int cStop = 100;
     private static final double kappaC = 1.0e-3;
@@ -40,7 +40,7 @@ public class KMP2Solver implements Solver {
     }
 
     @Override
-    public void init(Graph graph) {
+    public void init(Graph graph, double[] d) {
         chain = buildChain(graph, failureProbability);
     }
 

@@ -14,7 +14,7 @@ import java.util.concurrent.*;
  * of the fastest one. You should NOT pass ConcurrentSolver another instance
  * of ConcurrentSolver
  */
-public class ConcurrentSolver implements Solver {
+public class ConcurrentSolver extends Solver {
     private final int nThreads;
     private long timeout;
     private ArrayList<Solver> solvers;
@@ -31,7 +31,7 @@ public class ConcurrentSolver implements Solver {
     }
 
     @Override
-    public void init(final Graph graph) {
+    public void init(final Graph graph, double[] d) {
         this.graph = graph;
     }
 

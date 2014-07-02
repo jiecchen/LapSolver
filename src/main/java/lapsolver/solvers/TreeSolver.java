@@ -16,7 +16,7 @@ import lapsolver.solvers.Solver;
 import lapsolver.util.GraphUtils;
 import lapsolver.util.TreeUtils;
 
-public class TreeSolver implements Solver {
+public class TreeSolver extends Solver {
     private Tree tree;
 
     /**
@@ -24,7 +24,7 @@ public class TreeSolver implements Solver {
      *
      * @param graph the graph to solve
      */
-    public void init(Graph graph) {
+    public void init(Graph graph, double[] d) {
         tree = GraphUtils.toTree(graph);
     }
 
