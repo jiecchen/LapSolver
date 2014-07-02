@@ -6,16 +6,20 @@ package lapsolver.solvers;
 import lapsolver.EdgeList;
 import lapsolver.Graph;
 import lapsolver.Tree;
+import lapsolver.algorithms.GraphVertexRemoval;
+import lapsolver.algorithms.LDLDecomposition;
 import lapsolver.algorithms.Stretch;
 import lapsolver.lsst.SpanningTreeStrategy;
+import lapsolver.util.GraphUtils;
 import lapsolver.util.TreeUtils;
-import lapsolver.util.Unboxed;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import static lapsolver.algorithms.GraphVertexRemoval.AnswerPair;
+import static lapsolver.algorithms.LDLDecomposition.ReturnPair;
 import static lapsolver.algorithms.Stretch.StretchResult;
 
 public class KMP2Solver implements Solver {
@@ -25,11 +29,14 @@ public class KMP2Solver implements Solver {
 
     private final SpanningTreeStrategy treeStrategy;
     private final double failureProbability;
+    private final double[] delta;
+
     public List<ChainEntry> chain;
 
-    public KMP2Solver(SpanningTreeStrategy strategy, double p) {
+    public KMP2Solver(SpanningTreeStrategy strategy, double p, double[] delta) {
         treeStrategy = strategy;
         failureProbability = p;
+        this.delta = delta;
     }
 
     @Override
@@ -47,16 +54,16 @@ public class KMP2Solver implements Solver {
      *
      * @param edges The edges to sample
      * @param pp    The frequencies of each edge in edges. Indices must correspond to those in edges.
-     * @param eps   The error with which to sample
+     * @param xi    The error with which to sample
      * @return the chosen edges
      */
-    public EdgeList sample(EdgeList edges, StretchResult pp, double eps) {
+    public EdgeList sample(EdgeList edges, StretchResult pp, double xi) {
         // Step 1:  t := \sum_e p'_e
         double t = pp.total;
 
         // Step 2:  q := C_s t \log t \log (1/\epsilon)
-        final double q = Cs * t * Math.log(t) * Math.log(1 / eps);
-        assert q > 0;
+        final double q = Cs * t * Math.log(t) * Math.log(1 / xi);
+        System.out.println("Cs = " + Cs + " t = " + t + " xi = " + xi + " q = " + q);
 
         // Step 3:  p_e := p'_e / t
         double[] p = pp.allStretches.clone();
@@ -84,16 +91,22 @@ public class KMP2Solver implements Solver {
     /**
      * This is IncrementalSparsify from KMP2
      *
-     * @param inG the graph to sparsify
-     * @param inT a low-stretch spanning tree for the graph
+     * @param inG the graph to sparsify (resistances)
+     * @param inT a low-stretch spanning tree for the graph (resistances)
      * @param kap kappa, the condition number
-     * @param eps epsilon, the maximum allowable error
+     * @param xi  epsilon, the maximum allowable error
      * @return the sparsified graph
      */
-    public Graph incrementalSparsify(Graph inG, Tree inT, double kap, double eps) {
-        // Step 1: Compute stretch_T(G)
-        double totalStretch = Stretch.compute(inG, inT).total;
+    public Graph incrementalSparsify(Graph inG, Tree inT, double kap, double xi) {
+        if (kap <= 1.0)
+            throw new IllegalArgumentException("kappa must be > 1");
+        if (xi <= 0.0 || xi >= 1.0)
+            throw new IllegalArgumentException("0 < xi < 1");
 
+        // Step 1: Compute stretch_T(G)
+        double totalStretch = Stretch.compute(inG, inT, TreeUtils.getOffTreeEdges(inG, inT)).total;
+
+        // Copy the original graph, so we can blow it up
         Tree tPrime = new Tree(inT);
 
         // Step 2: if |stretch_T(G)| <= 1
@@ -104,36 +117,39 @@ public class KMP2Solver implements Solver {
             return new Graph(tPrime);
         } // Step 4: end if
 
-        // Step 5: T' := kT
+        // Step 5: T' := kT - divide because they're resistances
         for (int i = 0; i < tPrime.weight.length; i++)
-            tPrime.weight[i] *= kap;
+            tPrime.weight[i] /= kap;
 
         // Step 6: G' := G + (k-1)T  ie. replace T with T'
         Graph gPrime = new Graph(inG);
-        int[] parent = tPrime.parent;
-        for (int u = 0; u < parent.length; u++) {
-            int v = parent[u];
-            if (u != v)
-                for (int e = 0; e < gPrime.nbrs[u].length; e++)
-                    if (e == v) // this is our edge
-                        gPrime.weights[u][e] = tPrime.weight[u];
+        for (int u = 0; u < tPrime.parent.length; u++) {
+            int v = tPrime.parent[u]; // Now we have edge (u,v)
+            if (u == v) continue;
+            for (int iV = 0; iV < gPrime.nbrs[u].length; iV++)
+                if (gPrime.nbrs[u][iV] == v) { // this is our edge -- update both sides
+                    final double trWt = tPrime.weight[u];
+                    final int iU = gPrime.backInd[u][iV];
+                    gPrime.weights[u][iV] = trWt;
+                    gPrime.weights[v][iU] = trWt;
+                }
         }
 
-        // Step 7: \hat{t} := |stretch_{T'}(G')|
+        // Step 7: \hat{t} := |stretch_{T'}(G')| = |stretch_{T}(G)| / k
         double tHat = totalStretch / kap;
 
         // Step 8: t := \hat{t} + n - 1
-        double t = tHat + inG.nv - 1;
+        final double t = tHat + inT.nv - 1;
 
         // Implementation step: need off-tree edges:
         final EdgeList offTreeEdges = TreeUtils.getOffTreeEdges(gPrime, tPrime);
 
-        // Step 9: H~ = (V, L~) := SAMPLE(G', stretch_T'(E'), \eps)
+        // Step 9: H~ = (V, L~) := SAMPLE(G', stretch_T'(E'), \xi)
         StretchResult stretchResult = Stretch.compute(gPrime, tPrime, offTreeEdges);
-        EdgeList hSquiggle = sample(offTreeEdges, stretchResult, eps);
+        EdgeList hSquiggle = sample(offTreeEdges, stretchResult, xi);
 
         // Steps 10-12: Check for failure
-        final double upperBound = 2 * (tHat / t) * Cs * Math.log(t) * Math.log(1 / eps);
+        final double upperBound = 2 * (tHat / t) * Cs * Math.log(t) * Math.log(1 / xi);
         final double offTreeStretch = stretchResult.total;
         if (offTreeStretch >= upperBound) {
             System.err.println("Error! " + offTreeStretch + " > " + upperBound);
@@ -196,8 +212,8 @@ public class KMP2Solver implements Solver {
         // G2 = H1
         Graph g2 = new Graph(h1);
 
-        // eps := 2 log n
-        double epsilon = 2 * Math.log(t.nv);
+        // xi := 2 log n
+        double xi = 2 * Math.log(t.nv);
 
         // Initialize the chain
         chain.add(new ChainEntry(g1, h1, t, logSquaredFactor));
@@ -205,7 +221,8 @@ public class KMP2Solver implements Solver {
 
         ChainEntry chainEnd = chain.get(chain.size() - 1);
         while (chainEnd.gGraph.nv > cStop) {
-            chainEnd.hGraph = incrementalSparsify(chainEnd.gGraph, chainEnd.tree, chainEnd.kappa, p * epsilon);
+            chainEnd.hGraph = incrementalSparsify(chainEnd.gGraph, chainEnd.tree, chainEnd.kappa, p * xi);
+            if (chainEnd.hGraph == null) return null; // We failed.
             chain.add(greedyElimination(chainEnd.hGraph, chainEnd.tree));
             chainEnd = chain.get(chain.size() - 1);
         }
@@ -213,128 +230,23 @@ public class KMP2Solver implements Solver {
         return chain;
     }
 
-    /*
-     * TODO: Figure out what the heck to do with GraphVertexRemoval / LDLDecomposition... they're unintelligible!
-     */
-    public ChainEntry greedyElimination(Graph graph, Tree tree) {
-        // Convert to LIL format
-        ArrayList<LinkedList<Neighbor>> lilGraph = new ArrayList<>(graph.nv);
-        for (int i = 0; i < graph.nv; i++)
-            lilGraph.add(new LinkedList<Neighbor>());
-        for (int u = 0; u < lilGraph.size(); u++)
-            for (int i = 0; i < graph.nbrs[u].length; i++)
-                lilGraph.get(u).add(new Neighbor(graph.nbrs[u][i], graph.weights[u][i]));
+    public ChainEntry greedyElimination(Graph hGraph, Tree tree) {
+        AnswerPair answerPair = new GraphVertexRemoval(hGraph).solve();
+        Graph nextGraph = GraphUtils.permuteGraph(hGraph, answerPair.permutation);
 
-        ArrayList<Integer> newParents = new ArrayList<>(tree.parent.length);
-        for (int i : tree.parent) newParents.add(i);
+        ReturnPair returnPair = new LDLDecomposition(nextGraph, delta).solve(answerPair.numRemoved);
+        nextGraph = KMPSolver.buildReducedSparsifier(nextGraph, answerPair, returnPair);
 
-        ArrayList<Double> newTreeWeights = new ArrayList<>(tree.weight.length);
-        for (double i : tree.weight) newTreeWeights.add(i);
-
-        boolean removedOne;
-        do {
-            removedOne = false;
-            // Remove degree 1
-            for (int u = 0; u < lilGraph.size(); u++)
-                if (lilGraph.get(u).size() == 1) {
-                    for (int i = 0; i < newParents.size(); i++)
-                        if (newParents.get(i) > u)
-                            newParents.set(i, newParents.get(i) - 1);
-
-                    newParents.remove(u);
-                    newTreeWeights.remove(u);
-                    removeVertex(lilGraph, u);
-                    removedOne = true;
-                }
-
-            // Remove degree 2
-            for (int curVtx = 0; curVtx < lilGraph.size(); curVtx++) {
-                LinkedList<Neighbor> vertex = lilGraph.get(curVtx);
-                if (vertex.size() == 2) {
-                    Neighbor u1 = vertex.get(0);
-                    Neighbor u2 = vertex.get(1);
-                    double weight = 1. / (1. / u1.weight + 1. / u2.weight);
-
-                    lilGraph.get(u1.v).add(new Neighbor(u2.v, weight));
-                    lilGraph.get(u2.v).add(new Neighbor(u1.v, weight));
-
-                    boolean v_u1_exists = newParents.get(curVtx) == u1.v || newParents.get(u1.v) == curVtx;
-                    boolean v_u2_exists = newParents.get(curVtx) == u2.v || newParents.get(u2.v) == curVtx;
-
-                    // If both edges are in the tree
-                    if (v_u1_exists && v_u2_exists) {
-                        if (newParents.get(curVtx) == curVtx) { // If I'm the root
-                            newParents.set(u1.v, u2.v); // Make u2 the new root
-                            newTreeWeights.set(u1.v, weight);
-                            newParents.set(u2.v, u2.v);
-                        } else if (newParents.get(u1.v) == curVtx) {
-                            newParents.set(u1.v, u2.v);
-                            newTreeWeights.set(u1.v, weight);
-                        } else if (newParents.get(u2.v) == curVtx) {
-                            newParents.set(u2.v, u1.v);
-                            newTreeWeights.set(u2.v, weight);
-                        }
-                    } else if (v_u1_exists && newParents.get(curVtx) == curVtx)
-                        newParents.set(u1.v, u1.v);
-                    else if (v_u2_exists && newParents.get(curVtx) == curVtx)
-                        newParents.set(u2.v, u2.v);
-
-                    for (int i = 0; i < newParents.size(); i++)
-                        if (newParents.get(i) > curVtx)
-                            newParents.set(i, newParents.get(i) - 1);
-
-                    removeVertex(lilGraph, curVtx);
-                    newParents.remove(curVtx);
-                    newTreeWeights.remove(curVtx);
-                    removedOne = true;
-                }
-            }
-        } while (removedOne);
-
-        // Rebuild graph
-        int ne = 0;
-        for (LinkedList<Neighbor> neighbors : lilGraph) ne += neighbors.size();
-        ne /= 2;
-
-        int[] us = new int[ne];
-        int[] vs = new int[ne];
-        double[] ws = new double[ne];
-        int index = 0;
-
-        for (int u = 0; u < lilGraph.size(); u++) {
-            for (Neighbor neighbor : lilGraph.get(u))
-                if (u < neighbor.v) {
-                    us[index] = u;
-                    vs[index] = neighbor.v;
-                    ws[index++] = neighbor.weight;
-                }
+        // Now apply to the tree -- how?
+        EdgeList l = returnPair.L;
+        System.out.println("L matrix:");
+        for (int i = 0; i < l.ne; i++) {
+            System.out.println("(" + l.u[i] + ", " + l.v[i] + ", " + l.weight[i] + ")");
         }
 
-        Tree newTree = new Tree(Unboxed.intsToArray(newParents), Unboxed.doublesToArray(newTreeWeights));
-        return new ChainEntry(new Graph(us, vs, ws), null, newTree, kappaC);
-    }
-
-    private void removeVertex(ArrayList<LinkedList<Neighbor>> lilGraph, int vertex) {
-        LinkedList<Neighbor> neighbors = lilGraph.get(vertex);
-        for (Neighbor neighbor : neighbors)
-            for (Iterator<Neighbor> i = lilGraph.get(neighbor.v).iterator(); i.hasNext(); )
-                if (i.next().v == vertex)
-                    i.remove();
-        lilGraph.remove(vertex);
-        for (LinkedList<Neighbor> nbrs : lilGraph)
-            for (Neighbor nbr : nbrs)
-                if (nbr.v > vertex)
-                    nbr.v--;
-    }
-
-    private static class Neighbor {
-        int v;
-        double weight;
-
-        private Neighbor(int v, double weight) {
-            this.v = v;
-            this.weight = weight;
-        }
+        ChainEntry result = new ChainEntry(nextGraph, null, tree, kappaC);
+        result.gRemoved = Arrays.copyOfRange(answerPair.permutation, 0, answerPair.numRemoved);
+        return result;
     }
 
     public static class ChainEntry {
@@ -342,6 +254,8 @@ public class KMP2Solver implements Solver {
         public Graph hGraph;
         public Tree tree;
         public double kappa;
+
+        public int[] gRemoved = new int[0];
 
         private ChainEntry(Graph gGraph, Graph hGraph, Tree tree, double kappa) {
             this.gGraph = gGraph;

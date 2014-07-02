@@ -196,15 +196,13 @@ public class KMPSolver {
     public static Graph blowUpTreeEdges(Graph graph, Tree spanningTree, double k) {
         Graph auxGraph = new Graph(graph);
 
-        for (int u = 0; u < auxGraph.nv; u++) {
+        for (int u = 0; u < auxGraph.nv; u++)
             for (int i = 0; i < auxGraph.deg[u]; i++) {
                 int v = auxGraph.nbrs[u][i];
 
-                if (spanningTree.parent[u] == v || spanningTree.parent[v] == u) {
+                if (spanningTree.parent[u] == v || spanningTree.parent[v] == u)
                     auxGraph.weights[u][i] /= k;
-                }
             }
-        }
 
         return auxGraph;
     }
