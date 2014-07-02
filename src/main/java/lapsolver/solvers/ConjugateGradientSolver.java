@@ -13,7 +13,6 @@ import lapsolver.util.GraphOperators;
 import org.apache.commons.math3.linear.*;
 
 public class ConjugateGradientSolver extends Solver {
-    public Graph graph;
     public GraphOperators.LaplacianOperator lapOperator;
     public ConjugateGradient conjugateGradient;
 

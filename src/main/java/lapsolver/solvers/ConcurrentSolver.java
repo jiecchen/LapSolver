@@ -18,7 +18,6 @@ public class ConcurrentSolver extends Solver {
     private final int nThreads;
     private long timeout;
     private ArrayList<Solver> solvers;
-    private Graph graph = null;
 
     public ConcurrentSolver(Solver[] solvers) {
         this(solvers, Integer.MAX_VALUE);

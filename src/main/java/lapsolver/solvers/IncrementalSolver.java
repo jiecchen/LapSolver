@@ -16,8 +16,6 @@ import lapsolver.util.GraphUtils;
 import java.util.Arrays;
 
 public class IncrementalSolver extends Solver {
-    public Graph graph;
-
     public Solver solver; // The underlying solver.
     public int nIterations;
 

@@ -9,8 +9,14 @@
 package lapsolver.solvers;
 
 import lapsolver.Graph;
+import org.apache.commons.math3.exception.DimensionMismatchException;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealLinearOperator;
+import org.apache.commons.math3.linear.RealVector;
 
-public abstract class Solver {
+public abstract class Solver extends RealLinearOperator {
+    public Graph graph;
+
     /**
      * Initialize solver on a particular graph, and perform preprocessing.
      * @param graph The input graph (weights are conductances).
@@ -23,7 +29,7 @@ public abstract class Solver {
      * @param graph The input graph (weights are conductances).
      */
     public void init (Graph graph) {
-
+        init (graph, null);
     }
 
     /**
@@ -32,4 +38,19 @@ public abstract class Solver {
      * @return The solution x.
      */
     public abstract double[] solve (double[] b);
+
+    @Override
+    public int getRowDimension() {
+        return graph.nv;
+    }
+
+    @Override
+    public int getColumnDimension() {
+        return graph.nv;
+    }
+
+    @Override
+    public RealVector operate(RealVector x) throws DimensionMismatchException {
+        return new ArrayRealVector( solve(x.toArray()) );
+    }
 }

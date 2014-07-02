@@ -25,7 +25,6 @@ import lapsolver.util.TreeUtils;
 import lapsolver.solvers.TreeSolver;
 
 public class KelnerSolver extends Solver {
-    public Graph graph;
     public Tree spanningTree;
     private SpanningTreeStrategy treeStrategy;
     private FlowTree flowTree;
