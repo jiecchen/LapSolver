@@ -11,6 +11,7 @@ package lapsolver.algorithms;
 
 import lapsolver.EdgeList;
 import lapsolver.Graph;
+import lapsolver.util.GraphUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -300,5 +301,29 @@ public class LDLDecomposition {
         }
 
         return x;
+    }
+
+    public static Graph getReducedGraph(Graph graph, GraphVertexRemoval.AnswerPair gvr, ReturnPair ldl) {
+        ldl.D = GraphUtils.sanitizeEdgeList(ldl.D);
+        ArrayList<Integer> edgesToAdd = new ArrayList<>();
+
+        int index = 0;
+        for (int i = 0; i < ldl.D.ne; i++) {
+            if (ldl.D.u[i] >= ldl.D.v[i]) continue;
+            if (ldl.D.u[i] >= gvr.numRemoved && ldl.D.v[i] >= gvr.numRemoved) {
+                edgesToAdd.add(i);
+            }
+        }
+
+        EdgeList reducedSparsifierEdges = new EdgeList(edgesToAdd.size());
+
+        for (int i : edgesToAdd) {
+            reducedSparsifierEdges.u[index] = ldl.D.u[i] - gvr.numRemoved;
+            reducedSparsifierEdges.v[index] = ldl.D.v[i] - gvr.numRemoved;
+            reducedSparsifierEdges.weight[index] = -ldl.D.weight[i];
+            index++;
+        }
+
+        return new Graph(reducedSparsifierEdges);
     }
 }

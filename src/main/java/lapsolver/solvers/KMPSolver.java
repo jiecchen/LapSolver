@@ -44,7 +44,7 @@ public class KMPSolver {
         System.out.println(graph.nv + " " + graph.ne);
         innerGraph = graph;
 
-        if (graph.nv < 500 || level == 0)
+        if (graph.nv < 500)
             return solveBaseCase(graph, b, addDiag);
 
         //Build the preconditioner for the given graph
@@ -122,7 +122,7 @@ public class KMPSolver {
 
         //Blow up graph by 4 * avgstretch * log(numRemoved)
         double k = 4. * (stretch.total / (offEdges.ne + 1) * (Math.log(graph.nv) + 1)) *
-                        (stretch.total / (offEdges.ne + 1) * (Math.log(graph.nv) + 1))+ 1;
+                        (stretch.total / (offEdges.ne + 1) * (Math.log(graph.nv) + 1)) + 1;
         Graph blownUpGraph = blowUpTreeEdges(graph, spanningTree, k);
 
         // find stretches in blown-up graph
@@ -130,7 +130,7 @@ public class KMPSolver {
         StretchResult blownUpStretch = Stretch.compute(blownUpGraph, spanningTree, offEdges);
         GraphUtils.reciprocateWeights(blownUpGraph);
 
-        // Expect to grab q = O(m / log(m)) edges
+        //Expect to grab q = O(m / log(m)) edges
         double q = 10. * graph.ne / Math.log(graph.ne) / Math.log(graph.ne);
 
         //Assign p_e = stretch(e) / (total stretch)
@@ -222,7 +222,7 @@ public class KMPSolver {
 //        System.out.println(graph.nv);
 //        System.out.println(Arrays.toString(diag));
 
-        ConjugateGradientSolver solver = new ConjugateGradientSolver(1000, 1e-2);
+        ConjugateGradientSolver solver = new ConjugateGradientSolver(1000, 1e-6);
         solver.init(graph, diag);
         return solver.solve(b);
     }
