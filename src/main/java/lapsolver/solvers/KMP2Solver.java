@@ -14,7 +14,6 @@ import lapsolver.util.GraphUtils;
 import lapsolver.util.TreeUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -29,19 +28,19 @@ public class KMP2Solver extends Solver {
 
     private final SpanningTreeStrategy treeStrategy;
     private final double failureProbability;
-    private final double[] delta;
+    private double[] delta = null;
 
     public List<ChainEntry> chain;
 
-    public KMP2Solver(SpanningTreeStrategy strategy, double p, double[] delta) {
+    public KMP2Solver(SpanningTreeStrategy strategy, double p) {
         treeStrategy = strategy;
         failureProbability = p;
-        this.delta = delta;
     }
 
     @Override
     public void init(Graph graph, double[] d) {
-        chain = buildChain(graph, failureProbability);
+//        chain = buildChain(graph, failureProbability);
+        delta = d;
     }
 
     @Override
@@ -233,19 +232,54 @@ public class KMP2Solver extends Solver {
     public ChainEntry greedyElimination(Graph hGraph, Tree tree) {
         AnswerPair answerPair = new GraphVertexRemoval(hGraph).solve();
         Graph nextGraph = GraphUtils.permuteGraph(hGraph, answerPair.permutation);
+        Tree permutedTree = TreeUtils.permuteTree(tree, answerPair.permutation);
 
         ReturnPair returnPair = new LDLDecomposition(nextGraph, delta).solve(answerPair.numRemoved);
         nextGraph = KMPSolver.buildReducedSparsifier(nextGraph, answerPair, returnPair);
 
-        // Now apply to the tree -- how?
-        EdgeList l = returnPair.L;
-        System.out.println("L matrix:");
-        for (int i = 0; i < l.ne; i++) {
-            System.out.println("(" + l.u[i] + ", " + l.v[i] + ", " + l.weight[i] + ")");
+        int[] deg = new int[answerPair.numRemoved];
+        for (int i = 0; i < returnPair.L.ne; i++)
+            if (returnPair.L.u[i] != returnPair.L.v[i])
+                deg[returnPair.L.v[i]]++;
+
+        int index = 0;
+        EdgeList updatedTree = new EdgeList(tree.nv - answerPair.numRemoved);
+
+        final int N = answerPair.permutation.length;
+        int invPerm[] = new int[N];
+        for (int i = 0; i < N; i++)
+            invPerm[answerPair.permutation[i]] = i;
+
+        for (int i = answerPair.numRemoved; i < permutedTree.nv; i++) {
+            if (permutedTree.parent[i] < answerPair.numRemoved) continue;
+            updatedTree.u[index] = Math.min(i, permutedTree.parent[i]) - answerPair.numRemoved;
+            updatedTree.v[index] = Math.max(i, permutedTree.parent[i]) - answerPair.numRemoved;
+            updatedTree.weight[index++] = permutedTree.weight[index];
         }
 
-        ChainEntry result = new ChainEntry(nextGraph, null, tree, kappaC);
-        result.gRemoved = Arrays.copyOfRange(answerPair.permutation, 0, answerPair.numRemoved);
+        for (int i = 0; i < deg.length; i++) {
+            if (deg[i] == 2) {
+                int u = answerPair.permutation[i];
+                int v1 = hGraph.nbrs[u][0];
+                int v2 = hGraph.nbrs[u][1];
+
+                boolean u_v1 = tree.parent[u] == v1 || tree.parent[v1] == u;
+                boolean u_v2 = tree.parent[u] == v2 || tree.parent[v2] == u;
+
+                assert u_v1 || u_v2;
+
+                if (u_v1 && u_v2) {
+                    v1 = invPerm[v1];
+                    v2 = invPerm[v2];
+                    updatedTree.u[index] = Math.min(v1, v2) - answerPair.numRemoved;
+                    updatedTree.v[index] = Math.max(v1, v2) - answerPair.numRemoved;
+                    updatedTree.weight[index++] = 1. / (1. / hGraph.weights[u][0] + 1. / hGraph.weights[u][1]);
+                }
+            }
+        }
+
+        ChainEntry result = new ChainEntry(nextGraph, null, new Tree(updatedTree), kappaC);
+        result.perm = answerPair.permutation;
         return result;
     }
 
@@ -255,9 +289,9 @@ public class KMP2Solver extends Solver {
         public Tree tree;
         public double kappa;
 
-        public int[] gRemoved = new int[0];
+        public int[] perm = new int[0];
 
-        private ChainEntry(Graph gGraph, Graph hGraph, Tree tree, double kappa) {
+        public ChainEntry(Graph gGraph, Graph hGraph, Tree tree, double kappa) {
             this.gGraph = gGraph;
             this.hGraph = hGraph;
             this.tree = tree;
