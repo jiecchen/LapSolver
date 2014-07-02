@@ -4,10 +4,10 @@ function [x, err] = kmp1(a, b)
     import lapsolver.solvers.*;
 
     g = a2g(a);
-    D = zeros(1,length(a));
+    D = ones(1,length(a));
     la = lap(a) + diag(D);
     kmp = KMPSolver(StarDecompositionTree);
-    x = kmp.solve(g,b,6,D);
+    x = kmp.solve(g,b,5,D);
     err = norm(la*x - b)
 end
 

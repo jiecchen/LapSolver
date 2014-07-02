@@ -17,9 +17,10 @@ public class ConjugateGradientSolver extends Solver {
     public GraphOperators.LaplacianOperator lapOperator;
     public ConjugateGradient conjugateGradient;
 
-    public int maxIters, tolerance;
+    public int maxIters;
+    public double tolerance;
 
-    public ConjugateGradientSolver(int maxIters, int tolerance) {
+    public ConjugateGradientSolver(int maxIters, double tolerance) {
         this.maxIters = maxIters;
         this.tolerance = tolerance;
     }
