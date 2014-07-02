@@ -24,8 +24,7 @@ import lapsolver.util.GraphUtils;
 import lapsolver.util.TreeUtils;
 import lapsolver.solvers.TreeSolver;
 
-public class KelnerSolver implements Solver {
-    public Graph graph;
+public class KelnerSolver extends Solver {
     public Tree spanningTree;
     private SpanningTreeStrategy treeStrategy;
     private FlowTree flowTree;
@@ -47,7 +46,11 @@ public class KelnerSolver implements Solver {
 
     // initialize solver on a particular graph, and perform preprocessing
     @Override
-    public void init(Graph graph) {
+    public void init(Graph graph, double[] d) {
+        if (d != null) {
+            throw new IllegalArgumentException("Kelner solver only solves singular Laplacian systems");
+        }
+
         this.graph = new Graph(graph);
         GraphUtils.reciprocateWeights(this.graph);
 
