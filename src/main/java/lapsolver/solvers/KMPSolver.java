@@ -20,35 +20,120 @@ import lapsolver.util.GraphUtils;
 import lapsolver.util.TreeUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 
 import static lapsolver.algorithms.GraphVertexRemoval.AnswerPair;
 import static lapsolver.algorithms.LDLDecomposition.ReturnPair;
 import static lapsolver.algorithms.Stretch.StretchResult;
 
-public class KMPSolver {
-    private SpanningTreeStrategy treeStrategy;
+public class KMPSolver extends Solver {
+    public SpanningTreeStrategy treeStrategy;
+    public Solver baseCaseSolver;
+    public KMPSolver sparsifiedSolver;
 
-    //Initialize solver with a spanning tree strategy
-    public KMPSolver(SpanningTreeStrategy treeStrategy) {
+    public Graph reducedGraph;
+    public double[] reducedD, ldlDiag;
+    public Tree spanningTree;
+    public Graph sparsifier;
+
+    public AnswerPair gvrPair;
+    public ReturnPair ldlPair;
+    public int[] gvrInversePerm;
+
+    // Initialize solver with a spanning tree strategy and a solver to run at the bottom level
+    public KMPSolver(SpanningTreeStrategy treeStrategy, Solver baseCaseSolver) {
         this.treeStrategy = treeStrategy;
+        this.baseCaseSolver = baseCaseSolver;
     }
 
-    public EdgeList LL;
-    public EdgeList DD;
-    public Graph innerGraph;
+    // Use PCGSolver as default
+    public KMPSolver(SpanningTreeStrategy spanningTreeStrategy) {
+        this (spanningTreeStrategy, new ConjugateGradientSolver(1000, 1e-8));
+    }
 
-    //Initialize solver on a particular graph, and perform preprocessing
-    public double[] solve(Graph graph, double b[], int level, double[] addDiag) {
+    public void init (Graph graph, double[] d) {
         System.out.println(graph.nv + " " + graph.ne);
-        innerGraph = graph;
 
-        if (graph.nv < 500)
-            return solveBaseCase(graph, b, addDiag);
+        this.graph = graph;
+        this.d = d;
 
-        //Build the preconditioner for the given graph
-        Graph sparsifier = buildPreconditioner(graph, treeStrategy.getTree(graph));
+        if (graph.nv < 500) {
+            sparsifiedSolver = null;
+            baseCaseSolver.init(graph, d);
+        }
+        else {
+            eliminate();
+
+            spanningTree = treeStrategy.getTree(reducedGraph);
+            sparsifier = sparsify(reducedGraph, spanningTree);
+
+            sparsifiedSolver = new KMPSolver(treeStrategy, baseCaseSolver);
+            sparsifiedSolver.init(sparsifier, reducedD);
+        }
+    }
+
+    // eliminate low-degree vertices
+    public void eliminate() {
+        // prepare graph for elimination
+        GraphVertexRemoval gvr = new GraphVertexRemoval(graph);
+        gvrPair = gvr.solve();
+        gvrInversePerm = new int[graph.nv];
+        for (int i = 0; i < graph.nv; i++) {
+            gvrInversePerm[gvrPair.permutation[i]] = i;
+        }
+
+        Graph permutedGraph = GraphUtils.permuteGraph(graph, gvrPair.permutation);
+        double[] permutedDiag = applyPerm(gvrPair.permutation, d);
+
+        // perform elimination
+        LDLDecomposition ldl = new LDLDecomposition(permutedGraph, permutedDiag);
+        ldlPair = ldl.solve(gvrPair.numRemoved);
+
+        // get diagonal from LDL
+        ldlDiag = new double[graph.nv];
+        for (int i = 0; i < ldlPair.D.ne; i++) {
+            if (ldlPair.D.u[i] == ldlPair.D.v[i]) {
+                ldlDiag[ldlPair.D.u[i]] += ldlPair.D.weight[i];
+            }
+        }
+
+        // get new graph + diag from LDL
+        reducedGraph = LDLDecomposition.getReducedGraph(permutedGraph, gvrPair, ldlPair);
+        reducedD = new double[reducedGraph.nv];
+        for (int i = gvrPair.numRemoved; i < graph.nv; i++) {
+            reducedD[i - gvrPair.numRemoved] = permutedDiag[i];
+        }
+    }
+
+    public double[] solve (double[] b) {
+        if (sparsifiedSolver == null) {
+            // we are at the bottom level
+            return baseCaseSolver.solve(b);
+        }
+
+        double[] outerB = LDLDecomposition.applyLInv(ldlPair.L, applyPerm(gvrPair.permutation, b));
+        double[] innerB = new double[reducedGraph.nv];
+        for (int i = 0; i < innerB.length; i++) {
+            innerB[i] = outerB[gvrPair.numRemoved + i];
+        }
+
+        double[] innerX = sparsifiedSolver.solve(innerB);
+        double[] outerX = new double[graph.nv];
+
+        for (int i = 0; i < graph.nv; i++) {
+            if (i < gvrPair.numRemoved) {
+                outerX[i] = outerB[i] / ldlDiag[i];
+            }
+            else {
+                outerX[i] = innerX[i - gvrPair.numRemoved];
+            }
+        }
+
+        return applyPerm(gvrInversePerm, LDLDecomposition.applyLTransInv(ldlPair.L, outerX));
+    }
+
+    public double[] solve (Graph graph, double b[], int level, double[] addDiag) {
+        System.out.println(graph.nv + " " + graph.ne);
 
         //Create the graph that will be used in the recursion (laplacian given by D matrix)
         GraphVertexRemoval gvrElement = new GraphVertexRemoval(sparsifier);
@@ -60,9 +145,6 @@ public class KMPSolver {
 
         LDLDecomposition ldlElement = new LDLDecomposition(permSparsifier, addDiag);
         ReturnPair ldl = ldlElement.solve(gvr.numRemoved);
-
-        LL = new EdgeList(ldl.L);
-        DD = new EdgeList(ldl.D);
 
         b = LDLDecomposition.applyLInv(ldl.L, b);
 
@@ -110,7 +192,7 @@ public class KMPSolver {
     }
 
     //Construct a preconditioner for graph
-    public static Graph buildPreconditioner(Graph graph, Tree spanningTree) {
+    public static Graph sparsify(Graph graph, Tree spanningTree) {
         EdgeList offEdges;
 
         //Get off-tree edges, find stretches
@@ -214,17 +296,6 @@ public class KMPSolver {
         }
 
         return new Graph(reducedSparsifierEdges);
-    }
-
-    //Construct the graph laplacian and call the pcg solver
-    public double[] solveBaseCase(Graph graph, double[] b, double[] diag) {
-//        System.out.println("*********");
-//        System.out.println(graph.nv);
-//        System.out.println(Arrays.toString(diag));
-
-        ConjugateGradientSolver solver = new ConjugateGradientSolver(1000, 1e-6);
-        solver.init(graph, diag);
-        return solver.solve(b);
     }
 
     public static void checkSparsifier(Graph G, Graph H) {

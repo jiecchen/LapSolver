@@ -30,6 +30,7 @@ public class IncrementalSolver extends Solver {
     @Override
     public void init(Graph graph, double[] d) {
         this.graph = graph;
+        this.d = d;
         solver.init(graph, d);
     }
 
