@@ -1,13 +1,12 @@
-function [x, err] = kmp1(a, b)
+function [x, err] = kmp1(a, d, b)
 %KMP1 Test for KMP1 solver.
     import lapsolver.lsst.*;
     import lapsolver.solvers.*;
 
     g = a2g(a);
-    D = ones(1,length(a));
-    la = lap(a) + diag(D);
+    la = lap(a) + diag(d);
     kmp = KMPSolver(StarDecompositionTree, ConjugateGradientSolver(1000,1e-4));
-    kmp.init(g,D);
+    kmp.init(g,d);
     x = kmp.solve(b);
     err = norm(la*x - b)
 end

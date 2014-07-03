@@ -205,6 +205,9 @@ public class KMPSolver extends Solver {
         //Blow up graph by 4 * avgstretch * log(numRemoved)
         double k = 4. * (stretch.total / (offEdges.ne + 1) * (Math.log(graph.nv) + 1)) *
                         (stretch.total / (offEdges.ne + 1) * (Math.log(graph.nv) + 1)) + 1;
+
+        k=1;
+        
         Graph blownUpGraph = blowUpTreeEdges(graph, spanningTree, k);
 
         // find stretches in blown-up graph
