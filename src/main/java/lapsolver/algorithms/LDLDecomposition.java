@@ -303,14 +303,14 @@ public class LDLDecomposition {
         return x;
     }
 
-    public static Graph getReducedGraph(Graph graph, GraphVertexRemoval.AnswerPair gvr, ReturnPair ldl) {
-        ldl.D = GraphUtils.sanitizeEdgeList(ldl.D);
+    public static Graph getReducedGraph(Graph graph, EdgeList D, int shift) {
+        EdgeList sanitizedD = GraphUtils.sanitizeEdgeList(D);
         ArrayList<Integer> edgesToAdd = new ArrayList<>();
 
         int index = 0;
-        for (int i = 0; i < ldl.D.ne; i++) {
-            if (ldl.D.u[i] >= ldl.D.v[i]) continue;
-            if (ldl.D.u[i] >= gvr.numRemoved && ldl.D.v[i] >= gvr.numRemoved) {
+        for (int i = 0; i < sanitizedD.ne; i++) {
+            if (sanitizedD.u[i] >= sanitizedD.v[i]) continue;
+            if (sanitizedD.u[i] >= shift && sanitizedD.v[i] >= shift) {
                 edgesToAdd.add(i);
             }
         }
@@ -318,9 +318,9 @@ public class LDLDecomposition {
         EdgeList reducedSparsifierEdges = new EdgeList(edgesToAdd.size());
 
         for (int i : edgesToAdd) {
-            reducedSparsifierEdges.u[index] = ldl.D.u[i] - gvr.numRemoved;
-            reducedSparsifierEdges.v[index] = ldl.D.v[i] - gvr.numRemoved;
-            reducedSparsifierEdges.weight[index] = -ldl.D.weight[i];
+            reducedSparsifierEdges.u[index] = sanitizedD.u[i] - shift;
+            reducedSparsifierEdges.v[index] = sanitizedD.v[i] - shift;
+            reducedSparsifierEdges.weight[index] = -sanitizedD.weight[i];
             index++;
         }
 

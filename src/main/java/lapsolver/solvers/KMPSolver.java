@@ -98,7 +98,7 @@ public class KMPSolver extends Solver {
         }
 
         // get new graph + diag from LDL
-        reducedGraph = LDLDecomposition.getReducedGraph(permutedGraph, gvrPair, ldlPair);
+        reducedGraph = LDLDecomposition.getReducedGraph(permutedGraph, ldlPair.D, gvrPair.numRemoved);
         reducedD = new double[reducedGraph.nv];
         for (int i = gvrPair.numRemoved; i < graph.nv; i++) {
             reducedD[i - gvrPair.numRemoved] = permutedDiag[i];
