@@ -47,10 +47,6 @@ public class Grid2 implements GraphFactory {
         this.verticalWeight = verticalWeight;
     }
 
-    private int getIdx(final int i, final int j) {
-        return width * i + j;
-    }
-
     /**
      * Actually generate the graph
      *
@@ -75,7 +71,7 @@ public class Grid2 implements GraphFactory {
     }
 
     /**
-     * Native C call to vectorize the grid construction
+     * Native C call to vectorize / parallelize the grid construction
      *
      * @param src            the source vertices
      * @param dst            the corresponding destinations
