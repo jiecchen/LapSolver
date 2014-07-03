@@ -52,7 +52,7 @@ public class KMPSolver extends Solver {
     }
 
     public void init (Graph graph, double[] d) {
-        System.out.println(graph.nv + " " + graph.ne);
+        System.out.println("INIT " + graph.nv + " " + graph.ne);
 
         this.graph = graph;
         this.d = d;
@@ -106,6 +106,8 @@ public class KMPSolver extends Solver {
     }
 
     public double[] solve (double[] b) {
+        System.out.println("SOLVE " + graph.nv + " " + graph.ne);
+
         if (sparsifiedSolver == null) {
             // we are at the bottom level
             return baseCaseSolver.solve(b);
@@ -117,7 +119,11 @@ public class KMPSolver extends Solver {
             innerB[i] = outerB[gvrPair.numRemoved + i];
         }
 
-        double[] innerX = sparsifiedSolver.solve(innerB);
+        ConjugateGradientSolver innerPCG = new ConjugateGradientSolver(sparsifiedSolver, 1000, 1e-2);
+        innerPCG.init(reducedGraph, reducedD);
+        double[] innerX = innerPCG.solve(innerB);
+
+
         double[] outerX = new double[graph.nv];
 
         for (int i = 0; i < graph.nv; i++) {
@@ -130,56 +136,6 @@ public class KMPSolver extends Solver {
         }
 
         return applyPerm(gvrInversePerm, LDLDecomposition.applyLTransInv(ldlPair.L, outerX));
-    }
-
-    public double[] solve (Graph graph, double b[], int level, double[] addDiag) {
-        System.out.println(graph.nv + " " + graph.ne);
-
-        //Create the graph that will be used in the recursion (laplacian given by D matrix)
-        GraphVertexRemoval gvrElement = new GraphVertexRemoval(sparsifier);
-        AnswerPair gvr = gvrElement.solve();
-
-        b = applyPerm(gvr.permutation, b);
-        addDiag = applyPerm(gvr.permutation, addDiag);
-        Graph permSparsifier = GraphUtils.permuteGraph(sparsifier, gvr.permutation);
-
-        LDLDecomposition ldlElement = new LDLDecomposition(permSparsifier, addDiag);
-        ReturnPair ldl = ldlElement.solve(gvr.numRemoved);
-
-        b = LDLDecomposition.applyLInv(ldl.L, b);
-
-        // grab diagonal elements from D matrix
-        double[] diagD = new double[graph.nv];
-        for (int i = 0; i < ldl.D.ne; i++) {
-            if (ldl.D.u[i] == ldl.D.v[i]) {
-                diagD[ldl.D.u[i]] += ldl.D.weight[i];
-            }
-        }
-
-        Graph reducedSparsifier = buildReducedSparsifier(graph, gvr, ldl);
-
-        // for eliminated vertices, x[i] = b[i]/D[i,i]
-        double[] x = new double[graph.nv];
-        for (int i = 0; i < gvr.numRemoved; i++) {
-            x[i] = b[i] / diagD[i];
-        }
-
-        double[] smallb = new double[graph.nv - gvr.numRemoved];
-        System.arraycopy(b, gvr.numRemoved, smallb, 0, smallb.length);
-
-        double[] smallAddDiag = new double[graph.nv - gvr.numRemoved];
-        System.arraycopy(addDiag, gvr.numRemoved, smallAddDiag, 0, smallAddDiag.length);
-
-        double[] KMPx = solve(reducedSparsifier, smallb, level - 1, smallAddDiag);
-        System.arraycopy(KMPx, 0, x, gvr.numRemoved, KMPx.length);
-
-        x = LDLDecomposition.applyLTransInv(ldl.L, x);
-
-        int[] inversePerm = new int[graph.nv];
-        for (int i = 0; i < graph.nv; i++)
-            inversePerm[gvr.permutation[i]] = i;
-
-        return applyPerm(inversePerm, x);
     }
 
     public static double[] applyPerm(int[] perm, double[] x) {
@@ -207,7 +163,7 @@ public class KMPSolver extends Solver {
                         (stretch.total / (offEdges.ne + 1) * (Math.log(graph.nv) + 1)) + 1;
 
         k=1;
-        
+
         Graph blownUpGraph = blowUpTreeEdges(graph, spanningTree, k);
 
         // find stretches in blown-up graph
