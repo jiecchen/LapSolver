@@ -6,8 +6,9 @@ function [x, err] = kmp1(a, b)
     g = a2g(a);
     D = ones(1,length(a));
     la = lap(a) + diag(D);
-    kmp = KMPSolver(StarDecompositionTree);
-    x = kmp.solve(g,b,5,D);
+    kmp = KMPSolver(StarDecompositionTree, ConjugateGradientSolver(1000,1e-4));
+    kmp.init(g,D);
+    x = kmp.solve(b);
     err = norm(la*x - b)
 end
 
