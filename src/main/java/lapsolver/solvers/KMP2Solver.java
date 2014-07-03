@@ -241,7 +241,7 @@ public class KMP2Solver extends Solver {
         Tree permutedTree = TreeUtils.permuteTree(tree, gvr.permutation);
         Tree updatedTree = updateTree(permutedGraph, permutedTree, ldl.L, gvr.numRemoved);
 
-        Graph reducedGraph = LDLDecomposition.getReducedGraph(permutedGraph, gvr, ldl);
+        Graph reducedGraph = LDLDecomposition.getReducedGraph(permutedGraph, ldl.D, gvr.numRemoved);
 
         ChainEntry result = new ChainEntry(reducedGraph, updatedTree, kappaC);
         result.perm = gvr.permutation;
