@@ -61,7 +61,8 @@ public class KMP2Solver extends Solver {
         double t = pp.total;
 
         // Step 2:  q := C_s t \log t \log (1/\epsilon)
-        final double q = Cs * t * Math.log(t) * Math.log(1 / xi);
+//        final double q = Cs * t * Math.log(t) * Math.log(1 / xi);
+        final double q = Cs * t / Math.log(t) / Math.log(t);
         System.out.println("Cs = " + Cs + " t = " + t + " xi = " + xi + " q = " + q);
 
         // Step 3:  p_e := p'_e / t
@@ -124,14 +125,14 @@ public class KMP2Solver extends Solver {
         Graph gPrime = new Graph(inG);
         for (int u = 0; u < tPrime.parent.length; u++) {
             int v = tPrime.parent[u]; // Now we have edge (u,v)
-            if (u == v) continue;
-            for (int iV = 0; iV < gPrime.nbrs[u].length; iV++)
-                if (gPrime.nbrs[u][iV] == v) { // this is our edge -- update both sides
-                    final double trWt = tPrime.weight[u];
-                    final int iU = gPrime.backInd[u][iV];
-                    gPrime.weights[u][iV] = trWt;
-                    gPrime.weights[v][iU] = trWt;
-                }
+            if (u != v)
+                for (int iV = 0; iV < gPrime.nbrs[u].length; iV++)
+                    if (gPrime.nbrs[u][iV] == v) { // this is our edge -- update both sides
+                        final double trWt = tPrime.weight[u];
+                        final int iU = gPrime.backInd[u][iV];
+                        gPrime.weights[u][iV] = trWt;
+                        gPrime.weights[v][iU] = trWt;
+                    }
         }
 
         // Step 7: \hat{t} := |stretch_{T'}(G')| = |stretch_{T}(G)| / k
@@ -170,12 +171,12 @@ public class KMP2Solver extends Solver {
         }
 
         // 12T'
-        for (int i = 0; i < tPrime.nv - 1; i++) {
-            if (i == tPrime.parent[i]) continue;
-            H.u[nOffTree + i] = i;
-            H.v[nOffTree + i] = tPrime.parent[i];
-            H.weight[nOffTree + i] = 4 * 3 * tPrime.weight[i];
-        }
+        for (int i = 0; i < tPrime.nv - 1; i++)
+            if (i != tPrime.parent[i]) {
+                H.u[nOffTree + i] = i;
+                H.v[nOffTree + i] = tPrime.parent[i];
+                H.weight[nOffTree + i] = 4 * 3 * tPrime.weight[i];
+            }
 
         return new Graph(H);
     }
@@ -189,7 +190,7 @@ public class KMP2Solver extends Solver {
      */
     public List<ChainEntry> buildChain(Graph graph, double p) {
         // C := 0
-        List<ChainEntry> chain = new LinkedList<>();
+        LinkedList<ChainEntry> chain = new LinkedList<>();
 
         // G1 = G
         Graph g1 = new Graph(graph);
@@ -201,12 +202,11 @@ public class KMP2Solver extends Solver {
         Graph h1 = new Graph(g1);
         double logSquaredFactor = Math.pow(Math.log(t.nv) * Math.log(Math.log(t.nv)), 2.0);
         int[] parent = t.parent;
-        for (int i = 0; i < parent.length; i++) {
-            if (i == t.parent[i]) continue;
-            for (int j = 0; j < h1.nbrs[i].length; j++)
-                if (h1.nbrs[i][j] == t.parent[i])
-                    h1.weights[i][j] = logSquaredFactor * t.weight[i];
-        }
+        for (int i = 0; i < parent.length; i++)
+            if (i != t.parent[i])
+                for (int j = 0; j < h1.nbrs[i].length; j++)
+                    if (h1.nbrs[i][j] == t.parent[i])
+                        h1.weights[i][j] = logSquaredFactor * t.weight[i];
 
         // G2 = H1
         Graph g2 = new Graph(h1);
@@ -215,53 +215,66 @@ public class KMP2Solver extends Solver {
         double xi = 2 * Math.log(t.nv);
 
         // Initialize the chain
-        chain.add(new ChainEntry(g1, h1, t, logSquaredFactor));
-        chain.add(new ChainEntry(g2, null, t, kappaC));
+        chain.add(new ChainEntry(g1, t, logSquaredFactor)); // G
+        chain.add(new ChainEntry(h1, t, logSquaredFactor)); // H
+        chain.add(new ChainEntry(g2, t, kappaC));           // G
 
-        ChainEntry chainEnd = chain.get(chain.size() - 1);
-        while (chainEnd.gGraph.nv > cStop) {
-            chainEnd.hGraph = incrementalSparsify(chainEnd.gGraph, chainEnd.tree, chainEnd.kappa, p * xi);
-            if (chainEnd.hGraph == null) return null; // We failed.
-            chain.add(greedyElimination(chainEnd.hGraph, chainEnd.tree));
-            chainEnd = chain.get(chain.size() - 1);
+        ChainEntry chainEnd = chain.getLast();
+        while (chainEnd.graph.nv > cStop) {
+            Graph hGraph = incrementalSparsify(chainEnd.graph, chainEnd.tree, chainEnd.kappa, p * xi);
+            if (hGraph == null) return null; // We failed.
+            chain.add(new ChainEntry(hGraph, chainEnd.tree, chainEnd.kappa)); // H
+            chain.add(greedyElimination(hGraph, chainEnd.tree)); // G
+            chainEnd = chain.getLast();
         }
 
         return chain;
     }
 
     public ChainEntry greedyElimination(Graph hGraph, Tree tree) {
-        AnswerPair answerPair = new GraphVertexRemoval(hGraph).solve();
-        Graph nextGraph = GraphUtils.permuteGraph(hGraph, answerPair.permutation);
-        Tree permutedTree = TreeUtils.permuteTree(tree, answerPair.permutation);
+        AnswerPair gvr = new GraphVertexRemoval(hGraph).solve();
+        Graph permutedGraph = GraphUtils.permuteGraph(hGraph, gvr.permutation);
 
-        ReturnPair returnPair = new LDLDecomposition(nextGraph, delta).solve(answerPair.numRemoved);
-        nextGraph = KMPSolver.buildReducedSparsifier(nextGraph, answerPair, returnPair);
+        ReturnPair ldl = new LDLDecomposition(permutedGraph, delta).solve(gvr.numRemoved);
 
-        int[] deg = new int[answerPair.numRemoved];
-        for (int i = 0; i < returnPair.L.ne; i++)
-            if (returnPair.L.u[i] != returnPair.L.v[i])
-                deg[returnPair.L.v[i]]++;
+        Tree permutedTree = TreeUtils.permuteTree(tree, gvr.permutation);
+        Tree updatedTree = updateTree(permutedGraph, permutedTree, ldl.L, gvr.numRemoved);
+
+        Graph reducedGraph = LDLDecomposition.getReducedGraph(permutedGraph, ldl.D, gvr.numRemoved);
+
+        ChainEntry result = new ChainEntry(reducedGraph, updatedTree, kappaC);
+        result.perm = gvr.permutation;
+        return result;
+    }
+
+    /**
+     * Removes numRemoved vertices from the Tree as per the procedure in KMP2.
+     *
+     * @param graph      The graph of which tree is a spanning tree
+     * @param tree       The spanning tree to update
+     * @param lMatrix    The L-matrix of the graph after LDLDecompostion
+     * @param numRemoved The number of degree 1 and 2 vertices removed
+     * @return The spanning tree with appropriately-weighted edges
+     */
+    private Tree updateTree(Graph graph, Tree tree, EdgeList lMatrix, int numRemoved) {
+        int[] deg = new int[numRemoved];
+        for (int i = 0; i < lMatrix.ne; i++)
+            if (lMatrix.u[i] != lMatrix.v[i])
+                deg[lMatrix.v[i]]++;
 
         int index = 0;
-        EdgeList updatedTree = new EdgeList(tree.nv - answerPair.numRemoved);
+        EdgeList updatedTree = new EdgeList(tree.nv - numRemoved);
+        for (int i = numRemoved; i < tree.nv; i++)
+            if (tree.parent[i] >= numRemoved) {
+                updatedTree.u[index] = Math.min(i, tree.parent[i]) - numRemoved;
+                updatedTree.v[index] = Math.max(i, tree.parent[i]) - numRemoved;
+                updatedTree.weight[index++] = tree.weight[index];
+            }
 
-        final int N = answerPair.permutation.length;
-        int invPerm[] = new int[N];
-        for (int i = 0; i < N; i++)
-            invPerm[answerPair.permutation[i]] = i;
-
-        for (int i = answerPair.numRemoved; i < permutedTree.nv; i++) {
-            if (permutedTree.parent[i] < answerPair.numRemoved) continue;
-            updatedTree.u[index] = Math.min(i, permutedTree.parent[i]) - answerPair.numRemoved;
-            updatedTree.v[index] = Math.max(i, permutedTree.parent[i]) - answerPair.numRemoved;
-            updatedTree.weight[index++] = permutedTree.weight[index];
-        }
-
-        for (int i = 0; i < deg.length; i++) {
-            if (deg[i] == 2) {
-                int u = answerPair.permutation[i];
-                int v1 = hGraph.nbrs[u][0];
-                int v2 = hGraph.nbrs[u][1];
+        for (int u = 0; u < deg.length; u++)
+            if (deg[u] == 2) {
+                int v1 = graph.nbrs[u][0];
+                int v2 = graph.nbrs[u][1];
 
                 boolean u_v1 = tree.parent[u] == v1 || tree.parent[v1] == u;
                 boolean u_v2 = tree.parent[u] == v2 || tree.parent[v2] == u;
@@ -269,31 +282,25 @@ public class KMP2Solver extends Solver {
                 assert u_v1 || u_v2;
 
                 if (u_v1 && u_v2) {
-                    v1 = invPerm[v1];
-                    v2 = invPerm[v2];
-                    updatedTree.u[index] = Math.min(v1, v2) - answerPair.numRemoved;
-                    updatedTree.v[index] = Math.max(v1, v2) - answerPair.numRemoved;
-                    updatedTree.weight[index++] = 1. / (1. / hGraph.weights[u][0] + 1. / hGraph.weights[u][1]);
+                    updatedTree.u[index] = Math.min(v1, v2) - numRemoved;
+                    updatedTree.v[index] = Math.max(v1, v2) - numRemoved;
+                    updatedTree.weight[index++] = (graph.weights[u][0] * graph.weights[u][1])
+                            / (graph.weights[u][0] + graph.weights[u][1]);
                 }
             }
-        }
 
-        ChainEntry result = new ChainEntry(nextGraph, null, new Tree(updatedTree), kappaC);
-        result.perm = answerPair.permutation;
-        return result;
+        return new Tree(updatedTree);
     }
 
     public static class ChainEntry {
-        public Graph gGraph;
-        public Graph hGraph;
+        public Graph graph;
         public Tree tree;
         public double kappa;
 
         public int[] perm = new int[0];
 
-        public ChainEntry(Graph gGraph, Graph hGraph, Tree tree, double kappa) {
-            this.gGraph = gGraph;
-            this.hGraph = hGraph;
+        public ChainEntry(Graph graph, Tree tree, double kappa) {
+            this.graph = graph;
             this.tree = tree;
             this.kappa = kappa;
         }
