@@ -125,14 +125,14 @@ public class KMP2Solver extends Solver {
         Graph gPrime = new Graph(inG);
         for (int u = 0; u < tPrime.parent.length; u++) {
             int v = tPrime.parent[u]; // Now we have edge (u,v)
-            if (u == v) continue;
-            for (int iV = 0; iV < gPrime.nbrs[u].length; iV++)
-                if (gPrime.nbrs[u][iV] == v) { // this is our edge -- update both sides
-                    final double trWt = tPrime.weight[u];
-                    final int iU = gPrime.backInd[u][iV];
-                    gPrime.weights[u][iV] = trWt;
-                    gPrime.weights[v][iU] = trWt;
-                }
+            if (u != v)
+                for (int iV = 0; iV < gPrime.nbrs[u].length; iV++)
+                    if (gPrime.nbrs[u][iV] == v) { // this is our edge -- update both sides
+                        final double trWt = tPrime.weight[u];
+                        final int iU = gPrime.backInd[u][iV];
+                        gPrime.weights[u][iV] = trWt;
+                        gPrime.weights[v][iU] = trWt;
+                    }
         }
 
         // Step 7: \hat{t} := |stretch_{T'}(G')| = |stretch_{T}(G)| / k
@@ -171,12 +171,12 @@ public class KMP2Solver extends Solver {
         }
 
         // 12T'
-        for (int i = 0; i < tPrime.nv - 1; i++) {
-            if (i == tPrime.parent[i]) continue;
-            H.u[nOffTree + i] = i;
-            H.v[nOffTree + i] = tPrime.parent[i];
-            H.weight[nOffTree + i] = 4 * 3 * tPrime.weight[i];
-        }
+        for (int i = 0; i < tPrime.nv - 1; i++)
+            if (i != tPrime.parent[i]) {
+                H.u[nOffTree + i] = i;
+                H.v[nOffTree + i] = tPrime.parent[i];
+                H.weight[nOffTree + i] = 4 * 3 * tPrime.weight[i];
+            }
 
         return new Graph(H);
     }
@@ -202,12 +202,11 @@ public class KMP2Solver extends Solver {
         Graph h1 = new Graph(g1);
         double logSquaredFactor = Math.pow(Math.log(t.nv) * Math.log(Math.log(t.nv)), 2.0);
         int[] parent = t.parent;
-        for (int i = 0; i < parent.length; i++) {
-            if (i == t.parent[i]) continue;
-            for (int j = 0; j < h1.nbrs[i].length; j++)
-                if (h1.nbrs[i][j] == t.parent[i])
-                    h1.weights[i][j] = logSquaredFactor * t.weight[i];
-        }
+        for (int i = 0; i < parent.length; i++)
+            if (i != t.parent[i])
+                for (int j = 0; j < h1.nbrs[i].length; j++)
+                    if (h1.nbrs[i][j] == t.parent[i])
+                        h1.weights[i][j] = logSquaredFactor * t.weight[i];
 
         // G2 = H1
         Graph g2 = new Graph(h1);
@@ -265,14 +264,14 @@ public class KMP2Solver extends Solver {
 
         int index = 0;
         EdgeList updatedTree = new EdgeList(tree.nv - numRemoved);
-        for (int i = numRemoved; i < tree.nv; i++) {
-            if (tree.parent[i] < numRemoved) continue;
-            updatedTree.u[index] = Math.min(i, tree.parent[i]) - numRemoved;
-            updatedTree.v[index] = Math.max(i, tree.parent[i]) - numRemoved;
-            updatedTree.weight[index++] = tree.weight[index];
-        }
+        for (int i = numRemoved; i < tree.nv; i++)
+            if (tree.parent[i] >= numRemoved) {
+                updatedTree.u[index] = Math.min(i, tree.parent[i]) - numRemoved;
+                updatedTree.v[index] = Math.max(i, tree.parent[i]) - numRemoved;
+                updatedTree.weight[index++] = tree.weight[index];
+            }
 
-        for (int u = 0; u < deg.length; u++) {
+        for (int u = 0; u < deg.length; u++)
             if (deg[u] == 2) {
                 int v1 = graph.nbrs[u][0];
                 int v2 = graph.nbrs[u][1];
@@ -289,7 +288,6 @@ public class KMP2Solver extends Solver {
                             / (graph.weights[u][0] + graph.weights[u][1]);
                 }
             }
-        }
 
         return new Tree(updatedTree);
     }
