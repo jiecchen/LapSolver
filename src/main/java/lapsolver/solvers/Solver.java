@@ -16,6 +16,7 @@ import org.apache.commons.math3.linear.RealVector;
 
 public abstract class Solver extends RealLinearOperator {
     public Graph graph;
+    public double[] d;
 
     /**
      * Initialize solver on a particular graph, and perform preprocessing.

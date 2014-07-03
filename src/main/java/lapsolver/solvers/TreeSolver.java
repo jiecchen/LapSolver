@@ -26,6 +26,7 @@ public class TreeSolver extends Solver {
      */
     public void init(Graph graph, double[] d) {
         tree = GraphUtils.toTree(graph);
+        this.d = d;
     }
 
     /**

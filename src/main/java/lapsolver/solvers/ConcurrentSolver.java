@@ -31,7 +31,7 @@ public class ConcurrentSolver extends Solver {
 
     @Override
     public void init(final Graph graph, double[] d) {
-        this.graph = graph;
+        this.graph = graph; this.d = d;
     }
 
     @Override
