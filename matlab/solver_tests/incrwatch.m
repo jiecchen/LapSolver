@@ -16,7 +16,6 @@ function [x, errs] = incrwatch(a, b, niters)
     for i = 1:niters
         res = incrsolver.residue;
         incrsolver.solve_iter;
-        norm(lap(a) * incrsolver.dx - res) / norm(res)
         x = incrsolver.solve_return;
         errs(i) = norm(incrsolver.residue);
     end

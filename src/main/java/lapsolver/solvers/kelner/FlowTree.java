@@ -11,6 +11,8 @@ package lapsolver.solvers.kelner;
 import lapsolver.EdgeList;
 import lapsolver.Tree;
 
+import java.util.Arrays;
+
 public abstract class FlowTree {
     // common implementation for off-tree edges
     public Tree tree;
@@ -28,6 +30,11 @@ public abstract class FlowTree {
     public void update(int e, double alpha) {
         treeUpdate(e, alpha);
         offFlow[e] += alpha;
+    }
+
+    // set all off-tree flows to 0
+    public void clearOffFlows() {
+        Arrays.fill(offFlow, 0);
     }
 
     // find sum of V = IR along the tree cycle on edge e

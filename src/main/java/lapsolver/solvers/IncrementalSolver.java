@@ -49,12 +49,9 @@ public class IncrementalSolver extends Solver {
         currentX = new double[graph.nv];
     }
 
-    public double[] dx, ldx;
-
     // perform one iteration of the incremental meta-solving process
     public void solve_iter() {
-        //double[]
-                dx = solver.solve(residue);
+        double[] dx = solver.solve(residue);
 
         // update current guess
         for (int i = 0; i < graph.nv; i++) {
@@ -62,8 +59,13 @@ public class IncrementalSolver extends Solver {
         }
 
         // update residue
-        //double[]
-                ldx = GraphUtils.applyLaplacian(graph, dx);
+        double[] ldx = GraphUtils.applyLaplacian(graph, dx);
+        if (d != null) {
+            for (int i = 0; i < graph.nv; i++) {
+                ldx[i] += d[i] * dx[i];
+            }
+        }
+
         for (int i = 0; i < graph.nv; i++) {
             residue[i] -= ldx[i];
         }

@@ -70,15 +70,13 @@ public class KelnerSolver extends Solver {
         treeSolver.init(spanningTree);
 
         // initialize the cycle query data structure
-        flowTree = new DirectFlowTree(spanningTree, offEdges);
+        flowTree = new KelnerFlowTree(spanningTree, offEdges);
     }
 
     // solve for x in Lx = b, with default parameters
     @Override
     public double[] solve(double[] b) {
         int iters = (int) Math.ceil(totalStretch * Math.log(totalStretch));
-
-        iters = 100000;
         System.out.println("KelnerSolver: " + iters + " iterations");
         return solve (b, iters);
     }

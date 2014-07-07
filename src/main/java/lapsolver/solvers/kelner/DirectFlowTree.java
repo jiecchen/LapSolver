@@ -62,6 +62,7 @@ public class DirectFlowTree extends FlowTree {
 
     // initialize the structure with some flows
     public void setTreeFlows(double[] treeFlows) {
+        super.clearOffFlows();
         this.treeFlows = treeFlows.clone();
     }
 
