@@ -12,6 +12,8 @@ function aflow = flowProblem(a,k)
 % but, there can be overlap
 %
 
+import lapsolver.*;
+import lapsolver.util.*;
 
 n = length(a);
 
@@ -19,15 +21,13 @@ n = length(a);
 
 start = ceil(n*rand(1));
 
-g = lapsolver.UnweightedGraph(ai,aj);
-g.bfsWalk(start-1);
-bfs = g.bfs + 1;
+g = Graph(ai-1,aj-1, av);
+bfs = 1 + GraphUtils.bfsOrder(g,start-1);
 
 s1 = bfs(1:k);
 
 last = bfs(end);
-g.bfsWalk(last-1);
-bfs = g.bfs + 1;
+bfs = 1 + GraphUtils.bfsOrder(g,last-1);
 
 s2 = bfs(1:k);
 

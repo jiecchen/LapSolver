@@ -6,6 +6,7 @@ LIBRARY_NAME=liblapsolver
 CFLAGS=-O3 -march=native -mtune=native -flto -std=c99 -fPIC
 LFLAGS:=$(CFLAGS)
 CLASSES=lapsolver.generators.Grid2 \
+        lapsolver.generators.Grid3 \
         lapsolver.generators.TriangleGrid2
 SOURCES=src/generators.c $(addsuffix .c,$(addprefix src/,$(subst .,_,$(CLASSES))))
 OBJECTS=$(SOURCES:.c=.o)
