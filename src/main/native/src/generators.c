@@ -4,7 +4,7 @@
 void grid2(int * restrict src, int * restrict dst, double * restrict weight,
            const int height, const int width, const double verticalWeight)
 {
-    const int N = width*height;
+
     const int shortHeight = height-1;
     const int shortWidth = width-1;
 
@@ -42,7 +42,6 @@ void grid3(int * restrict src, int * restrict dst, double * restrict weight,
     const int shortx = x - 1;
     const int shorty = y - 1;
     const int shortz = z - 1;
-    const int slice = x * shorty + shortx * shorty;
 
     int e = 0; //edge number counter
 

@@ -63,14 +63,10 @@ function x = maxflow(A, s, t, c)
 
 		sigma = sum(s_inv2(M + 1 : end));
 
-		% [result1, garbage] = pcg(W, r, 1 / (20 * (sqrt(M) + 1)), 40);
-		% [result2, garbage] = pcg(W, b_, 1 / (20 * (sqrt(M) + 1)), 40);
-		[result1, garbage] = cmgSolver(W, r);
-		[result2, garbage] = cmgSolver(W, b_);
-
-
-		% result1 = pcg(W, r, 1 / (20 * (sqrt(M) + 1)), 40);
-		% result2 = pcg(W, b_, 1 / (20 * (sqrt(M) + 1)), 40);
+		[result1, garbage] = pcg(W, r, 1 / (20 * (sqrt(M) + 1)), 40);
+		[result2, garbage] = pcg(W, b_, 1 / (20 * (sqrt(M) + 1)), 40);
+		% [result1, garbage] = cmgSolver(W, r);
+		% [result2, garbage] = cmgSolver(W, b_);
 
 		result = result1 - (sigma * (result2 * (b_' * result1)) / (1 + sigma * (b_' * result2)));
 
@@ -115,12 +111,10 @@ function x = maxflow(A, s, t, c)
 		sigma = sum(s_inv2(M + 1 : end));
 
 
-		% [result1, garbage] = pcg(W, r, 1 / (20 * (sqrt(M) + 1)), 40);
-		% [result2, garbage] = pcg(W, b, 1 / (20 * (sqrt(M) + 1)), 40);
-		[result1, garbage] = cmgSolver(W, r);
-		[result2, garbage] = cmgSolver(W, b);
-		% result1 = pcg(W, r, 1 / (20 * (sqrt(M) + 1)), 40);
-		% result2 = pcg(W, b, 1 / (20 * (sqrt(M) + 1)), 40);
+		[result1, garbage] = pcg(W, r, 1 / (20 * (sqrt(M) + 1)), 40);
+		[result2, garbage] = pcg(W, b, 1 / (20 * (sqrt(M) + 1)), 40);
+		% [result1, garbage] = cmgSolver(W, r);
+		% [result2, garbage] = cmgSolver(W, b);
 
 		result = result1 - (sigma * (result2 * (b' * result1)) / (1 + sigma * (b' * result2)));
 
@@ -163,12 +157,11 @@ function x = maxflow(A, s, t, c)
 	sigma = sum(s_inv2(M + 1 : end));
 
 
-	% [result1, garbage] = pcg(W, r, .1, 40);
-	% [result2, garbage] = pcg(W, b, .1, 40);
-	[result1, garbage] = cmgSolver(W, r);
-	[result2, garbage] = cmgSolver(W, b);
-	% result1 = pcg(W, r, .1, 40);
-	% result2 = pcg(W, b, .1, 40);
+	[result1, garbage] = pcg(W, r, .1, 40);
+	[result2, garbage] = pcg(W, b, .1, 40);
+	% [result1, garbage] = cmgSolver(W, r);
+	% [result2, garbage] = cmgSolver(W, b);
+
 
 	result = result1 - (sigma * (result2 * (b' * result1)) / (1 + sigma * (b' * result2)));
 
