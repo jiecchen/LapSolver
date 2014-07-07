@@ -48,7 +48,7 @@ public class KMPSolver extends Solver {
 
     // Use PCGSolver as default
     public KMPSolver(SpanningTreeStrategy spanningTreeStrategy) {
-        this (spanningTreeStrategy, new ConjugateGradientSolver(1000, 1e-8));
+        this(spanningTreeStrategy, new ConjugateGradientSolver(1000, 1e-8));
     }
 
     public void init (Graph graph, double[] d) {
@@ -119,7 +119,8 @@ public class KMPSolver extends Solver {
             innerB[i] = outerB[gvrPair.numRemoved + i];
         }
 
-        ConjugateGradientSolver innerPCG = new ConjugateGradientSolver(sparsifiedSolver, 1000, 1e-2);
+        ConjugateGradientSolver innerPCG = new ConjugateGradientSolver(sparsifiedSolver, 1000, 1e-10);
+        // ConjugateGradientSolver innerPCG = new ConjugateGradientSolver(null, 1000, 1e-2);
         innerPCG.init(reducedGraph, reducedD);
         double[] innerX = innerPCG.solve(innerB);
 
@@ -162,13 +163,17 @@ public class KMPSolver extends Solver {
         double k = 4. * (stretch.total / (offEdges.ne + 1) * (Math.log(graph.nv) + 1)) *
                         (stretch.total / (offEdges.ne + 1) * (Math.log(graph.nv) + 1)) + 1;
 
-        k=1;
-
         Graph blownUpGraph = blowUpTreeEdges(graph, spanningTree, k);
 
         // find stretches in blown-up graph
         GraphUtils.reciprocateWeights(blownUpGraph);
+        for (int i = 0; i < spanningTree.nv; i++) {
+            spanningTree.weight[i] /= k;
+        }
         StretchResult blownUpStretch = Stretch.compute(blownUpGraph, spanningTree, offEdges);
+
+        System.out.println("Old: " + stretch.total + ", New: " + blownUpStretch.total);
+
         GraphUtils.reciprocateWeights(blownUpGraph);
 
         //Expect to grab q = O(m / log(m)) edges
