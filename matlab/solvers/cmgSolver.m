@@ -14,7 +14,7 @@ function [x,iter] = cmgSolver(la,b,opts)
 
 default('b',[]);
 
-default('opts','tol',1e-6);
+default('opts','tol',0.01);
 default('opts','maxit',100);
 
 cmgOpts.display = 0;

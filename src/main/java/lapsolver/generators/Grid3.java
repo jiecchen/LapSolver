@@ -11,8 +11,8 @@ public class Grid3 implements GraphFactory {
 	private final int xsize;
 	private final int ysize;
 	private final int zsize;
-	private final int yweight;
-	private final int zweight;
+	private final double yweight;
+	private final double zweight;
 
 	private Graph graph = null;
 
@@ -24,22 +24,12 @@ public class Grid3 implements GraphFactory {
 		this(x, y, z, 1, 1);
 	}
 
-	public Grid3(int x, int y, int z, int yw, int zw) {
+	public Grid3(int x, int y, int z, double yw, double zw) {
 		this.xsize = x;
 		this.ysize = y;
 		this.zsize = z;
 		this.yweight = yw;
 		this.zweight = zw;
-	}
-
-	private int getx(int i) {
-		i = i % (xsize * ysize);
-		return i % xsize;
-	}
-
-	private int gety(int i) {
-		i = i % (xsize * ysize);
-		return i / xsize;
 	}
 
 	public Graph generateGraph() {
@@ -63,15 +53,8 @@ public class Grid3 implements GraphFactory {
 	}
 
 	private native void populateg3(int[] src, int[] dst, double[] weight,
-                                  int x, int y, int z, int yweight, int zweight);
+                                  int x, int y, int z, double yweight, double zweight);
 
 }
-
-
-
-
-
-
-
 
 
