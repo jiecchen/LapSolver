@@ -24,7 +24,7 @@ import static lapsolver.algorithms.Stretch.StretchResult;
 public class KMP2Solver extends Solver {
     private static final double Cs = 4.0;
     private static final int cStop = 100;
-    private static final double kappaC = 1.0e-3;
+    private static final double kappaC = 1000;
 
     private final SpanningTreeStrategy treeStrategy;
     private final double failureProbability;
@@ -63,7 +63,6 @@ public class KMP2Solver extends Solver {
         // Step 2:  q := C_s t \log t \log (1/\epsilon)
 //        final double q = Cs * t * Math.log(t) * Math.log(1 / xi);
         final double q = Cs * t / Math.log(t) / Math.log(t);
-        System.out.println("Cs = " + Cs + " t = " + t + " xi = " + xi + " q = " + q);
 
         // Step 3:  p_e := p'_e / t
         double[] p = pp.allStretches.clone();
@@ -99,9 +98,11 @@ public class KMP2Solver extends Solver {
      */
     public Graph incrementalSparsify(Graph inG, Tree inT, double kap, double xi) {
         if (kap <= 1.0)
-            throw new IllegalArgumentException("kappa must be > 1");
+            throw new IllegalArgumentException("kappa (" + kap + ") must be > 1");
         if (xi <= 0.0 || xi >= 1.0)
             throw new IllegalArgumentException("0 < xi < 1");
+        if (inG.nv != inT.nv)
+            throw new IllegalArgumentException("Graph (" + inG.nv + ") and Tree (" + inT.nv + ") must have same number of vertices!");
 
         // Step 1: Compute stretch_T(G)
         double totalStretch = Stretch.compute(inG, inT, TreeUtils.getOffTreeEdges(inG, inT)).total;
@@ -111,9 +112,9 @@ public class KMP2Solver extends Solver {
 
         // Step 2: if |stretch_T(G)| <= 1
         if (totalStretch <= 1) {
-            // Step 3: return 2T
+            // Step 3: return 2T (resistances -> divide)
             for (int i = 0; i < tPrime.weight.length; i++)
-                tPrime.weight[i] *= 2;
+                tPrime.weight[i] /= 2;
             return new Graph(tPrime);
         } // Step 4: end if
 
@@ -161,24 +162,26 @@ public class KMP2Solver extends Solver {
 
         // Step 14+15: H := 4(L + 3T') = 4L + 12T'
         int nOffTree = hSquiggle.ne;
-        EdgeList H = new EdgeList(nOffTree + tPrime.nv - 1);
+        EdgeList tEdges = new EdgeList(tPrime);
+        EdgeList H = new EdgeList(nOffTree + tEdges.ne);
 
         // 4L
         for (int i = 0; i < nOffTree; i++) {
             H.u[i] = hSquiggle.u[i];
             H.v[i] = hSquiggle.v[i];
-            H.weight[i] = 4 * hSquiggle.weight[i];
+            H.weight[i] = hSquiggle.weight[i] / 4;
         }
 
         // 12T'
-        for (int i = 0; i < tPrime.nv - 1; i++)
-            if (i != tPrime.parent[i]) {
-                H.u[nOffTree + i] = i;
-                H.v[nOffTree + i] = tPrime.parent[i];
-                H.weight[nOffTree + i] = 4 * 3 * tPrime.weight[i];
-            }
+        for (int i = 0; i < tEdges.ne; i++) {
+            H.u[nOffTree + i] = tEdges.u[i];
+            H.v[nOffTree + i] = tEdges.v[i];
+            H.weight[nOffTree + i] = tEdges.weight[i] / 12;
+        }
 
-        return new Graph(H);
+        Graph grH = new Graph(H);
+        System.out.println("Incremental sparsify returns |H| = " + grH.nv);
+        return grH;
     }
 
     /**
@@ -222,8 +225,9 @@ public class KMP2Solver extends Solver {
         ChainEntry chainEnd = chain.getLast();
         while (chainEnd.graph.nv > cStop) {
             Graph hGraph = incrementalSparsify(chainEnd.graph, chainEnd.tree, chainEnd.kappa, p * xi);
-            if (hGraph == null) return null; // We failed.
+            if (hGraph == null) break; // Failed to sparsify further
             chain.add(new ChainEntry(hGraph, chainEnd.tree, chainEnd.kappa)); // H
+            System.out.printf("|hGraph| = %d, |chainEnd.tree| = %d, |chainEnd.graph| = %d\n", hGraph.nv, chainEnd.tree.nv, chainEnd.graph.nv);
             chain.add(greedyElimination(hGraph, chainEnd.tree)); // G
             chainEnd = chain.getLast();
         }
@@ -231,10 +235,11 @@ public class KMP2Solver extends Solver {
         return chain;
     }
 
-    public ChainEntry greedyElimination(Graph hGraph, Tree tree) {
-        AnswerPair gvr = new GraphVertexRemoval(hGraph).solve();
-        Graph permutedGraph = GraphUtils.permuteGraph(hGraph, gvr.permutation);
+    public ChainEntry greedyElimination(Graph graph, Tree tree) {
+        AnswerPair gvr = new GraphVertexRemoval(graph).solve();
+        Graph permutedGraph = GraphUtils.permuteGraph(graph, gvr.permutation);
 
+        delta = applyPerm(gvr.permutation, delta);
         ReturnPair ldl = new LDLDecomposition(permutedGraph, delta).solve(gvr.numRemoved);
 
         Tree permutedTree = TreeUtils.permuteTree(tree, gvr.permutation);
@@ -242,9 +247,22 @@ public class KMP2Solver extends Solver {
 
         Graph reducedGraph = LDLDecomposition.getReducedGraph(permutedGraph, ldl.D, gvr.numRemoved);
 
+        double[] reducedD = new double[reducedGraph.nv];
+        System.arraycopy(delta, gvr.numRemoved, reducedD, 0, reducedGraph.nv);
+        delta = reducedD;
+
         ChainEntry result = new ChainEntry(reducedGraph, updatedTree, kappaC);
         result.perm = gvr.permutation;
         return result;
+    }
+
+    private static double[] applyPerm(int[] perm, double[] x) {
+        double[] xPerm = new double[perm.length];
+
+        for (int i = 0; i < x.length; i++)
+            xPerm[i] = x[perm[i]];
+
+        return xPerm;
     }
 
     /**
@@ -265,7 +283,8 @@ public class KMP2Solver extends Solver {
         int index = 0;
         EdgeList updatedTree = new EdgeList(tree.nv - numRemoved);
         for (int i = numRemoved; i < tree.nv; i++)
-            if (tree.parent[i] >= numRemoved) {
+            // Don't include self-loops
+            if (tree.parent[i] >= numRemoved && tree.parent[i] != i) {
                 updatedTree.u[index] = Math.min(i, tree.parent[i]) - numRemoved;
                 updatedTree.v[index] = Math.max(i, tree.parent[i]) - numRemoved;
                 updatedTree.weight[index++] = tree.weight[index];
@@ -281,7 +300,8 @@ public class KMP2Solver extends Solver {
 
                 assert u_v1 || u_v2;
 
-                if (u_v1 && u_v2) {
+                // Make sure both endpoints were preserved
+                if (u_v1 && u_v2 && !(v1 < numRemoved || v2 < numRemoved)) {
                     updatedTree.u[index] = Math.min(v1, v2) - numRemoved;
                     updatedTree.v[index] = Math.max(v1, v2) - numRemoved;
                     updatedTree.weight[index++] = (graph.weights[u][0] * graph.weights[u][1])
@@ -289,6 +309,8 @@ public class KMP2Solver extends Solver {
                 }
             }
 
+        // Confirm we added back all the edges
+        assert index == (tree.nv - numRemoved - 1);
         return new Tree(updatedTree);
     }
 
