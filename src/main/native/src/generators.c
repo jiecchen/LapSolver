@@ -267,7 +267,7 @@ void hypercube(int * restrict src, int * restrict dst, double * restrict weight,
 
     // remaining j = shorty, k = shortx region
     #pragma omp parallel for 
-    for (int i = 0; i < shortz; i++) {erm
+    for (int i = 0; i < shortz; i++) {
         for (int l = 0; l < w; l++) {
             //z
             src[e+l] = get4d(i, shorty, shortx, l);

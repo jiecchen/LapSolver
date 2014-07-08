@@ -102,7 +102,8 @@ public class KMP2Solver extends Solver {
         if (xi <= 0.0 || xi >= 1.0)
             throw new IllegalArgumentException("0 < xi < 1");
         if (inG.nv != inT.nv)
-            throw new IllegalArgumentException("Graph (" + inG.nv + ") and Tree (" + inT.nv + ") must have same number of vertices!");
+            throw new IllegalArgumentException("Graph (" + inG.nv + ") and Tree (" + inT.nv
+                    + ") must have same number of vertices!");
 
         // Step 1: Compute stretch_T(G)
         double totalStretch = Stretch.compute(inG, inT, TreeUtils.getOffTreeEdges(inG, inT)).total;
@@ -179,9 +180,7 @@ public class KMP2Solver extends Solver {
             H.weight[nOffTree + i] = tEdges.weight[i] / 12;
         }
 
-        Graph grH = new Graph(H);
-        System.out.println("Incremental sparsify returns |H| = " + grH.nv);
-        return grH;
+        return new Graph(H);
     }
 
     /**
@@ -227,7 +226,6 @@ public class KMP2Solver extends Solver {
             Graph hGraph = incrementalSparsify(chainEnd.graph, chainEnd.tree, chainEnd.kappa, p * xi);
             if (hGraph == null) break; // Failed to sparsify further
             chain.add(new ChainEntry(hGraph, chainEnd.tree, chainEnd.kappa)); // H
-            System.out.printf("|hGraph| = %d, |chainEnd.tree| = %d, |chainEnd.graph| = %d\n", hGraph.nv, chainEnd.tree.nv, chainEnd.graph.nv);
             chain.add(greedyElimination(hGraph, chainEnd.tree)); // G
             chainEnd = chain.getLast();
         }
