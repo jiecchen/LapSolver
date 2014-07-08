@@ -35,6 +35,7 @@ public class KelnerFlowTree extends FlowTree {
 
     // initialize the structure with some flows
     public void setTreeFlows(double[] treeFlows) {
+        super.clearOffFlows();
         clearFlows(rootStructure);
 
         int[] order = TreeUtils.dfsOrder(tree);
@@ -74,8 +75,10 @@ public class KelnerFlowTree extends FlowTree {
         node.drop = 0;
         node.ext = 0;
 
-        for (SeparatorNode child : node.children) {
-            clearFlows(child);
+        if (node.children != null) {
+            for (SeparatorNode child : node.children) {
+                if (child != null) clearFlows(child);
+            }
         }
     }
 
