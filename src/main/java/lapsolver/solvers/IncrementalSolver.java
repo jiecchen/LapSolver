@@ -9,11 +9,7 @@
 package lapsolver.solvers;
 
 import lapsolver.Graph;
-import lapsolver.lsst.StarDecompositionTree;
-import lapsolver.solvers.kelner.KelnerFlowTree;
 import lapsolver.util.GraphUtils;
-
-import java.util.Arrays;
 
 public class IncrementalSolver extends Solver {
     public Solver solver; // The underlying solver.
@@ -22,7 +18,7 @@ public class IncrementalSolver extends Solver {
     public double[] residue;
     public double[] currentX;
 
-    public IncrementalSolver (Solver solver, int nIterations) {
+    public IncrementalSolver(Solver solver, int nIterations) {
         this.solver = solver;
         this.nIterations = nIterations;
     }
@@ -59,7 +55,7 @@ public class IncrementalSolver extends Solver {
         }
 
         // update residue
-        double[] ldx = GraphUtils.applyLaplacian(graph, dx);
+        double[] ldx = GraphUtils.applyLaPlacian(graph, dx);
         if (d != null) {
             for (int i = 0; i < graph.nv; i++) {
                 ldx[i] += d[i] * dx[i];

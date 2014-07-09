@@ -82,7 +82,7 @@ public class GraphUtils {
         parent[root] = root;
 
         // perform DFS
-        while(stack_pos > 0) {
+        while (stack_pos > 0) {
             int v = stack[--stack_pos]; // pop vertex
             visited[v] = true;
 
@@ -175,7 +175,7 @@ public class GraphUtils {
     }
 
     // exorcises duplicate edges and self-loops from an edge list
-    public static EdgeList sanitizeEdgeList (EdgeList edges) {
+    public static EdgeList sanitizeEdgeList(EdgeList edges) {
         // make scratch space
         final EdgeList auxEdges = new EdgeList(edges);
         ArrayList<Integer> edgeOrder = new ArrayList<>();
@@ -199,13 +199,12 @@ public class GraphUtils {
         for (int i = 0; i < auxEdges.ne; i++) {
             int curIndex = edgeOrder.get(i);
             if (firstEqualEdge == -1
-                    || auxEdges.u[edgeOrder.get(i-1)] != auxEdges.u[curIndex]
-                    || auxEdges.v[edgeOrder.get(i-1)] != auxEdges.v[curIndex]) {
+                    || auxEdges.u[edgeOrder.get(i - 1)] != auxEdges.u[curIndex]
+                    || auxEdges.v[edgeOrder.get(i - 1)] != auxEdges.v[curIndex]) {
                 // first time seeing this edge
                 edgesToKeep.add(curIndex);
                 firstEqualEdge = curIndex;
-            }
-            else {
+            } else {
                 // parallel edge
                 auxEdges.weight[firstEqualEdge] = auxEdges.weight[firstEqualEdge] + auxEdges.weight[curIndex];
             }
@@ -233,7 +232,7 @@ public class GraphUtils {
     }
 
     // apply the Laplacian matrix of a graph to a vector
-    public static double[] applyLaplacian(Graph graph, double[] x) {
+    public static double[] applyLaPlacian(Graph graph, double[] x) {
         double[] y = new double[graph.nv];
         for (int u = 0; u < graph.nv; u++) {
             for (int i = 0; i < graph.deg[u]; i++) {

@@ -13,9 +13,7 @@ import lapsolver.lsst.SpanningTreeStrategy;
 import lapsolver.util.GraphUtils;
 import lapsolver.util.TreeUtils;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import static lapsolver.algorithms.GraphVertexRemoval.AnswerPair;
 import static lapsolver.algorithms.LDLDecomposition.ReturnPair;
@@ -23,12 +21,13 @@ import static lapsolver.algorithms.Stretch.StretchResult;
 
 public class KMP2Solver extends Solver {
     private static final double Cs = 4.0;
-    private static final int cStop = 100;
+    private static final int cStop = 500;
     private static final double kappaC = 1000;
 
     private final SpanningTreeStrategy treeStrategy;
     private final double failureProbability;
-    private double[] delta = null;
+    private static Solver baseCaseSolver = new ConjugateGradientSolver(1000, 1e-9);
+    private double[] del;
 
     public List<ChainEntry> chain;
 
@@ -38,13 +37,17 @@ public class KMP2Solver extends Solver {
     }
 
     @Override
-    public void init(Graph graph, double[] d) {
-//        chain = buildChain(graph, failureProbability);
-        delta = d;
+    public void init(Graph graph, double[] delta) {
+        del = delta;
+        chain = buildChain(graph, failureProbability, del);
     }
 
     @Override
     public double[] solve(double[] b) {
+        if (b.length < cStop) {
+            baseCaseSolver.init(chain.get(0).graph, del);
+            return baseCaseSolver.solve(b);
+        }
         return new double[0];
     }
 
@@ -65,8 +68,9 @@ public class KMP2Solver extends Solver {
         final double q = Cs * t / Math.log(t) / Math.log(t);
 
         // Step 3:  p_e := p'_e / t
-        double[] p = pp.allStretches.clone();
-        for (int i = 0; i < p.length; i++) p[i] /= t;
+        double[] p = new double[pp.allStretches.length];
+        for (int i = 0; i < p.length; i++)
+            p[i] = pp.allStretches[i] / t;
 
         ArrayList<Integer> edgesToAdd = new ArrayList<>((int) q);
 
@@ -75,16 +79,16 @@ public class KMP2Solver extends Solver {
             if (Math.random() < p[i])
                 edgesToAdd.add(i);
 
-        EdgeList newG = new EdgeList(edgesToAdd.size());
+        EdgeList sampledEdges = new EdgeList(edgesToAdd.size());
         for (int i = 0; i < edgesToAdd.size(); i++) {
             int e = edgesToAdd.get(i);
             // Step 7: Add sample of e, l to L_e with weight w'_l  = w_e/(p_e q)
-            newG.u[i] = edges.u[e];
-            newG.v[i] = edges.v[e];
-            newG.weight[i] = edges.weight[e] / (p[e] * q);
+            sampledEdges.u[i] = edges.u[e];
+            sampledEdges.v[i] = edges.v[e];
+            sampledEdges.weight[i] = edges.weight[e] / (p[e] * q);
         }
 
-        return newG;
+        return sampledEdges;
     }
 
     /**
@@ -188,9 +192,10 @@ public class KMP2Solver extends Solver {
      *
      * @param graph The graph to precondition
      * @param p     Failure probability (lower = more success, takes longer)
+     * @param delta The
      * @return Chain of Graphs C = {G1, H1, G2, H2, ..., Gd} (no final H!!!)
      */
-    public List<ChainEntry> buildChain(Graph graph, double p) {
+    public List<ChainEntry> buildChain(Graph graph, double p, double[] delta) {
         // C := 0
         LinkedList<ChainEntry> chain = new LinkedList<>();
 
@@ -221,33 +226,34 @@ public class KMP2Solver extends Solver {
         chain.add(new ChainEntry(h1, t, logSquaredFactor)); // H
         chain.add(new ChainEntry(g2, t, kappaC));           // G
 
+        double[][] deltaRef = new double[1][];
+        deltaRef[0] = delta;
+
         ChainEntry chainEnd = chain.getLast();
         while (chainEnd.graph.nv > cStop) {
             Graph hGraph = incrementalSparsify(chainEnd.graph, chainEnd.tree, chainEnd.kappa, p * xi);
             if (hGraph == null) break; // Failed to sparsify further
             chain.add(new ChainEntry(hGraph, chainEnd.tree, chainEnd.kappa)); // H
-            chain.add(greedyElimination(hGraph, chainEnd.tree)); // G
+            chain.add(greedyElimination(hGraph, chainEnd.tree, deltaRef)); // G
             chainEnd = chain.getLast();
         }
 
         return chain;
     }
 
-    public ChainEntry greedyElimination(Graph graph, Tree tree) {
+    public ChainEntry greedyElimination(Graph graph, Tree tree, double[][] deltaRef) {
         AnswerPair gvr = new GraphVertexRemoval(graph).solve();
         Graph permutedGraph = GraphUtils.permuteGraph(graph, gvr.permutation);
 
-        delta = applyPerm(gvr.permutation, delta);
-        ReturnPair ldl = new LDLDecomposition(permutedGraph, delta).solve(gvr.numRemoved);
+        deltaRef[0] = applyPerm(gvr.permutation, deltaRef[0]);
+        ReturnPair ldl = new LDLDecomposition(permutedGraph, deltaRef[0]).solve(gvr.numRemoved);
 
         Tree permutedTree = TreeUtils.permuteTree(tree, gvr.permutation);
         Tree updatedTree = updateTree(permutedGraph, permutedTree, ldl.L, gvr.numRemoved);
 
         Graph reducedGraph = LDLDecomposition.getReducedGraph(permutedGraph, ldl.D, gvr.numRemoved);
 
-        double[] reducedD = new double[reducedGraph.nv];
-        System.arraycopy(delta, gvr.numRemoved, reducedD, 0, reducedGraph.nv);
-        delta = reducedD;
+        deltaRef[0] = Arrays.copyOfRange(deltaRef[0], gvr.numRemoved, gvr.numRemoved + reducedGraph.nv);
 
         ChainEntry result = new ChainEntry(reducedGraph, updatedTree, kappaC);
         result.perm = gvr.permutation;
@@ -317,12 +323,14 @@ public class KMP2Solver extends Solver {
         public Tree tree;
         public double kappa;
 
-        public int[] perm = new int[0];
+        public int[] perm;
 
         public ChainEntry(Graph graph, Tree tree, double kappa) {
             this.graph = graph;
             this.tree = tree;
             this.kappa = kappa;
+            this.perm = new int[graph.nv];
+            for (int i = 0; i < perm.length; i++) perm[i] = i;
         }
     }
 }
