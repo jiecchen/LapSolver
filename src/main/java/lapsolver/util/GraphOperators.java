@@ -15,7 +15,7 @@ import org.apache.commons.math3.linear.RealLinearOperator;
 import org.apache.commons.math3.linear.RealVector;
 
 public class GraphOperators {
-    public static RealLinearOperator buildLaplacianOperator(Graph graph) {
+    public static RealLinearOperator buildLaplacianOperator(final Graph graph) {
         return buildLaplacianOperator(graph, new double[graph.nv]);
     }
 
@@ -33,6 +33,8 @@ public class GraphOperators {
 
             @Override
             public RealVector operate(RealVector x) throws DimensionMismatchException {
+                if (graph.nv != x.getDimension())
+                    throw new DimensionMismatchException(x.getDimension(), graph.nv);
                 double[] xarr = x.toArray();
                 double[] lx = GraphUtils.applyLaPlacian(graph, xarr);
                 for (int i = 0; i < graph.nv; i++)
