@@ -50,7 +50,8 @@ public class LDLDecomposition {
         this.updatedDeg = new int[N];
 
         if (N != diagValues.length) {
-            throw new IllegalArgumentException("Graph and addition matrix have different sizes");
+            throw new IllegalArgumentException("Graph (" + N + ") and addition matrix (" +
+                    diagValues.length + ") have different sizes");
         }
 
         System.arraycopy(diagValues, 0, this.X, 0, N);
