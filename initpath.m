@@ -16,3 +16,4 @@ addpath([root, 'matlab/viz']);
 addpath([root, 'matlab/lsst']);
 addpath([root, 'matlab/kmp']);
 addpath([root, 'matlab/flow']);
+addpath([root, 'matlab/generators/badMillerTolliverGraph']);
