@@ -47,12 +47,11 @@ void grid3(int * restrict src, int * restrict dst, double * restrict weight,
     const int shorty = y - 1;
     const int shortz = z - 1;
 
-    int e = 0; //edge number counter
-
     //fills in most of the edges
     #pragma omp parallel for 
     for (int i = 0; i < shortz; i++) {
         for (int j = 0; j < shorty; j++) {
+            int e = (i * shorty + j) * (3 * x - 1);
             //edges in y and z directions
             for (int k = 0; k < x; k++) {
                 //y
@@ -73,12 +72,14 @@ void grid3(int * restrict src, int * restrict dst, double * restrict weight,
                 dst[e+k] = i * x * y + j * x + k + 1;
                 weight[e+k] = 1.0;
             }
-            e += shortx;
         }
     }
+
+    int offset = shortz * shorty * (3 * x - 1);
     //bottom grid (minus the bottom-back edges)
     #pragma omp parallel for
     for (int i = 0; i < shortz; i++) {
+        int e = offset + i * (2 * x - 1);
         //edges in z direction
         for (int k = 0; k < x; k++) {
             src[e+k] = i * x * y + shorty * x + k;
@@ -92,11 +93,13 @@ void grid3(int * restrict src, int * restrict dst, double * restrict weight,
             dst[e+k] = i * x * y + shorty * x + k + 1;
             weight[e+k] = 1.0;
         }
-        e += shortx;
     }
+
+    offset += shortz * (2 * x - 1);
     //back grid (minus the bottom-back edges)
     #pragma omp parallel for
     for (int j = 0; j < shorty; j++) {
+        int e = offset + j * (2 * x - 1);
         //y direction
         for (int k = 0; k < x; k++) {
             src[e+k] = shortz * x * y + j * x + k;
@@ -110,8 +113,9 @@ void grid3(int * restrict src, int * restrict dst, double * restrict weight,
             dst[e+k] = shortz * x * y + j * x + k + 1;
             weight[e+k] = 1.0;
         }
-        e += shortx;
     }
+
+    int e = offset + shorty * (2 * x - 1);
     //bottom-back edges
     #pragma omp parallel for
     for (int k = 0; k < shortx; k++) {
@@ -130,13 +134,12 @@ void hypercube(int * restrict src, int * restrict dst, double * restrict weight,
     const int shorty = y - 1;
     const int shortz = z - 1;
 
-    int e = 0;
-
     // the majority of the hypercube
     #pragma omp parallel for 
     for (int i = 0; i < shortz; i++) {
         for (int j = 0; j < shorty; j++) {
             for (int k = 0; k < shortx; k++) {
+                int e = (i * shorty * shortx + j * shortx + k) * (4 * w - 1);
                 for (int l = 0; l < w; l++) {
                     //z
                     src[e+l] = get4d(i, j, k, l);
@@ -160,15 +163,16 @@ void hypercube(int * restrict src, int * restrict dst, double * restrict weight,
                     dst[e+l] = get4d(i, j, k, l + 1);
                     weight[e+l] = 1.0;
                 }
-                e += shortw;
             }
         }
     }
 
+    int offset = shortz * shorty * shortx * (4 * w - 1);
     // most of i = shortz cube
     #pragma omp parallel for
     for (int j = 0; j < shorty; j++) {
         for (int k = 0; k < shortx; k++) {
+            int e = offset + (j * shortx + k) * (3 * w - 1);
             for (int l = 0; l < w; l++) {
                 //y
                 src[e+l] = get4d(shortz, j, k, l);
@@ -187,13 +191,14 @@ void hypercube(int * restrict src, int * restrict dst, double * restrict weight,
                 dst[e+l] = get4d(shortz, j, k, l + 1);
                 weight[e+l] = 1.0;
             }
-            e += shortw;
         }
     }
 
+    offset += shorty * shortx * (3 * w - 1);
     // i = shortz, j = shorty portion of cube
     #pragma omp parallel for
     for (int k = 0; k < shortx; k++) {
+        int e = offset + k * (2 * w - 1);
         for (int l = 0; l < w; l++) {
             //x
             src[e+l] = get4d(shortz, shorty, k, l);
@@ -207,12 +212,13 @@ void hypercube(int * restrict src, int * restrict dst, double * restrict weight,
             dst[e+l] = get4d(shortz, shorty, k, l + 1);
             weight[e+l] = 1.0;
         }
-        e += shortw;
     }
 
+    offset += shortx * (2 * w - 1);
     // i = shortz, k = shortx portion of cube
     #pragma omp parallel for
     for (int j = 0; j < shorty; j++) {
+        int e = offset + j * (2 * w - 1);
         for (int l = 0; l < w; l++) {
             //y
             src[e+l] = get4d(shortz, j, shortx, l);
@@ -226,23 +232,24 @@ void hypercube(int * restrict src, int * restrict dst, double * restrict weight,
             dst[e+l] = get4d(shortz, j, shortx, l + 1);
             weight[e+l] = 1.0;
         }
-        e += shortw;
     }
 
+    offset += shorty * (2 * w - 1);
     // remainder of i = shortz cube
     #pragma omp parallel for
     for (int l = 0; l < shortw; l++) {
         //w
-        src[e+l] = get4d(shortz, shorty, shortx, l);
-        dst[e+l] = get4d(shortz, shorty, shortx, l + 1);
-        weight[e+l] = 1.0;
+        src[offset+l] = get4d(shortz, shorty, shortx, l);
+        dst[offset+l] = get4d(shortz, shorty, shortx, l + 1);
+        weight[offset+l] = 1.0;
     }
-    e += shortw;
 
+    offset += shortw;
     // some of the j = shorty region
     #pragma omp parallel for
     for (int i = 0; i < shortz; i++) {
         for (int k = 0; k < shortx; k++) {
+            int e = offset + (i * shortx + k) * (3 * w - 1);
             for (int l = 0; l < w; l++) {
                 //z
                 src[e+l] = get4d(i, shorty, k, l);
@@ -261,13 +268,14 @@ void hypercube(int * restrict src, int * restrict dst, double * restrict weight,
                 dst[e+l] = get4d(i, shorty, k, l + 1);
                 weight[e+l] = 1.0;
             }
-            e += shortw;
         }
     }
 
+    offset += shortz * shortx * (3 * w - 1);
     // remaining j = shorty, k = shortx region
     #pragma omp parallel for 
-    for (int i = 0; i < shortz; i++) {erm
+    for (int i = 0; i < shortz; i++) {
+        int e = offset + i * (2 * w - 1);
         for (int l = 0; l < w; l++) {
             //z
             src[e+l] = get4d(i, shorty, shortx, l);
@@ -281,12 +289,13 @@ void hypercube(int * restrict src, int * restrict dst, double * restrict weight,
             dst[e+l] = get4d(i, shorty, shortx, l + 1);
             weight[e+l] = 1.0;
         }
-        e += shortw;
     }
 
+    offset += shortz * (2 * w - 1);
     #pragma omp parallel for 
     for (int i = 0; i < shortz; i++) {
         for (int j = 0; j < shorty; j++) {
+            int e = offset + (i * shorty + j) * (3 * w - 1);
             for (int l = 0; l < w; l++) {
                 //z
                 src[e+l] = get4d(i, j, shortx, l);
@@ -305,11 +314,25 @@ void hypercube(int * restrict src, int * restrict dst, double * restrict weight,
                 dst[e+l] = get4d(i, j, shortx, l + 1);
                 weight[e+l] = 1.0;
             }
-            e += shortw;
         }
     }
 }
 
+void cbt(int * restrict src, int * restrict dst, double * restrict weight, const int h) {
+
+    int n = (1 << h) - 1;
+    #pragma omp parallel for
+    for (int i = 0; i < n; i++) {
+        int x = i << 1;
+        src[x] = i;
+        dst[x] = x + 1;
+        weight[x] = 1.0;
+
+        src[x + 1] = i;
+        dst[x + 1] = x + 2;
+        weight[x + 1] = 1.0;
+    }
+}
 
 
 void triangleGrid2(int * restrict src, int * restrict dst, double * restrict weight,

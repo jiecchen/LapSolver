@@ -8,6 +8,7 @@ LFLAGS:=$(CFLAGS)
 CLASSES=lapsolver.generators.Grid2 \
         lapsolver.generators.Grid3 \
         lapsolver.generators.Hypercube \
+        lapsolver.generators.CBT \
         lapsolver.generators.TriangleGrid2
 SOURCES=src/generators.c $(addsuffix .c,$(addprefix src/,$(subst .,_,$(CLASSES))))
 OBJECTS=$(SOURCES:.c=.o)
