@@ -70,7 +70,7 @@ public class KelnerSolver extends Solver {
         treeSolver.init(spanningTree);
 
         // initialize the cycle query data structure
-        flowTree = new KelnerFlowTree(spanningTree, offEdges);
+        flowTree = new DirectFlowTree(spanningTree, offEdges);
     }
 
     // solve for x in Lx = b, with default parameters
