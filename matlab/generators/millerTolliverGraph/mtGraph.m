@@ -8,7 +8,7 @@ function [ rA ] = mtGraph( A, k, tol, edgetol, level)
     % Compute the f vectors for the A matrix such that 
     % L * f(:,i) = e(i) * D * f(:,i)
     [f, e] = compF(A, k);
-    
+
     % reweight the matrix
     [u, v, winit] = find(A);
     [u, v, wr] = find(reweightFA(A, k, f, e));
@@ -30,9 +30,11 @@ function [ rA ] = mtGraph( A, k, tol, edgetol, level)
     
     fprintf('another iteration at level %d\n', level)
     
-    rA = sanitize(rA, edgetol);
-    if (graphconncomp(rA) < k)
+    san = sanitize(rA, edgetol);
+    if (graphconncomp(san) < k)
         rA = mtGraph(rA, k, tol, edgetol, level + 1);
+    else
+        rA = san;
     end
 end
 

@@ -6,7 +6,7 @@ function [ reweightedA ] = reweightFA( A, k, f, e )
 
     a = zeros(k, N, N);
     b = zeros(k, N, N);
-
+    
     for eigIndex = 1:k,
         for i = 1:N,
             for j = 1:N,
@@ -30,7 +30,7 @@ function [ reweightedA ] = reweightFA( A, k, f, e )
                     suma = suma + a(eigIndex,i,j);
                     sumb = sumb + b(eigIndex,i,j);
                 end
-
+              
                 reweightedA(i, j) = A(i,j) * (sumb^2 / (suma^2 + sumb^2));
             end
         end

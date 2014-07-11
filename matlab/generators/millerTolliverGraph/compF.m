@@ -1,7 +1,7 @@
 function [f,e] = compF( A, k )
 %COMPG Computes the generalized eigenvectors for the pair (L,D) of matrix A
     N = size(A, 1);
-
+    
     % Compute the normalized Laplacian
     nL = normLap(A);
     
