@@ -126,8 +126,6 @@ public class LDLDecomposition {
     }
 
     public void removeDeg2Chain(int start, int stop, int outerStart, int outerStop) {
-//        System.out.println(outerStart + " > " + start + " " +` stop + " < " + outerStop);
-
         // outerValue is used to compute the L values of type (outerStart, u)
         double outerValue = -1;
         for (int i = 0; i < graph.deg[start]; i++)
@@ -304,7 +302,7 @@ public class LDLDecomposition {
         return x;
     }
 
-    public static Graph getReducedGraph(Graph graph, EdgeList D, int shift) {
+    public static Graph getReducedGraph(EdgeList D, int shift) {
         EdgeList sanitizedD = GraphUtils.sanitizeEdgeList(D);
         ArrayList<Integer> edgesToAdd = new ArrayList<>();
 

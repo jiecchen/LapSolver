@@ -1,4 +1,4 @@
-% A crude comparisson tool between the L matrice outputed by
+% A crude comparisson tool between the L matricx outputed by
 % Dan's myLDL2 and Serban's LDLDecomposition.
 
 function compLDLmat(graph)
@@ -16,11 +16,9 @@ function compLDLmat(graph)
     numRemoved = gvmPair.numRemoved;
     g = Graph(GraphUtils.permuteGraph(graph, perm));
     
-    
-    
     ldl = LDLDecomposition(g, X);
     ldlAns = ldl.solve(numRemoved);
-    serbanL = full(e2tril(ldlAns.L, n));
+    serbanL = full(e2mat(ldlAns.L));
     serbanD = full(e2mat(ldlAns.D));
     
     la = full(lap(g2a(g)) + diag(X));
@@ -38,6 +36,4 @@ function compLDLmat(graph)
     else
         fprintf('%d %d GG\n', graph.nv, graph.ne);
     end
-    
-    keyboard
 end
