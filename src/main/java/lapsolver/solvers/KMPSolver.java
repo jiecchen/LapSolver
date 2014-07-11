@@ -51,7 +51,7 @@ public class KMPSolver extends Solver {
         this(spanningTreeStrategy, new ConjugateGradientSolver(1000, 1e-8));
     }
 
-    public void init (Graph graph, double[] d) {
+    public void init(Graph graph, double[] d) {
         System.out.println("INIT " + graph.nv + " " + graph.ne);
 
         this.graph = graph;
@@ -60,8 +60,7 @@ public class KMPSolver extends Solver {
         if (graph.nv < 500) {
             sparsifiedSolver = null;
             baseCaseSolver.init(graph, d);
-        }
-        else {
+        } else {
             eliminate();
 
             spanningTree = treeStrategy.getTree(reducedGraph);
@@ -98,14 +97,12 @@ public class KMPSolver extends Solver {
         }
 
         // get new graph + diag from LDL
-        reducedGraph = LDLDecomposition.getReducedGraph(permutedGraph, ldlPair.D, gvrPair.numRemoved);
+        reducedGraph = LDLDecomposition.getReducedGraph(ldlPair.D, gvrPair.numRemoved);
         reducedD = new double[reducedGraph.nv];
-        for (int i = gvrPair.numRemoved; i < graph.nv; i++) {
-            reducedD[i - gvrPair.numRemoved] = permutedDiag[i];
-        }
+        System.arraycopy(permutedDiag, gvrPair.numRemoved, reducedD, 0, graph.nv - gvrPair.numRemoved);
     }
 
-    public double[] solve (double[] b) {
+    public double[] solve(double[] b) {
         System.out.println("SOLVE " + graph.nv + " " + graph.ne);
 
         if (sparsifiedSolver == null) {
@@ -115,9 +112,7 @@ public class KMPSolver extends Solver {
 
         double[] outerB = LDLDecomposition.applyLInv(ldlPair.L, applyPerm(gvrPair.permutation, b));
         double[] innerB = new double[reducedGraph.nv];
-        for (int i = 0; i < innerB.length; i++) {
-            innerB[i] = outerB[gvrPair.numRemoved + i];
-        }
+        System.arraycopy(outerB, gvrPair.numRemoved, innerB, 0, innerB.length);
 
         ConjugateGradientSolver innerPCG = new ConjugateGradientSolver(sparsifiedSolver, 1000, 1e-10);
         // ConjugateGradientSolver innerPCG = new ConjugateGradientSolver(null, 1000, 1e-2);
@@ -127,14 +122,9 @@ public class KMPSolver extends Solver {
 
         double[] outerX = new double[graph.nv];
 
-        for (int i = 0; i < graph.nv; i++) {
-            if (i < gvrPair.numRemoved) {
-                outerX[i] = outerB[i] / ldlDiag[i];
-            }
-            else {
-                outerX[i] = innerX[i - gvrPair.numRemoved];
-            }
-        }
+        for (int i = 0; i < gvrPair.numRemoved; i++)
+            outerX[i] = outerB[i] / ldlDiag[i];
+        System.arraycopy(innerX, 0, outerX, gvrPair.numRemoved, graph.nv - gvrPair.numRemoved);
 
         return applyPerm(gvrInversePerm, LDLDecomposition.applyLTransInv(ldlPair.L, outerX));
     }
@@ -161,7 +151,7 @@ public class KMPSolver extends Solver {
 
         //Blow up graph by 4 * avgstretch * log(numRemoved)
         double k = 4. * (stretch.total / (offEdges.ne + 1) * (Math.log(graph.nv) + 1)) *
-                        (stretch.total / (offEdges.ne + 1) * (Math.log(graph.nv) + 1)) + 1;
+                (stretch.total / (offEdges.ne + 1) * (Math.log(graph.nv) + 1)) + 1;
 
         Graph blownUpGraph = blowUpTreeEdges(graph, spanningTree, k);
 
