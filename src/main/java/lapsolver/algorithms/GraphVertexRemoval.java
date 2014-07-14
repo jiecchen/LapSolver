@@ -107,7 +107,7 @@ public class GraphVertexRemoval {
 
                             // I create the chains such that they have lengths at most 10
                             chainCount++;
-                            if (chainCount % 10 == 0)
+                            if (chainCount % 3 == 0)
                                 chains[newIndex]--;
 
                             int v = u;
