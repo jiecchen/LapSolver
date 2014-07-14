@@ -22,7 +22,7 @@ function [ rA ] = mtGraph( A, k, tol, edgetol, level)
         alpha = alpha / 2;
         for i = 1:size(u),
             wprime(i) = (1 - alpha) * winit(i) + alpha * wr(i);
-            disp(wprime(i))
+            %disp(wprime(i))
         end
         
         rA = sparse(u, v, wprime, N, N);
