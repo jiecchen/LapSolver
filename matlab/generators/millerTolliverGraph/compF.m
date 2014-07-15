@@ -17,6 +17,7 @@ function [f,e] = compF( A, k )
     d = diag(lap(A));
     for i = 1:n
         d(i) = 1 / d(i) ^ 0.5;
+    end
     sqrtInvD = diag(d);
     
     % The f values will solve the system D^(1/2) * f = g.

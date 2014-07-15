@@ -11,6 +11,7 @@ function [ nL ] = normLap( A )
     
     for i = 1:m
         deg(u(i)) = deg(u(i)) + w(i);
+    end
         
     finU = u;
     finV = v;
