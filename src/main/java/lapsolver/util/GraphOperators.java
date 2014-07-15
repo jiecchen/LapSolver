@@ -19,8 +19,11 @@ public class GraphOperators {
         return buildLaplacianOperator(graph, new double[graph.nv]);
     }
 
-    public static RealLinearOperator buildLaplacianOperator(final Graph graph, final double[] d) {
+    public static RealLinearOperator buildLaplacianOperator(final Graph graphIn, final double[] dIn) {
         return new RealLinearOperator() {
+            Graph graph = new Graph(graphIn);
+            double[] d = dIn.clone();
+
             @Override
             public int getRowDimension() {
                 return graph.nv;
