@@ -7,15 +7,11 @@ function [f,e] = compF( A, k )
     
     % Compute k eigenvectors for the normalized Laplacian
     
-    [allV, allE] = eigs(nL, k + 1, 'sa');
-    allE = diag(allE);
-   
-    e = zeros(k, 1);
-    g = zeros(size(nL, 1), k);
-    for i = 1:k
-        e(i) = allE(i + 1);
-        g(:,i) = allV(:,i);
-    end
+    [g, e] = eigs(nL, k + 1, 'sa');
+    e = diag(e);
+    
+    g = g(:,2:(k+1));
+    e = e(2:(k+1));
     
     % For each i from 1 to k, compute the f(i) based on g(i)
     d = diag(lap(A));
