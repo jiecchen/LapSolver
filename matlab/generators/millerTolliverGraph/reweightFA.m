@@ -1,4 +1,4 @@
-function [ reweightedA ] = reweightFA( A, k, f, e )
+function [ reweightedA ] = reweightFA( A, f, e )
 %REWEIGHTFA Reweight the given graph (given by A) using the Rfa formula.
 %           The eigenvalues are found in v and e.
 
@@ -7,21 +7,11 @@ function [ reweightedA ] = reweightFA( A, k, f, e )
     [u,v,w] = find(A);
     m = length(u);
     
-    finW = zeros(m,1);
+    sum_a2 = ( (f(u,:) - f(v,:)).^2 * (1./e) ) .^ 2;
+    sum_b2 = sum(f(u,:).^2 + f(v,:).^2, 2) .^ 2;
+    w_next = w .* (sum_b2 ./ (sum_a2 + sum_b2));
     
-    for i = 1:m
-        suma = 0;
-        sumb = 0;
-        
-        for eigIndex = 1:k
-            suma = suma + 1 / e(eigIndex) * (f(u(i),eigIndex) - f(v(i),eigIndex)) ^ 2;
-            sumb = sumb + f(u(i),eigIndex) ^ 2 + f(v(i),eigIndex) ^ 2;
-        end
-        
-        finW(i) = w(i) * (sumb^2 / (suma^2 + sumb^2));
-    end
-    
-    reweightedA = sparse(u, v, finW, n, n);
+    reweightedA = sparse(u, v, w_next, n, n);
     
     % make reweightedA symmetric
     low = tril(reweightedA, -1);

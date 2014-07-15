@@ -11,7 +11,7 @@ function [ rA ] = mtGraph( A, k, tol, edgetol, level)
 
     % reweight the matrix
     [u, v, winit] = find(A);
-    [u, v, wr] = find(reweightFA(A, k, f, e));
+    [u, v, wr] = find(reweightFA(A, f, e));
     wprime = wr;
     
     n = size(A,1);
