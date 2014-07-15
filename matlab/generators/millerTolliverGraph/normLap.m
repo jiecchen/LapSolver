@@ -1,28 +1,12 @@
 function [ nL ] = normLap( A )
 %NORMLAP Computes the normalized laplacian of a graph
+    n = length(A);
+    la = lap(A);
+    d_sqinv = sparse(1:n, 1:n, 1./sqrt(sum(A)), n, n);
+    nL = d_sqinv * la * d_sqinv;
 
-    N = size(A,1);
-        
-    % Compute the vertex degrees
-    deg = zeros(1, N);
-
-    for i = 1:N,
-        for j = 1:N,
-            deg(i) = deg(i) + A(i,j);
-        end
-    end
-    
-    nL = zeros(N);
-    
-    for i = 1:N,
-        for j = 1:N,
-            if i == j
-                nL(i,j) = 1;
-            elseif A(i,j) > 0
-                nL(i,j) = -A(i,j) / sqrt(deg(i) * deg(j));
-            end
-        end
-    end
-
+    % symmetrize
+    nL = tril(nL, -1);
+    nL = nL + nL';
 end
 
