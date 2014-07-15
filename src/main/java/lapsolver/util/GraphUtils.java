@@ -232,7 +232,7 @@ public class GraphUtils {
     }
 
     // apply the Laplacian matrix of a graph to a vector
-    public static double[] applyLaPlacian(Graph graph, double[] x) {
+    public static double[] applyLaplacian(Graph graph, double[] x) {
         double[] y = new double[graph.nv];
         for (int u = 0; u < graph.nv; u++) {
             for (int i = 0; i < graph.deg[u]; i++) {

@@ -55,7 +55,7 @@ public class IncrementalSolver extends Solver {
         }
 
         // update residue
-        double[] ldx = GraphUtils.applyLaPlacian(graph, dx);
+        double[] ldx = GraphUtils.applyLaplacian(graph, dx);
         if (d != null) {
             for (int i = 0; i < graph.nv; i++) {
                 ldx[i] += d[i] * dx[i];

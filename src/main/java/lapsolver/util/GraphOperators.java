@@ -36,7 +36,7 @@ public class GraphOperators {
                 if (graph.nv != x.getDimension())
                     throw new DimensionMismatchException(x.getDimension(), graph.nv);
                 double[] xarr = x.toArray();
-                double[] lx = GraphUtils.applyLaPlacian(graph, xarr);
+                double[] lx = GraphUtils.applyLaplacian(graph, xarr);
                 for (int i = 0; i < graph.nv; i++)
                     lx[i] += d[i] * xarr[i];
                 return new ArrayRealVector(lx);
