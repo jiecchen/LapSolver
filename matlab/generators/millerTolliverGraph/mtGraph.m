@@ -14,18 +14,17 @@ function [ rA ] = mtGraph( A, k, tol, edgetol, level)
     [u, v, wr] = find(reweightFA(A, k, f, e));
     wprime = wr;
     
-    N = size(A,1);
-    rA = sparse(u, v, wr, N, N);
+    n = size(A,1);
+    rA = sparse(u, v, wr, n, n);
     
     alpha = 1;
     while mtNormFA(rA, A, k) > mtNormFA(A, A, k) + tol
         alpha = alpha / 2;
         for i = 1:size(u),
             wprime(i) = (1 - alpha) * winit(i) + alpha * wr(i);
-            %disp(wprime(i))
         end
         
-        rA = sparse(u, v, wprime, N, N);
+        rA = sparse(u, v, wprime, n, n);
     end
     
     fprintf('another iteration at level %d\n', level)
