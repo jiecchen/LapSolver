@@ -12,5 +12,6 @@ function [ar, colors, a] = mttest(path, k, tol, edgetol, sigma)
     
     [~, colors] = graphconncomp(ar);
     colors = reshape(colors, dims(1), dims(2));
+    colors = colors / max(max(colors));
 end
 
