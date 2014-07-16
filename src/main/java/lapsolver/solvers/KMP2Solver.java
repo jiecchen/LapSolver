@@ -23,15 +23,16 @@ public class KMP2Solver extends Solver {
     private static final double Cs = 4.0;
     private static final int cStop = 500;
     private static final double kappaC = 1000;
+    private static final double tol = 1e-8;
 
     private final SpanningTreeStrategy treeStrategy;
     private final double failureProbability;
-    private static Solver baseCaseSolver = new ConjugateGradientSolver(10000, 1);
+    private static Solver baseCaseSolver = new ConjugateGradientSolver(1000, tol);
 
     public List<ChainEntry> chain;
 
     public KMP2Solver(SpanningTreeStrategy strategy) {
-        this(strategy, 1e-7);
+        this(strategy, tol);
     }
 
     public KMP2Solver(SpanningTreeStrategy strategy, double p) {
@@ -86,7 +87,7 @@ public class KMP2Solver extends Solver {
             public int getRowDimension() {
                 return current.graph.nv;
             }
-        }, 10000, 1e-10);
+        }, 1000, tol);
         innerPCG.init(sparsified.graph, sparsified.delta);
         double[] innerX = innerPCG.solve(innerB);
         double[] outerX = new double[current.graph.nv];
@@ -256,16 +257,20 @@ public class KMP2Solver extends Solver {
         // T = LowStretchTree(G)
         Tree t = treeStrategy.getTree(graph);
 
-        // H1 = G1 + O~(log^2 n)T
-        // G2 = H1
+        // G1 = G1 + O~(log^2 n)T
         Graph g2 = new Graph(g1);
         double logSquaredFactor = Math.pow(Math.log(t.nv) * Math.log(Math.log(t.nv)), 2.0);
         int[] parent = t.parent;
-        for (int i = 0; i < parent.length; i++)
-            if (i != t.parent[i])
-                for (int j = 0; j < g2.nbrs[i].length; j++)
-                    if (g2.nbrs[i][j] == t.parent[i])
-                        g2.weights[i][j] = logSquaredFactor * t.weight[i];
+        for (int u = 0; u < parent.length; u++)
+            if (u != t.parent[u])
+                for (int iV = 0; iV < g2.nbrs[u].length; iV++)
+                    if (g2.nbrs[u][iV] == t.parent[u]) {
+                        int v = g2.nbrs[u][iV];
+                        double adjustedWeight = logSquaredFactor * t.weight[u];
+                        int iU = g2.backInd[u][iV];
+                        g2.weights[u][iV] = adjustedWeight;
+                        g2.weights[v][iU] = adjustedWeight;
+                    }
 
         // xi := 2 log n
         double xi = 2 * Math.log(t.nv);
