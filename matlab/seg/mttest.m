@@ -1,9 +1,13 @@
-function [ar, colors, a] = mttest(path, k, tol, edgetol)
-%MTTEST Summary of this function goes here
+function [ar, colors, a] = mttest(path, k, tol, edgetol, sigma)
+%MTTEST Test for Miller-Tolliver image segmentation.
     image = double(imread(path));
     dims = size(image);
     
-    a = imgGrid(image, 70);
+    if nargin < 5
+        sigma = 70;
+    end
+    
+    a = imgGrid(image, sigma);
     ar = mtGraph(a, k, tol, edgetol);
     
     [~, colors] = graphconncomp(ar);
