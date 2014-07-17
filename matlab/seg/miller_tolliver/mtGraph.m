@@ -19,6 +19,8 @@ function [ rA ] = mtGraph(A, k, tol, edgetol)
         n = size(A,1);
         rA = sparse(u, v, wr, n, n);
 
+        fprintf('another iteration at level %d with norms (%.10f, %.10f) ', iter, mtNormFA(rA, A, k), mtNormFA(A, A, k));
+        
         alpha = 1;
         while mtNormFA(rA, A, k) > mtNormFA(A, A, k) + tol
             alpha = alpha / 2;
@@ -28,8 +30,9 @@ function [ rA ] = mtGraph(A, k, tol, edgetol)
 
             rA = sparse(u, v, wprime, n, n);
         end
+        
+        disp('normalizing done!');
 
-        fprintf('another iteration at level %d\n', iter);
         iter = iter + 1;
 
         san = sanitize(rA, edgetol);

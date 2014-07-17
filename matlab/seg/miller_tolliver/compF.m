@@ -3,7 +3,7 @@ function [f,e] = compF( A, k )
     n = size(A, 1);
     
     % Compute the normalized Laplacian
-    nL = normLap(A);
+    nL = normLap(A) - speye(n);
     
     % Compute k eigenvectors for the normalized Laplacian
     opts.tol = 1e-5;
