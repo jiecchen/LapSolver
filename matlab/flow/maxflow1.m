@@ -5,7 +5,6 @@ function x = maxflow1(A, s, t, c)
 	U = max(c(1 : m - 1));
 
 	ep = 0.5;
-	ep1 = 1e-6;
 	ep_flow = ep^2 / (64 * m^2 * n^2 * U^3);
 
 	b = [zeros(n, 1); c];
@@ -58,12 +57,12 @@ function x = maxflow1(A, s, t, c)
 				Q = A * D1 * d13;
 				v = sqrt(M) / (b_' * y - z) * b_;
 
-				% x1 = cmgSolver(Ms, r(1 : n) - Q * r(n + 1 : end));
-				[x1, garbage] = pcg(Ms, r(1 : n) - Q * r(n + 1 : end), ep1);
+				x1 = cmgSolver(Ms, r(1 : n) - Q * r(n + 1 : end));
+				% [x1, garbage] = pcg(Ms, r(1 : n) - Q * r(n + 1 : end));
 				x1 = [x1; d13 * (r(n + 1 : end) - D1 * A' * x1)];
 
-				% x2 = cmgSolver(Ms, v(1 : n) - Q * v(n + 1 : end));
-				[x2, garbage] = pcg(Ms, v(1 : n) - Q * v(n + 1 : end), ep1);
+				x2 = cmgSolver(Ms, v(1 : n) - Q * v(n + 1 : end));
+				% [x2, garbage] = pcg(Ms, v(1 : n) - Q * v(n + 1 : end));
 				x2 = [x2; d13 * (v(n + 1 : end) - D1 * A' * x2)];
 
 				x = x1 - (x2 * (x2' * r)) / (1 + v' * x2);
@@ -105,12 +104,12 @@ function x = maxflow1(A, s, t, c)
 				Q = A * D1 * d13;
 				v = sqrt(M) / (b' * y - z) * b;
 
-				% x1 = cmgSolver(Ms, r(1 : n) - Q * r(n + 1 : end));
-				[x1, garbage] = pcg(Ms, r(1 : n) - Q * r(n + 1 : end), ep1);
+				x1 = cmgSolver(Ms, r(1 : n) - Q * r(n + 1 : end));
+				% [x1, garbage] = pcg(Ms, r(1 : n) - Q * r(n + 1 : end));
 				x1 = [x1; d13 * (r(n + 1 : end) - D1 * A' * x1)];
 
-				% x2 = cmgSolver(Ms, v(1 : n) - Q * v(n + 1 : end));
-				[x2, garbage] = pcg(Ms, v(1 : n) - Q * v(n + 1 : end), ep1);
+				x2 = cmgSolver(Ms, v(1 : n) - Q * v(n + 1 : end));
+				% [x2, garbage] = pcg(Ms, v(1 : n) - Q * v(n + 1 : end));
 				x2 = [x2; d13 * (v(n + 1 : end) - D1 * A' * x2)];
 
 				x = x1 - (x2 * (x2' * r)) / (1 + v' * x2);
@@ -140,12 +139,12 @@ function x = maxflow1(A, s, t, c)
 	Q = A * D1 * d13;
 	v = sqrt(M) / s_gap * b;
 
-	% x1 = cmgSolver(Ms, r(1 : n) - Q * r(n + 1 : end));
-	[x1, garbage] = pcg(Ms, r(1 : n) - Q * r(n + 1 : end), ep1);
+	x1 = cmgSolver(Ms, r(1 : n) - Q * r(n + 1 : end));
+	% [x1, garbage] = pcg(Ms, r(1 : n) - Q * r(n + 1 : end));
 	x1 = [x1; d13 * (r(n + 1 : end) - D1 * A' * x1)];
 
-	% x2 = cmgSolver(Ms, v(1 : n) - Q * v(n + 1 : end));
-	[x2, garbage] = pcg(Ms, v(1 : n) - Q * v(n + 1 : end), ep1);
+	x2 = cmgSolver(Ms, v(1 : n) - Q * v(n + 1 : end));
+	% [x2, garbage] = pcg(Ms, v(1 : n) - Q * v(n + 1 : end));
 	x2 = [x2; d13 * (v(n + 1 : end) - D1 * A' * x2)];
 
 	v = x1 - (x2 * (x2' * r)) / (1 + v' * x2);
