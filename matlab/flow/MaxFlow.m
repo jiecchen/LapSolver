@@ -1,4 +1,4 @@
-function x = maxflow1(A, s, t, c)
+function x = maxflow(A, s, t, c)
 	% function x = maxflow1(A, s, t, c)
 	[A, c, n, m, u_t] = ProcessGraph(A, s, t, c);
 
