@@ -15,38 +15,35 @@ import org.apache.commons.math3.linear.RealLinearOperator;
 import org.apache.commons.math3.linear.RealVector;
 
 public class GraphOperators {
-    public static class LaplacianOperator extends RealLinearOperator {
-        public Graph graph;
-        public double[] d;
+    public static RealLinearOperator buildLaplacianOperator(final Graph graph) {
+        return buildLaplacianOperator(graph, new double[graph.nv]);
+    }
 
-        public LaplacianOperator (Graph graph) {
-            this.graph = graph;
-            d = new double[graph.nv];
-        }
+    public static RealLinearOperator buildLaplacianOperator(final Graph graphIn, final double[] dIn) {
+        return new RealLinearOperator() {
+            Graph graph = new Graph(graphIn);
+            double[] d = dIn.clone();
 
-        public LaplacianOperator (Graph graph, double[] d) {
-            this.graph = graph;
-            this.d = d;
-        }
-
-        @Override
-        public int getRowDimension() {
-            return graph.nv;
-        }
-
-        @Override
-        public int getColumnDimension() {
-            return graph.nv;
-        }
-
-        @Override
-        public RealVector operate(RealVector x) throws DimensionMismatchException {
-            double[] xarr = x.toArray();
-            double[] lx = GraphUtils.applyLaplacian(graph, xarr);
-            for (int i = 0; i < graph.nv; i++) {
-                lx[i] += d[i] * xarr[i];
+            @Override
+            public int getRowDimension() {
+                return graph.nv;
             }
-            return new ArrayRealVector( lx );
-        }
+
+            @Override
+            public int getColumnDimension() {
+                return graph.nv;
+            }
+
+            @Override
+            public RealVector operate(RealVector x) throws DimensionMismatchException {
+                if (graph.nv != x.getDimension())
+                    throw new DimensionMismatchException(x.getDimension(), graph.nv);
+                double[] xarr = x.toArray();
+                double[] lx = GraphUtils.applyLaplacian(graph, xarr);
+                for (int i = 0; i < graph.nv; i++)
+                    lx[i] += d[i] * xarr[i];
+                return new ArrayRealVector(lx);
+            }
+        };
     }
 }

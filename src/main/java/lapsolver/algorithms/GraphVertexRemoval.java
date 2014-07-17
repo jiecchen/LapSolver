@@ -99,10 +99,16 @@ public class GraphVertexRemoval {
                     int newIndex = index;
                     if (updatedDeg[u] == 2 && removed[u] == 0) {
                         // This is a degree two chain
+                        int chainCount = 0;
 
                         while (updatedDeg[u] == 2) {
                             removed[u] = 1;
                             chains[newIndex++] = u;
+
+                            // I create the chains such that they have lengths at most 10
+                            chainCount++;
+                            if (chainCount % 3 == 0)
+                                chains[newIndex]--;
 
                             int v = u;
                             for (int k = 0; k < graph.deg[u]; k++)
@@ -125,9 +131,8 @@ public class GraphVertexRemoval {
                         }
 
                         if (u == i) {
-                            // If the chain is connected to the same outer vertex at both ends, then one of its
-                            // vertices should be ignored.
-
+                            // If the chain is connected to the same outer vertex at both ends, then its end
+                            // should be ignored
                             unRemovable[chains[newIndex - 1]] = 1;
                             chains[--newIndex] = 0;
                         }

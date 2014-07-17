@@ -10,10 +10,13 @@ package lapsolver.solvers;
 
 import lapsolver.Graph;
 import lapsolver.util.GraphOperators;
-import org.apache.commons.math3.linear.*;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.ConjugateGradient;
+import org.apache.commons.math3.linear.RealLinearOperator;
+import org.apache.commons.math3.linear.RealVector;
 
 public class ConjugateGradientSolver extends Solver {
-    public GraphOperators.LaplacianOperator lapOperator;
+    public RealLinearOperator lapOperator;
     public ConjugateGradient conjugateGradient;
     public RealLinearOperator preconditioner;
 
@@ -34,7 +37,7 @@ public class ConjugateGradientSolver extends Solver {
     public void init (Graph graph, double[] d) {
         this.graph = graph;
         this.d = d;
-        lapOperator = new GraphOperators.LaplacianOperator(graph, d);
+        lapOperator = GraphOperators.buildLaplacianOperator(graph, d);
         conjugateGradient = new ConjugateGradient(maxIters, tolerance, true);
     }
 
