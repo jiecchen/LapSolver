@@ -2,7 +2,7 @@ function [ reweightedA ] = reweightFA( A, f, e )
 %REWEIGHTFA Reweight the given graph (given by A) using the Rfa formula.
 %           The eigenvalues are found in v and e.
 
-    n = size(A,1);
+    n = length(A);
     
     [u,v,w] = find(A);
     m = length(u);

@@ -7,6 +7,6 @@ function [ nL ] = normLap( A )
 
     % symmetrize
     nL = tril(nL, -1);
-    nL = nL + nL';
+    nL = nL + nL' + speye(n);
 end
 

@@ -16,4 +16,5 @@ addpath([root, 'matlab/viz']);
 addpath([root, 'matlab/lsst']);
 addpath([root, 'matlab/kmp']);
 addpath([root, 'matlab/flow']);
-addpath([root, 'matlab/generators/millerTolliverGraph']);
+addpath([root, 'matlab/seg']);
+addpath([root, 'matlab/seg/miller_tolliver']);
