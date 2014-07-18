@@ -3,15 +3,17 @@ function [f,e] = compF( A, k )
     n = length(A);
     
     % Compute the normalized Laplacian
-    nL = normLap(A) - speye(n);
+    nL = normLap(A);
     
     % Compute k eigenvectors for the normalized Laplacian
     opts.tol = 1e-5;
-    [g, e] = eigs(nL, k + 1, 'sa', opts);
+    [g, e] = eigs(nL, k, 'sa', opts);
     e = diag(e);
     
-    g = g(:,2:(k+1));
-    e = e(2:(k+1));
+    e = e - 1;
+    
+    % g = g(:,2:(k+1));
+    % e = e(2:(k+1));
     
     % The f values will solve the system D^(1/2) * f = g
     % f = D^(-1/2) * g
