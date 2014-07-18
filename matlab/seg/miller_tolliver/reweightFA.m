@@ -3,9 +3,7 @@ function [ reweightedA ] = reweightFA( A, f, e )
 %           The eigenvalues are found in v and e.
 
     n = length(A);
-    
     [u,v,w] = find(A);
-    m = length(u);
     
     sum_a2 = ( (f(u,:) - f(v,:)).^2 * (1./e) ) .^ 2;
     sum_b2 = sum(f(u,:).^2 + f(v,:).^2, 2) .^ 2;

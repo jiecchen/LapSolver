@@ -1,11 +1,7 @@
-function [ mtnorm ] = mtNormFA( mat, initMat, k )
+function [ mtnorm ] = mtNormFA(A, rA, f, e, k)
 %MTNORM Computes the norm of a matrix for the FA scheme
-
-    % Compute the f vectors for new matrix
-    [f, e] = compF(mat, k);
-    
     % Get the initial matrix edges
-    [u, v, w] = find(initMat);
+    [u, v, w] = find(A);
     m = size(u);
     
     topsum = 0;
