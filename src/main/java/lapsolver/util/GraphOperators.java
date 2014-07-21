@@ -9,41 +9,46 @@
 package lapsolver.util;
 
 import lapsolver.Graph;
-import org.apache.commons.math3.exception.DimensionMismatchException;
-import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.RealLinearOperator;
-import org.apache.commons.math3.linear.RealVector;
+import lapsolver.LinearOperator;
 
 public class GraphOperators {
-    public static RealLinearOperator buildLaplacianOperator(final Graph graph) {
-        return buildLaplacianOperator(graph, new double[graph.nv]);
-    }
-
-    public static RealLinearOperator buildLaplacianOperator(final Graph graphIn, final double[] dIn) {
-        return new RealLinearOperator() {
+    public static LinearOperator laplacian(final Graph graphIn, final double[] dIn) {
+        return new LinearOperator() {
             Graph graph = new Graph(graphIn);
             double[] d = dIn.clone();
-
             @Override
-            public int getRowDimension() {
-                return graph.nv;
-            }
-
-            @Override
-            public int getColumnDimension() {
-                return graph.nv;
-            }
-
-            @Override
-            public RealVector operate(RealVector x) throws DimensionMismatchException {
-                if (graph.nv != x.getDimension())
-                    throw new DimensionMismatchException(x.getDimension(), graph.nv);
-                double[] xarr = x.toArray();
-                double[] lx = GraphUtils.applyLaplacian(graph, xarr);
-                for (int i = 0; i < graph.nv; i++)
-                    lx[i] += d[i] * xarr[i];
-                return new ArrayRealVector(lx);
+            public double[] apply (double[] x) {
+                return applyLaplacian(graph, d, x);
             }
         };
+    }
+
+    public static LinearOperator laplacian(final Graph graphIn) {
+        return new LinearOperator() {
+            Graph graph = new Graph(graphIn);
+            @Override
+            public double[] apply (double[] x) {
+                return applyLaplacian(graph, x, null);
+            }
+        };
+    }
+
+    // apply the Laplacian matrix of a graph to a vector
+    public static double[] applyLaplacian(Graph graph, double[] d, double[] x) {
+        double[] y = new double[graph.nv];
+        for (int u = 0; u < graph.nv; u++) {
+            for (int i = 0; i < graph.deg[u]; i++) {
+                int v = graph.nbrs[u][i];
+                y[u] += graph.weights[u][i] * (x[u] - x[v]);
+            }
+        }
+
+        if (d != null) {
+            for (int u = 0; u < graph.nv; u++) {
+                y[u] += d[u] * x[u];
+            }
+        }
+
+        return y;
     }
 }

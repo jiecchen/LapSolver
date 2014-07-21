@@ -9,12 +9,9 @@
 package lapsolver.solvers;
 
 import lapsolver.Graph;
-import org.apache.commons.math3.exception.DimensionMismatchException;
-import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.RealLinearOperator;
-import org.apache.commons.math3.linear.RealVector;
+import lapsolver.LinearOperator;
 
-public abstract class Solver extends RealLinearOperator {
+public abstract class Solver implements LinearOperator {
     public Graph graph;
     public double[] d;
 
@@ -41,17 +38,7 @@ public abstract class Solver extends RealLinearOperator {
     public abstract double[] solve (double[] b);
 
     @Override
-    public int getRowDimension() {
-        return graph.nv;
-    }
-
-    @Override
-    public int getColumnDimension() {
-        return graph.nv;
-    }
-
-    @Override
-    public RealVector operate(RealVector x) throws DimensionMismatchException {
-        return new ArrayRealVector( solve(x.toArray()) );
+    public double[] apply(double[] b) {
+        return solve(b);
     }
 }

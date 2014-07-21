@@ -9,6 +9,7 @@
 package lapsolver.solvers;
 
 import lapsolver.Graph;
+import lapsolver.util.GraphOperators;
 import lapsolver.util.GraphUtils;
 
 public class IncrementalSolver extends Solver {
@@ -55,12 +56,7 @@ public class IncrementalSolver extends Solver {
         }
 
         // update residue
-        double[] ldx = GraphUtils.applyLaplacian(graph, dx);
-        if (d != null) {
-            for (int i = 0; i < graph.nv; i++) {
-                ldx[i] += d[i] * dx[i];
-            }
-        }
+        double[] ldx = GraphOperators.applyLaplacian(graph, d, dx);
 
         for (int i = 0; i < graph.nv; i++) {
             residue[i] -= ldx[i];
