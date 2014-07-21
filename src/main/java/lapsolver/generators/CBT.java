@@ -3,7 +3,7 @@ package lapsolver.generators;
 import lapsolver.Graph;
 import lapsolver.util.NativeLoader;
 
-public class CompleteBinaryTree implements GraphFactory {
+public class CBT implements GraphFactory {
 	static {
 		NativeLoader.loadLibrary("lapsolver");
 	}
@@ -11,7 +11,7 @@ public class CompleteBinaryTree implements GraphFactory {
 	private final int h;
 	private Graph graph = null;
 
-	public CompleteBinaryTree(int height) {
+	public CBT(int height) {
 		this.h = height;
 	}
 
