@@ -30,4 +30,15 @@ public class LinearAlgebraUtils {
         }
         return Math.sqrt(result);
     }
+
+    /**
+     * Normalize a vector in place.
+     */
+    public static void normalize (double[] v) {
+        double norm = norm(v);
+        norm = Math.sqrt(norm);
+        for (int i = 0; i < v.length; i++) {
+            v[i] /= norm;
+        }
+    }
 }
