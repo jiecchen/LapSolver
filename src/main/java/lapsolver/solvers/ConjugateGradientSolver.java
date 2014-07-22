@@ -113,7 +113,7 @@ public class ConjugateGradientSolver extends Solver {
             }
 
             // beta = (z dot r) / (oldz dot oldr)
-            double beta = LinearAlgebraUtils.dot(z, r) / beta_denom;
+            double beta = LinearAlgebraUtils.dot(z  , r) / beta_denom;
 
             // p = z + beta*p
             for (int i = 0; i < graph.nv; i++) {

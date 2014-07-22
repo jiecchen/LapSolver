@@ -36,17 +36,17 @@ function [ rA ] = mtGraph(A, k, tol, edgetol)
 
         iter = iter + 1;
         
-        %if (iter == 30)
+        %if (iter == 5)
         %    rA = smartCluster(rA, k);
         %    break;
         %end
         
-        if mtNormFA(rA, A, k) < tol
+        %if mtNormFA(rA, A, k) < tol
             %sanitize so that only k components remain
-            fprintf('**********************************************\n');
-            rA = incrementalSanitize(rA, k);
-            break;
-        end
+        %    fprintf('**********************************************\n');
+        %    rA = incrementalSanitize(rA, k);
+        %    break;
+        %end
         
         san = sanitize(rA, edgetol);
         if (graphconncomp(san) < k)

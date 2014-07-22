@@ -41,4 +41,34 @@ public class LinearAlgebraUtils {
             v[i] /= norm;
         }
     }
+
+    /**
+     * Computes the sum of two arrays, element wise
+     */
+     public static double[] add (double[] u, double[] v) {
+         double[] res = new double[u.length];
+         for (int i = 0; i < res.length; i++)
+             res[i] = u[i] + v[i];
+         return res;
+     }
+
+    /**
+     * Computes the sum of two arrays, element wise
+     */
+     public static double[] sub (double[] u, double[] v) {
+         double[] res = new double[u.length];
+         for (int i = 0; i < res.length; i++)
+             res[i] = u[i] - v[i];
+         return res;
+     }
+
+    /**
+     * Computes the sum of two arrays, element wise
+     */
+     public static double[] scalarProd (double[] u, double x) {
+         double[] res = new double[u.length];
+         for (int i = 0; i < res.length; i++)
+             res[i] = u[i] * x;
+         return res;
+     }
 }

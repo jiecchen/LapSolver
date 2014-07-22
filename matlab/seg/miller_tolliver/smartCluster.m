@@ -10,7 +10,7 @@ function [ partA ] = smartCluster(A, k)
     
     m = length(w);
     for i = 1:m
-        w(i) = 1 / w(i);
+        w(i) = -w(i) + 10;
     end
     
     A = sparse(u, v, w);
@@ -39,7 +39,7 @@ function [ partA ] = smartCluster(A, k)
     
     % I will create the answer, broken in k components
     
-    [s, c] = graphconncomp(t, 'Directed', false);
+    [s, c] = graphconncomp(t);
     
     ufin = u;
     vfin = v;
