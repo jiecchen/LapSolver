@@ -10,6 +10,6 @@ function [v, e] = normLapEigs(a, k)
     ipe = InversePowerEigensolver(a2g(a),nsolver,true);
     
     v = ipe.getVectors(k,100)';
-    e = diag(sqrt(sum( (lap(a)*v).^2 )));
+    e = diag(sqrt(sum( (normLap(a)*v).^2 )));
 end
 
