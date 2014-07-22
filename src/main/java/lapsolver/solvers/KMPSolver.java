@@ -103,14 +103,15 @@ public class KMPSolver extends Solver {
     }
 
     public double[] solve(double[] b) {
-        System.out.println("SOLVE " + graph.nv + " " + graph.ne);
+//        System.out.println("SOLVE " + graph.nv + " " + graph.ne);
 
         if (sparsifiedSolver == null) {
             // we are at the bottom level
             return baseCaseSolver.solve(b);
         }
 
-        double[] outerB = LDLDecomposition.applyLInv(ldlPair.L, applyPerm(gvrPair.permutation, b));
+//        double[] outerB = LDLDecomposition.applyLInv(ldlPair.L, applyPerm(gvrPair.permutation, b));
+        double[] outerB = ldlPair.L.applyLInv(applyPerm(gvrPair.permutation, b));
         double[] innerB = new double[reducedGraph.nv];
         System.arraycopy(outerB, gvrPair.numRemoved, innerB, 0, innerB.length);
 
@@ -126,7 +127,8 @@ public class KMPSolver extends Solver {
             outerX[i] = outerB[i] / ldlDiag[i];
         System.arraycopy(innerX, 0, outerX, gvrPair.numRemoved, graph.nv - gvrPair.numRemoved);
 
-        return applyPerm(gvrInversePerm, LDLDecomposition.applyLTransInv(ldlPair.L, outerX));
+//        return applyPerm(gvrInversePerm, LDLDecomposition.applyLTransInv(ldlPair.L, outerX));
+        return applyPerm(gvrInversePerm, ldlPair.L.applyLTransInv(outerX));
     }
 
     public static double[] applyPerm(int[] perm, double[] x) {
@@ -168,6 +170,7 @@ public class KMPSolver extends Solver {
 
         //Expect to grab q = O(m / log(m)) edges
         double q = 10. * graph.ne / Math.log(graph.ne) / Math.log(graph.ne);
+        System.out.println("Expect to grab q = " + q + " edges.");
 
         //Assign p_e = stretch(e) / (total stretch)
         double[] p = blownUpStretch.allStretches.clone();

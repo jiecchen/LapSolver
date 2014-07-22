@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static lapsolver.algorithms.GraphVertexRemoval.AnswerPair;
+import static lapsolver.algorithms.LDLDecomposition.LMatrix;
 import static lapsolver.algorithms.LDLDecomposition.ReturnPair;
 import static lapsolver.algorithms.Stretch.StretchResult;
 
@@ -335,7 +336,8 @@ public class KMP2Solver extends Solver {
             }
 
             @Override public double[] solve(double[] b) {
-                double[] outerB = LDLDecomposition.applyLInv(next.lMatrix, applyPerm(next.perm, b));
+//                double[] outerB = LDLDecomposition.applyLInv(next.lMatrix, applyPerm(next.perm, b));
+                double[] outerB = next.lMatrix.applyLInv(applyPerm(next.perm, b));
                 double[] innerB = Arrays.copyOfRange(outerB, numRemoved, outerB.length);
                 double[] innerX = recSolve(innerB, chain, level + 1);
                 double[] outerX = new double[graph.nv];
@@ -344,7 +346,8 @@ public class KMP2Solver extends Solver {
                 System.arraycopy(innerX, 0, outerX, numRemoved, graph.nv - numRemoved);
                 int[] invPerm = new int[graph.nv];
                 for (int i = 0; i < graph.nv; i++) invPerm[next.perm[i]] = i;
-                return applyPerm(invPerm, LDLDecomposition.applyLTransInv(next.lMatrix, outerX));
+//                return applyPerm(invPerm, LDLDecomposition.applyLTransInv(next.lMatrix, outerX));
+                return applyPerm(invPerm, next.lMatrix.applyLTransInv(outerX));
             }
         };
         preconditioner.init(current.sparsifier, current.delta);
@@ -360,7 +363,7 @@ public class KMP2Solver extends Solver {
 
         public Graph sparsifier;
         public int[] perm;
-        public EdgeList lMatrix = null;
+        public LMatrix lMatrix = null;
 
         public double[] delta = null;
         public double[] diag = null;

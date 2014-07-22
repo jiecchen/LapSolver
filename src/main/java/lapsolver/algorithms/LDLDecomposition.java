@@ -28,11 +28,11 @@ public class LDLDecomposition {
     public int Dindex = 0;
 
     public static class ReturnPair {
-        public EdgeList L;
+        public LMatrix L;
         public EdgeList D;
 
         public ReturnPair(EdgeList A, EdgeList B) {
-            this.L = A;
+            this.L = new LMatrix(A);
             this.D = B;
         }
     }
@@ -246,60 +246,52 @@ public class LDLDecomposition {
         return false;
     }
 
-    public static class Operation {
-        public int u;
-        public int v;
-        public double weight;
+    public static class LMatrix {
+        private EdgeList L;
+        private ArrayList<Integer> idxInv;
+        private ArrayList<Integer> idxTransInv;
 
-        public Operation(int u, int v, double weight) {
-            this.u = u;
-            this.v = v;
-            this.weight = weight;
-        }
-    }
+        public LMatrix(final EdgeList L) {
+            this.L = L;
+            idxInv = new ArrayList<>(L.ne);
 
-    public static double[] applyLInv(EdgeList L, double[] x) {
-        ArrayList<Operation> operations = new ArrayList<>();
-        for (int i = 0; i < L.ne; i++)
-            operations.add(new Operation(L.u[i], L.v[i], L.weight[i]));
-        Collections.sort(operations, new Comparator<Operation>() {
-            @Override
-            public int compare(Operation o1, Operation o2) {
-                int vCmp = Integer.compare(o1.v, o2.v);
-                if (vCmp != 0) return vCmp;
-                return Integer.compare(o1.u, o2.u);
-            }
-        });
+            for (int i = 0; i < L.ne; i++)
+                if (L.u[i] != L.v[i])
+                    idxInv.add(i);
 
-        for (Operation op : operations) {
-            if (op.u != op.v) {
-                x[op.u] -= op.weight * x[op.v];
-            }
-        }
+            idxInv.trimToSize();
+            idxTransInv = new ArrayList<>(idxInv);
 
-        return x;
-    }
+            Collections.sort(idxInv, new Comparator<Integer>() {
+                @Override
+                public int compare(Integer o1, Integer o2) {
+                    int vCmp = Integer.compare(L.v[o1], L.v[o2]);
+                    if (vCmp != 0) return vCmp;
+                    return Integer.compare(L.u[o1], L.u[o2]);
+                }
+            });
 
-    public static double[] applyLTransInv(EdgeList L, double[] x) {
-        ArrayList<Operation> operations = new ArrayList<>();
-        for (int i = 0; i < L.ne; i++)
-            operations.add(new Operation(L.u[i], L.v[i], L.weight[i]));
-        Collections.sort(operations, new Comparator<Operation>() {
-            @Override
-            public int compare(Operation o1, Operation o2) {
-                int vCmp = Integer.compare(o2.v, o1.v);
-                if (vCmp != 0) return vCmp;
-                return Integer.compare(o2.u, o1.u);
-            }
-        });
-
-        for (Operation op : operations) {
-            if (op.u != op.v) {
-                x[op.v] -= op.weight * x[op.u];
-            }
+            Collections.sort(idxTransInv, new Comparator<Integer>() {
+                @Override
+                public int compare(Integer o1, Integer o2) {
+                    int vCmp = Integer.compare(L.v[o2], L.v[o1]);
+                    if (vCmp != 0) return vCmp;
+                    return Integer.compare(L.u[o2], L.u[o1]);
+                }
+            });
         }
 
-        return x;
+        public double[] applyLInv(double[] x) {
+            for (Integer i : idxInv)
+                x[L.u[i]] -= L.weight[i] * x[L.v[i]];
+            return x;
+        }
+
+        public double[] applyLTransInv(double[] x) {
+            for (Integer i : idxTransInv)
+                x[L.v[i]] -= L.weight[i] * x[L.u[i]];
+            return x;
+        }
     }
 
     public static Graph getReducedGraph(EdgeList D, int shift) {
