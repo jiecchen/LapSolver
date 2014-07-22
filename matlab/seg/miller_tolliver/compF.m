@@ -6,7 +6,6 @@ function [f,e] = compF( A, k )
     nL = normLap(A);
     
     % Compute k eigenvectors for the normalized Laplacian
-    
     % opts.tol = 1e-5;
     % [g, e] = eigs(nL, k, 'sa', opts);
     [g, e] = normLapEigs(A, k);

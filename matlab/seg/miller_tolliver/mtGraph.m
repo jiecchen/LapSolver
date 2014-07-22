@@ -15,7 +15,6 @@ function [ rA ] = mtGraph(A, k, tol, iters)
         
         [f, e] = compF(rA, k);
         rA = reweightFA(rA, f, e);
-        disp(e);
         
         [~,~,w] = find(rA);
         fprintf('reweighted, minw=%.6f, maxw=%.6f\n', min(w), max(w));
