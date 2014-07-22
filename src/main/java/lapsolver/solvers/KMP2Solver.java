@@ -27,9 +27,9 @@ public class KMP2Solver extends Solver {
     private static final double Cs = 10.0;
     private static final int cStop = 500;
     private static final double kappaC = 2;
-    private static final double tolerance = 1e-8;
+    private static final double tolerance = 1e-10;
     private static final int maxIters = 1000;
-    private static final Solver baseCaseSolver = new ConjugateGradientSolver(maxIters, tolerance);
+    private static final Solver baseCaseSolver = new ConjugateGradientSolver(maxIters, 1e-8);
     private final SpanningTreeStrategy treeStrategy;
     public List<ChainEntry> chain;
 
@@ -62,13 +62,14 @@ public class KMP2Solver extends Solver {
         // G2 = H1 = G1 + O~(log^2 n)T
         Graph h1_g2 = new Graph(g1);
         double logSquaredFactor = Math.pow(Math.log(t.nv) * Math.log(Math.log(t.nv)), 2.0);
+        System.out.println("logSquaredFactor = " + logSquaredFactor);
         int[] parent = t.parent;
         for (int u = 0; u < parent.length; u++)
             if (u != t.parent[u])
                 for (int iV = 0; iV < h1_g2.nbrs[u].length; iV++)
                     if (h1_g2.nbrs[u][iV] == t.parent[u]) {
                         int v = h1_g2.nbrs[u][iV];
-                        double adjustedWeight = logSquaredFactor * t.weight[u];
+                        double adjustedWeight = t.weight[u] / logSquaredFactor;
                         int iU = h1_g2.backInd[u][iV];
                         h1_g2.weights[u][iV] = adjustedWeight;
                         h1_g2.weights[v][iU] = adjustedWeight;
@@ -87,7 +88,7 @@ public class KMP2Solver extends Solver {
         while (chainEnd.graph.nv > cStop) {
             Graph hGraph = incrementalSparsify(chainEnd.graph, chainEnd.tree, chainEnd.kappa);
             chainEnd.sparsifier = hGraph;
-            chain.add(greedyElimination(hGraph, chainEnd.tree, deltaRef)); // G
+            chain.add(greedyElimination(hGraph, chainEnd.tree, deltaRef));
             chainEnd = chain.getLast();
         }
 
@@ -119,9 +120,9 @@ public class KMP2Solver extends Solver {
 
         // Step 2: if |stretch_T(G)| <= 1
         if (totalStretch <= 1) {
-            // Step 3: return 2T (resistances -> divide)
+            // Step 3: return 2T
             for (int i = 0; i < tPrime.weight.length; i++)
-                tPrime.weight[i] *= 2;
+                tPrime.weight[i] /= 2;
             return new Graph(tPrime);
         } // Step 4: end if
 
@@ -161,14 +162,14 @@ public class KMP2Solver extends Solver {
         for (int i = 0; i < nOffTree; i++) {
             H.u[i] = hSquiggle.u[i];
             H.v[i] = hSquiggle.v[i];
-            H.weight[i] = hSquiggle.weight[i] * 4;
+            H.weight[i] = hSquiggle.weight[i] / 4;
         }
 
         // 12T'
         for (int i = 0; i < tEdges.ne; i++) {
             H.u[nOffTree + i] = tEdges.u[i];
             H.v[nOffTree + i] = tEdges.v[i];
-            H.weight[nOffTree + i] = tEdges.weight[i] * 12;
+            H.weight[nOffTree + i] = tEdges.weight[i] / 12;
         }
 
         return new Graph(H);
