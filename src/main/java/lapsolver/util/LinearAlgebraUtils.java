@@ -36,7 +36,6 @@ public class LinearAlgebraUtils {
      */
     public static void normalize (double[] v) {
         double norm = norm(v);
-        norm = Math.sqrt(norm);
         for (int i = 0; i < v.length; i++) {
             v[i] /= norm;
         }
