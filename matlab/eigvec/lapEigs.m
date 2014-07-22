@@ -1,4 +1,4 @@
-function v = lapEigs(a, k)
+function [v, e] = lapEigs(a, k)
 %LAPEIGS Gets the first k non-trivial eigenvectors
 % of the Laplacian matrix, given the adjacency matrix.
     import lapsolver.solvers.*;
@@ -9,5 +9,6 @@ function v = lapEigs(a, k)
     ipe = InversePowerEigensolver(a2g(a),lapsolver,false);
     
     v = ipe.getVectors(k,100)';
+    e = diag(sqrt(sum( (lap(a)*v).^2 )));
 end
 
