@@ -48,7 +48,7 @@ public class KMPSolver extends Solver {
 
     // Use PCGSolver as default
     public KMPSolver(SpanningTreeStrategy spanningTreeStrategy) {
-        this(spanningTreeStrategy, new ConjugateGradientSolver(1000, 1e-8));
+        this(spanningTreeStrategy, new ConjugateGradientSolver(100, 1e-12));
     }
 
     public void init(Graph graph, double[] d) {
@@ -115,7 +115,7 @@ public class KMPSolver extends Solver {
         double[] innerB = new double[reducedGraph.nv];
         System.arraycopy(outerB, gvrPair.numRemoved, innerB, 0, innerB.length);
 
-        ConjugateGradientSolver innerPCG = new ConjugateGradientSolver(sparsifiedSolver, 1000, 1e-10);
+        ConjugateGradientSolver innerPCG = new ConjugateGradientSolver(sparsifiedSolver, 5, 1e-12);
         // ConjugateGradientSolver innerPCG = new ConjugateGradientSolver(null, 1000, 1e-2);
         innerPCG.init(reducedGraph, reducedD);
         double[] innerX = innerPCG.solve(innerB);
@@ -154,6 +154,8 @@ public class KMPSolver extends Solver {
         //Blow up graph by 4 * avgstretch * log(numRemoved)
         double k = 4. * (stretch.total / (offEdges.ne + 1) * (Math.log(graph.nv) + 1)) *
                 (stretch.total / (offEdges.ne + 1) * (Math.log(graph.nv) + 1)) + 1;
+
+        k = 1;
 
         Graph blownUpGraph = blowUpTreeEdges(graph, spanningTree, k);
 
