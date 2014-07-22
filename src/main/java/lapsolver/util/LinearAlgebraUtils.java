@@ -55,7 +55,7 @@ public class LinearAlgebraUtils {
     /**
      * Computes the sum of two arrays, element wise
      */
-     public static double[] sub (double[] u, double[] v) {
+     public static double[] subtract (double[] u, double[] v) {
          double[] res = new double[u.length];
          for (int i = 0; i < res.length; i++)
              res[i] = u[i] - v[i];
@@ -65,7 +65,7 @@ public class LinearAlgebraUtils {
     /**
      * Computes the sum of two arrays, element wise
      */
-     public static double[] scalarProd (double[] u, double x) {
+     public static double[] scale (double[] u, double x) {
          double[] res = new double[u.length];
          for (int i = 0; i < res.length; i++)
              res[i] = u[i] * x;

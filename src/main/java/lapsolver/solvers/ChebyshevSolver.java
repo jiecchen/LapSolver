@@ -69,7 +69,7 @@ public class ChebyshevSolver extends Solver {
     public double[] solve(double b[]) {
         double d = (lMax + lMin) / 2;
         double c = (lMax - lMin) / 2;
-        r = LinearAlgebraUtils.sub(b, operator.apply(x));
+        r = LinearAlgebraUtils.subtract(b, operator.apply(x));
 
         double alpha = 0;
         double beta = 0;
@@ -89,14 +89,14 @@ public class ChebyshevSolver extends Solver {
             else {
                 beta = (c * alpha / 2) * (c * alpha / 2);
                 alpha = 1 / (d - beta / alpha);
-                p = LinearAlgebraUtils.add(z, LinearAlgebraUtils.scalarProd(p, beta));
+                p = LinearAlgebraUtils.add(z, LinearAlgebraUtils.scale(p, beta));
             }
 
-            x = LinearAlgebraUtils.add(x, LinearAlgebraUtils.scalarProd(p, alpha));
-            r = LinearAlgebraUtils.sub(b, operator.apply(x));
+            x = LinearAlgebraUtils.add(x, LinearAlgebraUtils.scale(p, alpha));
+            r = LinearAlgebraUtils.subtract(b, operator.apply(x));
 
             if (LinearAlgebraUtils.norm(r) < tolerance) {
-                return x;
+                break;
             }
         }
 
