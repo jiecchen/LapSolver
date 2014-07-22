@@ -1,5 +1,5 @@
 function [v, e] = normLapEigs(a, k)
-%NORMLAPEIGS Gets the first k non-trivial eigenvectors
+%NORMLAPEIGS Gets the first k eigenvectors
 % of the normalized Laplacian matrix, given the adjacency matrix.
     import lapsolver.solvers.*;
     import lapsolver.lsst.*;
@@ -9,7 +9,8 @@ function [v, e] = normLapEigs(a, k)
     nsolver = NormalizedSolver(lapsolver);
     ipe = InversePowerEigensolver(a2g(a),nsolver,true);
     
-    v = ipe.getVectors(k,100)';
+    dsqrt = sqrt(full(sum(a))');
+    v = [dsqrt/norm(dsqrt) ipe.getVectors(k-1,100)'];
     e = diag(sqrt(sum( (normLap(a)*v).^2 )));
 end
 
