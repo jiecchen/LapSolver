@@ -101,16 +101,15 @@ public class ConjugateGradientSolver extends Solver {
 
             // if residual is small enough, return x
             if (LinearAlgebraUtils.norm(r) < tolerance) {
+//                System.out.println("PCG: converged on " + iter);
                 return x;
             }
 
             // z = P * r
-            if (preconditioner == null) {
+            if (preconditioner == null)
                 System.arraycopy(r, 0, z, 0, graph.nv);
-            }
-            else {
+            else
                 z = preconditioner.apply(r);
-            }
 
             // beta = (z dot r) / (oldz dot oldr)
             double beta = LinearAlgebraUtils.dot(z  , r) / beta_denom;
@@ -120,7 +119,7 @@ public class ConjugateGradientSolver extends Solver {
                 p[i] = z[i] + beta * p[i];
             }
         }
-
+        System.out.println("PCG: defaulted");
         return x;
     }
 
