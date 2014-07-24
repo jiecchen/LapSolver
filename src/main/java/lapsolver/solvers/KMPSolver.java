@@ -68,22 +68,27 @@ public class KMPSolver extends Solver {
     }
 
     public void init(Graph graph, double[] d, int maxLevels) {
-        System.out.println("INIT: n=" + graph.nv + ", m=" + graph.ne);
+        if (watch) {
+            System.out.println("INIT: n=" + graph.nv + ", m=" + graph.ne);
+        }
 
         this.graph = graph;
         this.d = d;
 
-        if (maxLevels == 1 || graph.nv < 500) {
-            childSolver = null;
-            baseCaseSolver.init(graph, d);
-        } else {
-            eliminate();
+        eliminate();
 
+        if (maxLevels == 1 || reducedGraph.nv < 500) {
+            childSolver = null;
+            baseCaseSolver.init(reducedGraph, reducedD);
+        } else {
             spanningTree = treeStrategy.getTree(reducedGraph);
             sparsifier = sparsify(reducedGraph, spanningTree);
 
-            childSolver = new KMPSolver(treeStrategy, baseCaseSolver, 5, 1e-12, false);
+            childSolver = new KMPSolver(treeStrategy, baseCaseSolver, 5, 0, false);
             childSolver.init(sparsifier, reducedD, maxLevels - 1);
+
+            recursiveSolver = new ConjugateGradientSolver(childSolver, maxIters, tolerance, watch);
+            recursiveSolver.init(reducedGraph, reducedD);
         }
     }
 
@@ -125,19 +130,19 @@ public class KMPSolver extends Solver {
     public double[] solve(double[] b) {
 //        System.out.println("SOLVE: n=" + graph.nv + ", m=" + graph.ne);
 
-        if (childSolver == null) {
-            // we are at the bottom level
-            return baseCaseSolver.solve(b);
-        }
-
-//        double[] outerB = LDLDecomposition.applyLInv(ldlPair.L, applyPerm(gvrPair.permutation, b));
         double[] outerB = ldlPair.L.applyLInv(LinearAlgebraUtils.applyPerm(gvrPair.permutation, b));
         double[] innerB = new double[reducedGraph.nv];
         System.arraycopy(outerB, gvrPair.numRemoved, innerB, 0, innerB.length);
 
-        recursiveSolver = new ConjugateGradientSolver(childSolver, maxIters, tolerance, watch);
-        recursiveSolver.init(reducedGraph, reducedD);
-        double[] innerX = recursiveSolver.solve(innerB);
+        double[] innerX;
+
+        if (childSolver == null) {
+            // we are at the bottom level
+            innerX = baseCaseSolver.solve(innerB);
+        }
+        else {
+            innerX = recursiveSolver.solve(innerB);
+        }
 
         double[] outerX = new double[graph.nv];
 
@@ -145,7 +150,6 @@ public class KMPSolver extends Solver {
             outerX[i] = outerB[i] / ldlDiag[i];
         System.arraycopy(innerX, 0, outerX, gvrPair.numRemoved, graph.nv - gvrPair.numRemoved);
 
-//        return applyPerm(gvrInversePerm, LDLDecomposition.applyLTransInv(ldlPair.L, outerX));
         return LinearAlgebraUtils.applyPerm(gvrInversePerm, ldlPair.L.applyLTransInv(outerX));
     }
 
@@ -191,9 +195,6 @@ public class KMPSolver extends Solver {
         q = graph.nv / 4;
         p = HighStretchSampler.compute(blownUpStretch.allStretches, (int)q);
 
-        System.out.println("Old: " + stretch.total + ", New: " + blownUpStretch.total);
-        System.out.println("Expect to grab q = " + q + " edges.");
-
         //Sample the edges
         ArrayList<Integer> edgesToAdd = new ArrayList<>();
         for (int i = 0; i < offEdges.ne; i++) {
@@ -224,7 +225,10 @@ public class KMPSolver extends Solver {
             index++;
         }
 
-        checkSparsifier(graph, new Graph(sparsifierEdges));
+        System.out.println("Stretch: " + stretch.total + " -> " + blownUpStretch.total);
+        System.out.println("E[q] = " + q + ", q = " + edgesToAdd.size());
+
+        // checkSparsifier(graph, new Graph(sparsifierEdges));
 
         //Build sparsified graph
         return new Graph(sparsifierEdges);
