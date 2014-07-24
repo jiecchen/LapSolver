@@ -17,6 +17,7 @@ import lapsolver.algorithms.LDLDecomposition;
 import lapsolver.algorithms.Stretch;
 import lapsolver.lsst.SpanningTreeStrategy;
 import lapsolver.util.GraphUtils;
+import lapsolver.util.LinearAlgebraUtils;
 import lapsolver.util.TreeUtils;
 
 import java.util.ArrayList;
@@ -71,7 +72,7 @@ public class KMPSolver extends Solver {
             spanningTree = treeStrategy.getTree(reducedGraph);
             sparsifier = sparsify(reducedGraph, spanningTree);
 
-            childSolver = new KMPSolver(treeStrategy, baseCaseSolver, 5, 1e-1);
+            childSolver = new KMPSolver(treeStrategy, baseCaseSolver, 5, 1e-12);
             childSolver.init(sparsifier, reducedD);
         }
     }
@@ -87,7 +88,7 @@ public class KMPSolver extends Solver {
         }
 
         Graph permutedGraph = GraphUtils.permuteGraph(graph, gvrPair.permutation);
-        double[] permutedDiag = applyPerm(gvrPair.permutation, d);
+        double[] permutedDiag = LinearAlgebraUtils.applyPerm(gvrPair.permutation, d);
 
         // perform elimination
         LDLDecomposition ldl = new LDLDecomposition(permutedGraph, permutedDiag);
@@ -116,14 +117,13 @@ public class KMPSolver extends Solver {
         }
 
 //        double[] outerB = LDLDecomposition.applyLInv(ldlPair.L, applyPerm(gvrPair.permutation, b));
-        double[] outerB = ldlPair.L.applyLInv(applyPerm(gvrPair.permutation, b));
+        double[] outerB = ldlPair.L.applyLInv(LinearAlgebraUtils.applyPerm(gvrPair.permutation, b));
         double[] innerB = new double[reducedGraph.nv];
         System.arraycopy(outerB, gvrPair.numRemoved, innerB, 0, innerB.length);
 
         ConjugateGradientSolver innerPCG = new ConjugateGradientSolver(childSolver, maxIters, tolerance);
         innerPCG.init(reducedGraph, reducedD);
         double[] innerX = innerPCG.solve(innerB);
-
 
         double[] outerX = new double[graph.nv];
 
@@ -132,16 +132,7 @@ public class KMPSolver extends Solver {
         System.arraycopy(innerX, 0, outerX, gvrPair.numRemoved, graph.nv - gvrPair.numRemoved);
 
 //        return applyPerm(gvrInversePerm, LDLDecomposition.applyLTransInv(ldlPair.L, outerX));
-        return applyPerm(gvrInversePerm, ldlPair.L.applyLTransInv(outerX));
-    }
-
-    public static double[] applyPerm(int[] perm, double[] x) {
-        double[] answer = new double[perm.length];
-
-        for (int i = 0; i < x.length; i++)
-            answer[i] = x[perm[i]];
-
-        return answer;
+        return LinearAlgebraUtils.applyPerm(gvrInversePerm, ldlPair.L.applyLTransInv(outerX));
     }
 
     //Construct a preconditioner for graph
@@ -175,7 +166,7 @@ public class KMPSolver extends Solver {
         GraphUtils.reciprocateWeights(blownUpGraph);
 
         //Expect to grab q = O(m / log(m)) edges
-        double q = 2. * graph.ne / Math.pow( Math.log(graph.ne), 2 );
+        double q = 10. * graph.ne / Math.pow( Math.log(graph.ne), 2 );
         System.out.println("Expect to grab q = " + q + " edges.");
 
         //Assign p_e = stretch(e) / (total stretch)

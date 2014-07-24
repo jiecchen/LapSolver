@@ -70,4 +70,13 @@ public class LinearAlgebraUtils {
              res[i] = u[i] * x;
          return res;
      }
+
+    public static double[] applyPerm(int[] perm, double[] x) {
+        double[] answer = new double[perm.length];
+
+        for (int i = 0; i < x.length; i++)
+            answer[i] = x[perm[i]];
+
+        return answer;
+    }
 }
