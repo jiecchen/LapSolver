@@ -16,6 +16,7 @@ import lapsolver.algorithms.GraphVertexRemoval;
 import lapsolver.algorithms.LDLDecomposition;
 import lapsolver.algorithms.Stretch;
 import lapsolver.lsst.SpanningTreeStrategy;
+import lapsolver.lsst.StarDecompositionTree;
 import lapsolver.util.GraphUtils;
 import lapsolver.util.LinearAlgebraUtils;
 import lapsolver.util.TreeUtils;
@@ -32,8 +33,10 @@ public class KMPSolver extends Solver {
     public Solver baseCaseSolver;
 
     public KMPSolver childSolver;
+    public ConjugateGradientSolver recursiveSolver;
     public double tolerance;
     public int maxIters;
+    public boolean watch;
 
     public Graph reducedGraph;
     public double[] reducedD, ldlDiag;
@@ -45,25 +48,31 @@ public class KMPSolver extends Solver {
     public int[] gvrInversePerm;
 
     // Initialize solver with a spanning tree strategy and a solver to run at the bottom level
-    public KMPSolver(SpanningTreeStrategy treeStrategy, Solver baseCaseSolver, int maxIters, double tolerance) {
+    public KMPSolver(SpanningTreeStrategy treeStrategy, Solver baseCaseSolver, int maxIters, double tolerance, boolean watch) {
         this.treeStrategy = treeStrategy;
         this.baseCaseSolver = baseCaseSolver;
         this.maxIters = maxIters;
         this.tolerance = tolerance;
+        this.watch = watch;
     }
 
-    // Use PCGSolver as default
-    public KMPSolver(SpanningTreeStrategy spanningTreeStrategy) {
-        this(spanningTreeStrategy, new ConjugateGradientSolver(100, 1e-12), 1000, 1e-8);
+    // Use PCG and StarDecompositionTree strategies
+    public KMPSolver(int maxIters, double tolerance, boolean watch) {
+        this(new StarDecompositionTree(), new ConjugateGradientSolver(100, 1e-12), maxIters, tolerance, watch);
     }
 
-    public void init(Graph graph, double[] d) {
+    // vanilla default parameters
+    public KMPSolver() {
+        this(new StarDecompositionTree(), new ConjugateGradientSolver(100, 1e-12), 1000, 1e-8, false);
+    }
+
+    public void init(Graph graph, double[] d, int maxLevels) {
         System.out.println("INIT: n=" + graph.nv + ", m=" + graph.ne);
 
         this.graph = graph;
         this.d = d;
 
-        if (graph.nv < 500) {
+        if (maxLevels == 1 || graph.nv < 500) {
             childSolver = null;
             baseCaseSolver.init(graph, d);
         } else {
@@ -72,9 +81,13 @@ public class KMPSolver extends Solver {
             spanningTree = treeStrategy.getTree(reducedGraph);
             sparsifier = sparsify(reducedGraph, spanningTree);
 
-            childSolver = new KMPSolver(treeStrategy, baseCaseSolver, 5, 1e-12);
-            childSolver.init(sparsifier, reducedD);
+            childSolver = new KMPSolver(treeStrategy, baseCaseSolver, 5, 1e-12, false);
+            childSolver.init(sparsifier, reducedD, maxLevels - 1);
         }
+    }
+
+    public void init(Graph graph, double[] d) {
+        init(graph, d, -1);
     }
 
     // eliminate low-degree vertices
@@ -121,9 +134,9 @@ public class KMPSolver extends Solver {
         double[] innerB = new double[reducedGraph.nv];
         System.arraycopy(outerB, gvrPair.numRemoved, innerB, 0, innerB.length);
 
-        ConjugateGradientSolver innerPCG = new ConjugateGradientSolver(childSolver, maxIters, tolerance);
-        innerPCG.init(reducedGraph, reducedD);
-        double[] innerX = innerPCG.solve(innerB);
+        recursiveSolver = new ConjugateGradientSolver(childSolver, maxIters, tolerance, watch);
+        recursiveSolver.init(reducedGraph, reducedD);
+        double[] innerX = recursiveSolver.solve(innerB);
 
         double[] outerX = new double[graph.nv];
 
@@ -202,7 +215,7 @@ public class KMPSolver extends Solver {
         for (int i : edgesToAdd) {
             sparsifierEdges.u[index] = offEdges.u[i];
             sparsifierEdges.v[index] = offEdges.v[i];
-            sparsifierEdges.weight[index] = offEdges.weight[i] / p[i];
+            sparsifierEdges.weight[index] = offEdges.weight[i];// / p[i];
             index++;
         }
 
