@@ -13,6 +13,7 @@ import lapsolver.EdgeList;
 import lapsolver.Graph;
 import lapsolver.Tree;
 import lapsolver.algorithms.GraphVertexRemoval;
+import lapsolver.algorithms.HighStretchSampler;
 import lapsolver.algorithms.LDLDecomposition;
 import lapsolver.algorithms.Stretch;
 import lapsolver.lsst.SpanningTreeStrategy;
@@ -174,13 +175,10 @@ public class KMPSolver extends Solver {
         }
         StretchResult blownUpStretch = Stretch.compute(blownUpGraph, spanningTree, offEdges);
 
-        System.out.println("Old: " + stretch.total + ", New: " + blownUpStretch.total);
-
         GraphUtils.reciprocateWeights(blownUpGraph);
 
         //Expect to grab q = O(m / log(m)) edges
         double q = 10. * graph.ne / Math.pow( Math.log(graph.ne), 2 );
-        System.out.println("Expect to grab q = " + q + " edges.");
 
         //Assign p_e = stretch(e) / (total stretch)
         double[] p = blownUpStretch.allStretches.clone();
@@ -188,6 +186,13 @@ public class KMPSolver extends Solver {
             p[i] = q * p[i] / blownUpStretch.total;
             if (p[i] > 1) p[i] = 1;
         }
+
+        //nope. sample n/4 edges deterministically
+        q = graph.nv / 4;
+        p = HighStretchSampler.compute(blownUpStretch.allStretches, (int)q);
+
+        System.out.println("Old: " + stretch.total + ", New: " + blownUpStretch.total);
+        System.out.println("Expect to grab q = " + q + " edges.");
 
         //Sample the edges
         ArrayList<Integer> edgesToAdd = new ArrayList<>();
