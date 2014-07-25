@@ -59,12 +59,12 @@ public class KMPSolver extends Solver {
 
     // Use PCG and StarDecompositionTree strategies
     public KMPSolver(int maxIters, double tolerance, boolean watch) {
-        this(new StarDecompositionTree(), new ConjugateGradientSolver(100, 1e-12), maxIters, tolerance, watch);
+        this(new StarDecompositionTree(), new ConjugateGradientSolver(100, 1e-14), maxIters, tolerance, watch);
     }
 
     // vanilla default parameters
     public KMPSolver() {
-        this(new StarDecompositionTree(), new ConjugateGradientSolver(100, 1e-12), 1000, 1e-8, false);
+        this(new StarDecompositionTree(), new ConjugateGradientSolver(100, 1e-14), 1000, 1e-8, false);
     }
 
     public void init(Graph graph, double[] d, int maxLevels) {
@@ -81,10 +81,13 @@ public class KMPSolver extends Solver {
             childSolver = null;
             baseCaseSolver.init(reducedGraph, reducedD);
         } else {
+            GraphUtils.reciprocateWeights(reducedGraph);
             spanningTree = treeStrategy.getTree(reducedGraph);
+            GraphUtils.reciprocateWeights(reducedGraph);
+
             sparsifier = sparsify(reducedGraph, spanningTree);
 
-            childSolver = new KMPSolver(treeStrategy, baseCaseSolver, 5, 0, false);
+            childSolver = new KMPSolver(treeStrategy, baseCaseSolver, 100, 0, false);
             childSolver.init(sparsifier, reducedD, maxLevels - 1);
 
             recursiveSolver = new ConjugateGradientSolver(childSolver, maxIters, tolerance, watch);
@@ -124,7 +127,14 @@ public class KMPSolver extends Solver {
         // get new graph + diag from LDL
         reducedGraph = LDLDecomposition.getReducedGraph(ldlPair.D, gvrPair.numRemoved);
         reducedD = new double[reducedGraph.nv];
-        System.arraycopy(permutedDiag, gvrPair.numRemoved, reducedD, 0, graph.nv - gvrPair.numRemoved);
+        System.arraycopy(ldlDiag, gvrPair.numRemoved, reducedD, 0, graph.nv - gvrPair.numRemoved);
+
+        // turn ldlDiag into excess diagonals
+        for (int u = 0; u < reducedGraph.nv; u++) {
+            for (int i = 0; i < reducedGraph.deg[u]; i++) {
+                ldlDiag[gvrPair.numRemoved + u] -= reducedGraph.weights[u][i];
+            }
+        }
     }
 
     public double[] solve(double[] b) {
@@ -169,16 +179,11 @@ public class KMPSolver extends Solver {
                 (stretch.total / (offEdges.ne + 1) * (Math.log(graph.nv) + 1)) + 1;
 
         k = 1;
-
         Graph blownUpGraph = blowUpTreeEdges(graph, spanningTree, k);
 
         // find stretches in blown-up graph
         GraphUtils.reciprocateWeights(blownUpGraph);
-        for (int i = 0; i < spanningTree.nv; i++) {
-            spanningTree.weight[i] /= k;
-        }
         StretchResult blownUpStretch = Stretch.compute(blownUpGraph, spanningTree, offEdges);
-
         GraphUtils.reciprocateWeights(blownUpGraph);
 
         //Expect to grab q = O(m / log(m)) edges
@@ -213,7 +218,7 @@ public class KMPSolver extends Solver {
             if (u == spanningTree.root) continue;
             sparsifierEdges.u[index] = u;
             sparsifierEdges.v[index] = spanningTree.parent[u];
-            sparsifierEdges.weight[index] = spanningTree.weight[u] * k;
+            sparsifierEdges.weight[index] = 1 / (spanningTree.weight[u] * k);
             index++;
         }
 
@@ -238,40 +243,23 @@ public class KMPSolver extends Solver {
     public static Graph blowUpTreeEdges(Graph graph, Tree spanningTree, double k) {
         Graph auxGraph = new Graph(graph);
 
-        for (int u = 0; u < auxGraph.nv; u++)
+        // blow up in graph
+        for (int u = 0; u < auxGraph.nv; u++) {
             for (int i = 0; i < auxGraph.deg[u]; i++) {
                 int v = auxGraph.nbrs[u][i];
 
-                if (spanningTree.parent[u] == v || spanningTree.parent[v] == u)
+                if (spanningTree.parent[u] == v || spanningTree.parent[v] == u) {
                     auxGraph.weights[u][i] *= k;
+                }
             }
+        }
+
+        // blow up in tree
+        for (int i = 0; i < spanningTree.nv; i++) {
+            spanningTree.weight[i] /= k;
+        }
 
         return auxGraph;
-    }
-
-    //Construct the graph for the next step of the recursion
-    public static Graph buildReducedSparsifier(Graph graph, AnswerPair gvr, ReturnPair ldl) {
-        ldl.D = GraphUtils.sanitizeEdgeList(ldl.D);
-        ArrayList<Integer> edgesToAdd = new ArrayList<>();
-
-        int index = 0;
-        for (int i = 0; i < ldl.D.ne; i++) {
-            if (ldl.D.u[i] >= ldl.D.v[i]) continue;
-            if (ldl.D.u[i] >= gvr.numRemoved && ldl.D.v[i] >= gvr.numRemoved) {
-                edgesToAdd.add(i);
-            }
-        }
-
-        EdgeList reducedSparsifierEdges = new EdgeList(edgesToAdd.size());
-
-        for (int i : edgesToAdd) {
-            reducedSparsifierEdges.u[index] = ldl.D.u[i] - gvr.numRemoved;
-            reducedSparsifierEdges.v[index] = ldl.D.v[i] - gvr.numRemoved;
-            reducedSparsifierEdges.weight[index] = -ldl.D.weight[i];
-            index++;
-        }
-
-        return new Graph(reducedSparsifierEdges);
     }
 
     public static void checkSparsifier(Graph G, Graph H) {
