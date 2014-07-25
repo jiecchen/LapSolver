@@ -21,31 +21,55 @@ public class ConjugateGradientSolver extends Solver {
 
     public int maxIters;
     public double tolerance;
+    public boolean watch;
 
+    // state variables for PCG iterations
     public double[] r;
     public double[] z;
     public double[] p;
     public double[] x;
 
+    // introspection state
+    public double[] watchNorms; // |Lx - b| at each step
+    public int watchIters; // how many iterations actually occurred?
+
     /**
      * Standard constructor.
-     * @param preconditioner
-     * @param maxIters
-     * @param tolerance
+     * @param preconditioner The preconditioner M^(-1).
+     * @param maxIters The number of iterations at which to terminate, regardless of residual norm.
+     * @param tolerance The termination threshold for residual norm.
+     * @param watch Do we record norms for posterity?
      */
-    public ConjugateGradientSolver(Solver preconditioner, int maxIters, double tolerance) {
+    public ConjugateGradientSolver(Solver preconditioner, int maxIters, double tolerance, boolean watch) {
         this.preconditioner = preconditioner;
         this.maxIters = maxIters;
         this.tolerance = tolerance;
+        this.watch = watch;
+
+        if (watch) {
+            this.watchNorms = new double[maxIters];
+        }
+    }
+
+    /**
+     * Constructor with no preconditioner and no introspection.
+     */
+    public ConjugateGradientSolver(int maxIters, double tolerance) {
+        this (null, maxIters, tolerance, false);
+    }
+
+    /**
+     * Constructor with preconditioner but no introspection.
+     */
+    public ConjugateGradientSolver(Solver preconditioner, int maxIters, double tolerance) {
+        this (preconditioner, maxIters, tolerance, false);
     }
 
     /**
      * Constructor with no preconditioner.
-     * @param maxIters
-     * @param tolerance
      */
-    public ConjugateGradientSolver(int maxIters, double tolerance) {
-        this (null, maxIters, tolerance);
+    public ConjugateGradientSolver(int maxIters, double tolerance, boolean watch) {
+        this (null, maxIters, tolerance, watch);
     }
 
     @Override
@@ -82,6 +106,8 @@ public class ConjugateGradientSolver extends Solver {
         System.arraycopy(z, 0, p, 0, graph.nv);
 
         for (int iter = 0; iter < maxIters; iter++) {
+            watchIters = iter + 1;
+
             // alpha = (r dot z) / (p dot Ap)
             double[] ap = operator.apply(p);
             double alpha = LinearAlgebraUtils.dot(r, z) / LinearAlgebraUtils.dot(p, ap);
@@ -100,8 +126,11 @@ public class ConjugateGradientSolver extends Solver {
             }
 
             // if residual is small enough, return x
-            if (LinearAlgebraUtils.norm(r) < tolerance) {
-//                System.out.println("PCG: converged on " + iter);
+            double residualNorm = LinearAlgebraUtils.norm(r);
+            if (watch) {
+                watchNorms[iter] = residualNorm;
+            }
+            if (residualNorm < tolerance) {
                 return x;
             }
 
@@ -112,7 +141,7 @@ public class ConjugateGradientSolver extends Solver {
                 z = preconditioner.apply(r);
 
             // beta = (z dot r) / (oldz dot oldr)
-            double beta = LinearAlgebraUtils.dot(z  , r) / beta_denom;
+            double beta = LinearAlgebraUtils.dot(z, r) / beta_denom;
 
             // p = z + beta*p
             for (int i = 0; i < graph.nv; i++) {

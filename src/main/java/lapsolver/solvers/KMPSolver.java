@@ -13,10 +13,13 @@ import lapsolver.EdgeList;
 import lapsolver.Graph;
 import lapsolver.Tree;
 import lapsolver.algorithms.GraphVertexRemoval;
+import lapsolver.algorithms.HighStretchSampler;
 import lapsolver.algorithms.LDLDecomposition;
 import lapsolver.algorithms.Stretch;
 import lapsolver.lsst.SpanningTreeStrategy;
+import lapsolver.lsst.StarDecompositionTree;
 import lapsolver.util.GraphUtils;
+import lapsolver.util.LinearAlgebraUtils;
 import lapsolver.util.TreeUtils;
 
 import java.util.ArrayList;
@@ -29,7 +32,12 @@ import static lapsolver.algorithms.Stretch.StretchResult;
 public class KMPSolver extends Solver {
     public SpanningTreeStrategy treeStrategy;
     public Solver baseCaseSolver;
-    public KMPSolver sparsifiedSolver;
+
+    public KMPSolver childSolver;
+    public ConjugateGradientSolver recursiveSolver;
+    public double tolerance;
+    public int maxIters;
+    public boolean watch;
 
     public Graph reducedGraph;
     public double[] reducedD, ldlDiag;
@@ -41,34 +49,51 @@ public class KMPSolver extends Solver {
     public int[] gvrInversePerm;
 
     // Initialize solver with a spanning tree strategy and a solver to run at the bottom level
-    public KMPSolver(SpanningTreeStrategy treeStrategy, Solver baseCaseSolver) {
+    public KMPSolver(SpanningTreeStrategy treeStrategy, Solver baseCaseSolver, int maxIters, double tolerance, boolean watch) {
         this.treeStrategy = treeStrategy;
         this.baseCaseSolver = baseCaseSolver;
+        this.maxIters = maxIters;
+        this.tolerance = tolerance;
+        this.watch = watch;
     }
 
-    // Use PCGSolver as default
-    public KMPSolver(SpanningTreeStrategy spanningTreeStrategy) {
-        this(spanningTreeStrategy, new ConjugateGradientSolver(1000, 1e-8));
+    // Use PCG and StarDecompositionTree strategies
+    public KMPSolver(int maxIters, double tolerance, boolean watch) {
+        this(new StarDecompositionTree(), new ConjugateGradientSolver(100, 1e-12), maxIters, tolerance, watch);
     }
 
-    public void init(Graph graph, double[] d) {
-        System.out.println("INIT " + graph.nv + " " + graph.ne);
+    // vanilla default parameters
+    public KMPSolver() {
+        this(new StarDecompositionTree(), new ConjugateGradientSolver(100, 1e-12), 1000, 1e-8, false);
+    }
+
+    public void init(Graph graph, double[] d, int maxLevels) {
+        if (watch) {
+            System.out.println("INIT: n=" + graph.nv + ", m=" + graph.ne);
+        }
 
         this.graph = graph;
         this.d = d;
 
-        if (graph.nv < 500) {
-            sparsifiedSolver = null;
-            baseCaseSolver.init(graph, d);
-        } else {
-            eliminate();
+        eliminate();
 
+        if (maxLevels == 1 || reducedGraph.nv < 500) {
+            childSolver = null;
+            baseCaseSolver.init(reducedGraph, reducedD);
+        } else {
             spanningTree = treeStrategy.getTree(reducedGraph);
             sparsifier = sparsify(reducedGraph, spanningTree);
 
-            sparsifiedSolver = new KMPSolver(treeStrategy, baseCaseSolver);
-            sparsifiedSolver.init(sparsifier, reducedD);
+            childSolver = new KMPSolver(treeStrategy, baseCaseSolver, 5, 0, false);
+            childSolver.init(sparsifier, reducedD, maxLevels - 1);
+
+            recursiveSolver = new ConjugateGradientSolver(childSolver, maxIters, tolerance, watch);
+            recursiveSolver.init(reducedGraph, reducedD);
         }
+    }
+
+    public void init(Graph graph, double[] d) {
+        init(graph, d, -1);
     }
 
     // eliminate low-degree vertices
@@ -82,7 +107,7 @@ public class KMPSolver extends Solver {
         }
 
         Graph permutedGraph = GraphUtils.permuteGraph(graph, gvrPair.permutation);
-        double[] permutedDiag = applyPerm(gvrPair.permutation, d);
+        double[] permutedDiag = LinearAlgebraUtils.applyPerm(gvrPair.permutation, d);
 
         // perform elimination
         LDLDecomposition ldl = new LDLDecomposition(permutedGraph, permutedDiag);
@@ -103,23 +128,21 @@ public class KMPSolver extends Solver {
     }
 
     public double[] solve(double[] b) {
-//        System.out.println("SOLVE " + graph.nv + " " + graph.ne);
+//        System.out.println("SOLVE: n=" + graph.nv + ", m=" + graph.ne);
 
-        if (sparsifiedSolver == null) {
-            // we are at the bottom level
-            return baseCaseSolver.solve(b);
-        }
-
-//        double[] outerB = LDLDecomposition.applyLInv(ldlPair.L, applyPerm(gvrPair.permutation, b));
-        double[] outerB = ldlPair.L.applyLInv(applyPerm(gvrPair.permutation, b));
+        double[] outerB = ldlPair.L.applyLInv(LinearAlgebraUtils.applyPerm(gvrPair.permutation, b));
         double[] innerB = new double[reducedGraph.nv];
         System.arraycopy(outerB, gvrPair.numRemoved, innerB, 0, innerB.length);
 
-        ConjugateGradientSolver innerPCG = new ConjugateGradientSolver(sparsifiedSolver, 1000, 1e-10);
-        // ConjugateGradientSolver innerPCG = new ConjugateGradientSolver(null, 1000, 1e-2);
-        innerPCG.init(reducedGraph, reducedD);
-        double[] innerX = innerPCG.solve(innerB);
+        double[] innerX;
 
+        if (childSolver == null) {
+            // we are at the bottom level
+            innerX = baseCaseSolver.solve(innerB);
+        }
+        else {
+            innerX = recursiveSolver.solve(innerB);
+        }
 
         double[] outerX = new double[graph.nv];
 
@@ -127,17 +150,7 @@ public class KMPSolver extends Solver {
             outerX[i] = outerB[i] / ldlDiag[i];
         System.arraycopy(innerX, 0, outerX, gvrPair.numRemoved, graph.nv - gvrPair.numRemoved);
 
-//        return applyPerm(gvrInversePerm, LDLDecomposition.applyLTransInv(ldlPair.L, outerX));
-        return applyPerm(gvrInversePerm, ldlPair.L.applyLTransInv(outerX));
-    }
-
-    public static double[] applyPerm(int[] perm, double[] x) {
-        double[] answer = new double[perm.length];
-
-        for (int i = 0; i < x.length; i++)
-            answer[i] = x[perm[i]];
-
-        return answer;
+        return LinearAlgebraUtils.applyPerm(gvrInversePerm, ldlPair.L.applyLTransInv(outerX));
     }
 
     //Construct a preconditioner for graph
@@ -155,6 +168,8 @@ public class KMPSolver extends Solver {
         double k = 4. * (stretch.total / (offEdges.ne + 1) * (Math.log(graph.nv) + 1)) *
                 (stretch.total / (offEdges.ne + 1) * (Math.log(graph.nv) + 1)) + 1;
 
+        k = 1;
+
         Graph blownUpGraph = blowUpTreeEdges(graph, spanningTree, k);
 
         // find stretches in blown-up graph
@@ -164,13 +179,10 @@ public class KMPSolver extends Solver {
         }
         StretchResult blownUpStretch = Stretch.compute(blownUpGraph, spanningTree, offEdges);
 
-        System.out.println("Old: " + stretch.total + ", New: " + blownUpStretch.total);
-
         GraphUtils.reciprocateWeights(blownUpGraph);
 
         //Expect to grab q = O(m / log(m)) edges
-        double q = 10. * graph.ne / Math.log(graph.ne) / Math.log(graph.ne);
-        System.out.println("Expect to grab q = " + q + " edges.");
+        double q = 10. * graph.ne / Math.pow( Math.log(graph.ne), 2 );
 
         //Assign p_e = stretch(e) / (total stretch)
         double[] p = blownUpStretch.allStretches.clone();
@@ -178,6 +190,10 @@ public class KMPSolver extends Solver {
             p[i] = q * p[i] / blownUpStretch.total;
             if (p[i] > 1) p[i] = 1;
         }
+
+        //nope. sample n/4 edges deterministically
+        q = graph.nv / 4;
+        p = HighStretchSampler.compute(blownUpStretch.allStretches, (int)q);
 
         //Sample the edges
         ArrayList<Integer> edgesToAdd = new ArrayList<>();
@@ -205,11 +221,14 @@ public class KMPSolver extends Solver {
         for (int i : edgesToAdd) {
             sparsifierEdges.u[index] = offEdges.u[i];
             sparsifierEdges.v[index] = offEdges.v[i];
-            sparsifierEdges.weight[index] = offEdges.weight[i] / p[i];
+            sparsifierEdges.weight[index] = offEdges.weight[i];// / p[i];
             index++;
         }
 
-        checkSparsifier(graph, new Graph(sparsifierEdges));
+        System.out.println("Stretch: " + stretch.total + " -> " + blownUpStretch.total);
+        System.out.println("E[q] = " + q + ", q = " + edgesToAdd.size());
+
+        // checkSparsifier(graph, new Graph(sparsifierEdges));
 
         //Build sparsified graph
         return new Graph(sparsifierEdges);

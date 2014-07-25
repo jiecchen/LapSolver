@@ -15,7 +15,7 @@ public class GraphOperators {
     public static LinearOperator laplacian(final Graph graphIn, final double[] dIn) {
         return new LinearOperator() {
             Graph graph = new Graph(graphIn);
-            double[] d = dIn.clone();
+            double[] d = dIn == null ? null : dIn.clone();
             @Override
             public double[] apply (double[] x) {
                 return applyLaplacian(graph, d, x);
@@ -24,13 +24,7 @@ public class GraphOperators {
     }
 
     public static LinearOperator laplacian(final Graph graphIn) {
-        return new LinearOperator() {
-            Graph graph = new Graph(graphIn);
-            @Override
-            public double[] apply (double[] x) {
-                return applyLaplacian(graph, x, null);
-            }
-        };
+        return laplacian(graphIn, null);
     }
 
     // apply the Laplacian matrix of a graph to a vector

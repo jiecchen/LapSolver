@@ -7,9 +7,12 @@ function [x, errs] = incrwatch(a, b, niters)
         niters = 10; 
     end
     
-    solver = KelnerSolver(StarDecompositionTree);
+    % solver = KelnerSolver(StarDecompositionTree);
+    solver = KMPSolver(StarDecompositionTree);
+    d = ones(length(a),1);
+    
     incrsolver = IncrementalSolver(solver, niters);
-    incrsolver.init(a2g(a));
+    incrsolver.init(a2g(a), d);
 
     incrsolver.solve_init(b);
     errs = zeros(niters,1);

@@ -126,16 +126,20 @@ public class SolverWrapper extends Solver {
         else if (d == null) {
             // recover Laplacian solution from positive definite
             double[] x = new double[graph.nv];
-            double sum = 0;
+            double mean = 0;
 
             // copy entries except last
             for (int i = 0; i < graph.nv-1; i++) {
                 x[i] = x_sys[i];
-                sum += x[i];
+                mean += x[i];
             }
 
+            mean /= graph.nv;
+
             // set last entry to make sum 0
-            x[graph.nv] = -sum;
+            for (int i = 0; i < graph.nv; i++) {
+                x[i] -= mean;
+            }
 
             return x;
         }

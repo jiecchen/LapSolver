@@ -14,6 +14,7 @@ package lapsolver.solvers;
 
 import lapsolver.EdgeList;
 import lapsolver.Graph;
+import lapsolver.util.LinearAlgebraUtils;
 
 public class NormalizedSolver extends Solver {
     public Solver solver;
@@ -29,21 +30,14 @@ public class NormalizedSolver extends Solver {
             throw new IllegalArgumentException("NormalizedSolver only solves singular Laplacian systems");
         }
 
-        // precompute D^(1/2) diagonal entries
+        // precompute d^(1/2)
         sqrtDeg = new double[graph.nv];
-        double sqrtDegNorm = 0;
-
         for (int i = 0; i < graph.nv; i++) {
             sqrtDeg[i] = Math.sqrt( graph.deg[i] );
-            sqrtDegNorm += graph.deg[i];
         }
 
-        sqrtDegNorm = Math.sqrt(sqrtDegNorm);
-
-        // precompute normalized d^(1/2)
-        for (int i = 0; i < graph.nv; i++) {
-            unitSqrtDeg[i] = sqrtDeg[i] / sqrtDegNorm;
-        }
+        unitSqrtDeg = sqrtDeg.clone();
+        LinearAlgebraUtils.normalize(unitSqrtDeg);
 
         // initialize wrapped solver
         this.graph = graph;
@@ -56,7 +50,7 @@ public class NormalizedSolver extends Solver {
         applyProjection(b_lap);
         applyDiagonal(b_lap);
 
-        double[] x = solver.solve(b);
+        double[] x = solver.solve(b_lap);
         applyDiagonal(x);
         applyProjection(x);
 
@@ -68,10 +62,7 @@ public class NormalizedSolver extends Solver {
      * @param v The vector to be projected.
      */
     public void applyProjection(double[] v) {
-        double dot = 0;
-        for (int i = 0; i < graph.nv; i++) {
-            dot += v[i] * unitSqrtDeg[i];
-        }
+        double dot = LinearAlgebraUtils.dot(v, unitSqrtDeg);
 
         for (int i = 0; i < graph.nv; i++) {
             v[i] -= dot * unitSqrtDeg[i];
