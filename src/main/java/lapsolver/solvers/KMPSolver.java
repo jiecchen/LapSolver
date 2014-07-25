@@ -68,9 +68,7 @@ public class KMPSolver extends Solver {
     }
 
     public void init(Graph graph, double[] d, int maxLevels) {
-        if (watch) {
-            System.out.println("INIT: n=" + graph.nv + ", m=" + graph.ne);
-        }
+        System.out.println("INIT: n=" + graph.nv + ", m=" + graph.ne);
 
         this.graph = graph;
         this.d = d;
@@ -127,12 +125,12 @@ public class KMPSolver extends Solver {
         // get new graph + diag from LDL
         reducedGraph = LDLDecomposition.getReducedGraph(ldlPair.D, gvrPair.numRemoved);
         reducedD = new double[reducedGraph.nv];
-        System.arraycopy(ldlDiag, gvrPair.numRemoved, reducedD, 0, graph.nv - gvrPair.numRemoved);
 
-        // turn ldlDiag into excess diagonals
+        // compute excess diagonals
+        System.arraycopy(ldlDiag, gvrPair.numRemoved, reducedD, 0, graph.nv - gvrPair.numRemoved);
         for (int u = 0; u < reducedGraph.nv; u++) {
             for (int i = 0; i < reducedGraph.deg[u]; i++) {
-                ldlDiag[gvrPair.numRemoved + u] -= reducedGraph.weights[u][i];
+                reducedD[u] -= reducedGraph.weights[u][i];
             }
         }
     }
@@ -156,8 +154,10 @@ public class KMPSolver extends Solver {
 
         double[] outerX = new double[graph.nv];
 
-        for (int i = 0; i < gvrPair.numRemoved; i++)
+        for (int i = 0; i < gvrPair.numRemoved; i++) {
             outerX[i] = outerB[i] / ldlDiag[i];
+        }
+
         System.arraycopy(innerX, 0, outerX, gvrPair.numRemoved, graph.nv - gvrPair.numRemoved);
 
         return LinearAlgebraUtils.applyPerm(gvrInversePerm, ldlPair.L.applyLTransInv(outerX));
@@ -197,8 +197,8 @@ public class KMPSolver extends Solver {
         }
 
         //nope. sample n/4 edges deterministically
-        q = graph.nv / 4;
-        p = HighStretchSampler.compute(blownUpStretch.allStretches, (int)q);
+         q = graph.nv / 4;
+         p = HighStretchSampler.compute(blownUpStretch.allStretches, (int)q);
 
         //Sample the edges
         ArrayList<Integer> edgesToAdd = new ArrayList<>();
