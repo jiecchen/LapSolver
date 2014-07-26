@@ -11,6 +11,7 @@ import lapsolver.algorithms.LDLDecomposition;
 import lapsolver.algorithms.Stretch;
 import lapsolver.lsst.SpanningTreeStrategy;
 import lapsolver.util.GraphUtils;
+import lapsolver.util.LinearAlgebraUtils;
 import lapsolver.util.TreeUtils;
 
 import java.util.ArrayList;
@@ -27,11 +28,12 @@ public class KMP2Solver extends Solver {
     private static final double Cs = 10.0;
     private static final int cStop = 500;
     private static final double kappaC = 2;
-    private static final double tolerance = 1e-10;
-    private static final int maxIters = 1000;
-    private static final Solver baseCaseSolver = new ConjugateGradientSolver(maxIters, 1e-8);
+    private static final double tolerance = 1e-14;
+    private static final int maxIters = 100;
+    private static final int minIters = 50;
     private final SpanningTreeStrategy treeStrategy;
     public List<ChainEntry> chain;
+    private int[] iterations;
 
     public KMP2Solver(SpanningTreeStrategy strategy) {
         treeStrategy = strategy;
@@ -57,12 +59,13 @@ public class KMP2Solver extends Solver {
         Graph g1 = new Graph(graph);
 
         // T = LowStretchTree(G)
+        GraphUtils.reciprocateWeights(graph);
         Tree t = treeStrategy.getTree(graph);
+        GraphUtils.reciprocateWeights(graph);
 
         // G2 = H1 = G1 + O~(log^2 n)T
         Graph h1_g2 = new Graph(g1);
         double logSquaredFactor = Math.pow(Math.log(t.nv) * Math.log(Math.log(t.nv)), 2.0);
-        System.out.println("logSquaredFactor = " + logSquaredFactor);
         int[] parent = t.parent;
         for (int u = 0; u < parent.length; u++)
             if (u != t.parent[u])
@@ -147,6 +150,7 @@ public class KMP2Solver extends Solver {
         // Implementation step: need off-tree edges:
         final EdgeList offTreeEdges = TreeUtils.getOffTreeEdges(gPrime, tPrime);
 
+        // Sanity check
         System.out.printf("%f (new) == %f (old) with k = %f\n",
                           computeOffTreeStretch(gPrime, tPrime).total,
                           totalStretch / kap,
@@ -181,13 +185,15 @@ public class KMP2Solver extends Solver {
         AnswerPair gvr = new GraphVertexRemoval(graph).solve();
         Graph permutedGraph = GraphUtils.permuteGraph(graph, gvr.permutation);
 
-        deltaRef[0] = applyPerm(gvr.permutation, deltaRef[0]);
+        deltaRef[0] = LinearAlgebraUtils.applyPerm(gvr.permutation, deltaRef[0]);
         ReturnPair ldl = new LDLDecomposition(permutedGraph, deltaRef[0]).solve(gvr.numRemoved);
 
         Graph reducedGraph = LDLDecomposition.getReducedGraph(ldl.D, gvr.numRemoved);
 
 //        Tree permutedTree = TreeUtils.permuteTree(tree, gvr.permutation);
+        GraphUtils.reciprocateWeights(reducedGraph);
         Tree updatedTree = treeStrategy.getTree(reducedGraph);
+        GraphUtils.reciprocateWeights(reducedGraph);
 //        Tree updatedTree = updateTree(permutedGraph, permutedTree, gvr.numRemoved);
 
         deltaRef[0] = Arrays.copyOfRange(deltaRef[0], gvr.numRemoved, gvr.numRemoved + reducedGraph.nv);
@@ -202,7 +208,14 @@ public class KMP2Solver extends Solver {
         return result;
     }
 
-    public static StretchResult computeOffTreeStretch(Graph inG, Tree inT) {
+    /**
+     * Computes the off-tree stretch of the graph inG with respect to inT
+     *
+     * @param inG the graph containing the tree
+     * @param inT the tree whose stretch we want to compute
+     * @return the total stretch and individual edge stretches
+     */
+    private static StretchResult computeOffTreeStretch(Graph inG, Tree inT) {
         GraphUtils.reciprocateWeights(inG);
         for (int i = 0; i < inT.weight.length; i++) inT.weight[i] = 1 / inT.weight[i];
         StretchResult stretch = Stretch.compute(inG, inT, TreeUtils.getOffTreeEdges(inG, inT));
@@ -213,19 +226,14 @@ public class KMP2Solver extends Solver {
 
     /**
      * This is the SAMPLE procedure from KMP2.
-     * CORRECT. DO NOT CHANGE ME.
      *
      * @param edges The edges to sample
      * @param pp    The frequencies of each edge in edges. Indices must correspond to those in edges.
      * @return the chosen edges
      */
     private EdgeList sample(EdgeList edges, StretchResult pp) {
-        // Step 1:  t := \sum_e p'_e
-        double t = edges.ne;
+        final double q = Cs * edges.ne / Math.log(edges.ne) / Math.log(edges.ne);
 
-        final double q = Cs * t / Math.log(t) / Math.log(t);
-
-        // Step 3:  p_e := p'_e / t
         double[] p = new double[pp.allStretches.length];
         for (int i = 0; i < p.length; i++)
             p[i] = Math.min(1.0, q * pp.allStretches[i] / pp.total);
@@ -240,22 +248,12 @@ public class KMP2Solver extends Solver {
         EdgeList sampledEdges = new EdgeList(edgesToAdd.size());
         for (int i = 0; i < edgesToAdd.size(); i++) {
             int e = edgesToAdd.get(i);
-            // Step 7: Add sample of e, l to L_e with weight w'_l  = w_e / p_e
             sampledEdges.u[i] = edges.u[e];
             sampledEdges.v[i] = edges.v[e];
             sampledEdges.weight[i] = edges.weight[e] / p[e];
         }
 
         return sampledEdges;
-    }
-
-    private static double[] applyPerm(int[] perm, double[] x) {
-        double[] xPerm = new double[perm.length];
-
-        for (int i = 0; i < x.length; i++)
-            xPerm[i] = x[perm[i]];
-
-        return xPerm;
     }
 
     /**
@@ -316,7 +314,11 @@ public class KMP2Solver extends Solver {
 
     private double[] recSolve(double[] b, final List<ChainEntry> chain, final int level) {
         final ChainEntry current = chain.get(level);
+        int effectiveIters = iterations[level];
+//        System.out.printf("level = %d, iters = %d\n", level, effectiveIters);
+
         if (level == chain.size() - 1) {
+            Solver baseCaseSolver = new ConjugateGradientSolver(effectiveIters, tolerance);
             baseCaseSolver.init(current.graph, current.delta);
             return baseCaseSolver.solve(b);
         }
@@ -331,7 +333,11 @@ public class KMP2Solver extends Solver {
             }
 
             @Override public double[] solve(double[] b) {
-                double[] outerB = next.lMatrix.applyLInv(applyPerm(next.perm, b));
+//                if(level == 1) { // Bypass GVR
+//                    baseCaseSolver.init(graph, d);
+//                    return baseCaseSolver.solve(b);
+//                }
+                double[] outerB = next.lMatrix.applyLInv(LinearAlgebraUtils.applyPerm(next.perm, b));
                 double[] innerB = Arrays.copyOfRange(outerB, numRemoved, outerB.length);
                 double[] innerX = recSolve(innerB, chain, level + 1);
                 double[] outerX = new double[graph.nv];
@@ -340,19 +346,13 @@ public class KMP2Solver extends Solver {
                 System.arraycopy(innerX, 0, outerX, numRemoved, graph.nv - numRemoved);
                 int[] invPerm = new int[graph.nv];
                 for (int i = 0; i < graph.nv; i++) invPerm[next.perm[i]] = i;
-                return applyPerm(invPerm, next.lMatrix.applyLTransInv(outerX));
+                return LinearAlgebraUtils.applyPerm(invPerm, next.lMatrix.applyLTransInv(outerX));
             }
         };
         preconditioner.init(current.sparsifier, current.delta);
-        ConjugateGradientSolver pcg = new ConjugateGradientSolver(preconditioner, maxIters, tolerance);
+        ConjugateGradientSolver pcg = new ConjugateGradientSolver(preconditioner, effectiveIters, tolerance);
         pcg.init(current.graph, current.delta);
         return pcg.solve(b);
-    }
-
-    @Override
-    public double[] solve(double[] b) {
-        System.out.println("chain.size() = " + chain.size());
-        return recSolve(b, chain, 0);
     }
 
     public static class ChainEntry {
@@ -375,6 +375,17 @@ public class KMP2Solver extends Solver {
             this.delta = delta;
             for (int i = 0; i < perm.length; i++) perm[i] = i;
         }
+    }
+
+    @Override
+    public double[] solve(double[] b) {
+        System.out.println("chain.size() = " + chain.size());
+        iterations = new int[chain.size()];
+        for (int i = 0; i < iterations.length; i++) {
+            double t = -(chain.size() - 1) / Math.log((double) minIters / maxIters);
+            iterations[i] = (int) Math.round(maxIters * Math.exp(-i / t));
+        }
+        return recSolve(b, chain, 0);
     }
 
 

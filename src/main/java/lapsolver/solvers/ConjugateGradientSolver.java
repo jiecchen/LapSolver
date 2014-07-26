@@ -35,10 +35,11 @@ public class ConjugateGradientSolver extends Solver {
 
     /**
      * Standard constructor.
+     *
      * @param preconditioner The preconditioner M^(-1).
-     * @param maxIters The number of iterations at which to terminate, regardless of residual norm.
-     * @param tolerance The termination threshold for residual norm.
-     * @param watch Do we record norms for posterity?
+     * @param maxIters       The number of iterations at which to terminate, regardless of residual norm.
+     * @param tolerance      The termination threshold for residual norm.
+     * @param watch          Do we record norms for posterity?
      */
     public ConjugateGradientSolver(Solver preconditioner, int maxIters, double tolerance, boolean watch) {
         this.preconditioner = preconditioner;
@@ -55,25 +56,25 @@ public class ConjugateGradientSolver extends Solver {
      * Constructor with no preconditioner and no introspection.
      */
     public ConjugateGradientSolver(int maxIters, double tolerance) {
-        this (null, maxIters, tolerance, false);
+        this(null, maxIters, tolerance, false);
     }
 
     /**
      * Constructor with preconditioner but no introspection.
      */
     public ConjugateGradientSolver(Solver preconditioner, int maxIters, double tolerance) {
-        this (preconditioner, maxIters, tolerance, false);
+        this(preconditioner, maxIters, tolerance, false);
     }
 
     /**
      * Constructor with no preconditioner.
      */
     public ConjugateGradientSolver(int maxIters, double tolerance, boolean watch) {
-        this (null, maxIters, tolerance, watch);
+        this(null, maxIters, tolerance, watch);
     }
 
     @Override
-    public void init (Graph graph, double[] d) {
+    public void init(Graph graph, double[] d) {
         this.graph = graph;
         this.d = d;
 
@@ -87,7 +88,7 @@ public class ConjugateGradientSolver extends Solver {
     }
 
     @Override
-    public double[] solve (double[] b) {
+    public double[] solve(double[] b) {
         // x0 = 0
         Arrays.fill(x, 0);
 
@@ -97,8 +98,7 @@ public class ConjugateGradientSolver extends Solver {
         // z0 = P * r0
         if (preconditioner == null) {
             System.arraycopy(r, 0, z, 0, graph.nv);
-        }
-        else {
+        } else {
             z = preconditioner.apply(r);
         }
 
@@ -148,7 +148,7 @@ public class ConjugateGradientSolver extends Solver {
                 p[i] = z[i] + beta * p[i];
             }
         }
-        System.out.println("PCG: defaulted");
+//        System.out.println("PCG: defaulted");
         return x;
     }
 

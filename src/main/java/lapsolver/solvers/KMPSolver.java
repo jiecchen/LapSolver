@@ -62,6 +62,10 @@ public class KMPSolver extends Solver {
         this(new StarDecompositionTree(), new ConjugateGradientSolver(100, 1e-14), maxIters, tolerance, watch);
     }
 
+    public KMPSolver(SpanningTreeStrategy strat) {
+        this(strat, new ConjugateGradientSolver(100, 1e-14), 1000, 1e-8, false);
+    }
+
     // vanilla default parameters
     public KMPSolver() {
         this(new StarDecompositionTree(), new ConjugateGradientSolver(100, 1e-14), 1000, 1e-8, false);
