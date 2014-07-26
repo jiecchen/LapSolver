@@ -43,6 +43,7 @@ public class FractalGridGraph implements GraphFactory {
         for (int i = 0; i < u.length; i++) {
             edgeList.u[i] = u[i];
             edgeList.v[i] = v[i];
+            edgeList.weight[i] = 1;
         }
 
         return new Graph(edgeList);

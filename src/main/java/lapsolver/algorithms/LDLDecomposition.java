@@ -247,7 +247,7 @@ public class LDLDecomposition {
     }
 
     public static class LMatrix {
-        private EdgeList L;
+        public EdgeList L;
         private ArrayList<Integer> idxInv;
         private ArrayList<Integer> idxTransInv;
 
