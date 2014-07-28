@@ -12,7 +12,7 @@ function [x] = cgSolver(la,b,opts)
 
 default('b',[]);
 
-default('opts','tol',1e-6);
+default('opts','tol',1e-12);
 default('opts','maxit',1000);
 
 dd = diag(diag(la));
