@@ -127,8 +127,6 @@ public class LDLDecomposition {
     }
 
     public void removeDeg2Chain(int start, int stop, int outerStart, int outerStop) {
-        System.out.println("***** " + start + " " + stop);
-
         // outerValue is used to compute the L values of type (outerStart, u)
         double outerValue = -1;
         for (int i = 0; i < graph.deg[start]; i++)
