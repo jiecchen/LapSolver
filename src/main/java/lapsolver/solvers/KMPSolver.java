@@ -89,7 +89,7 @@ public class KMPSolver extends Solver {
 
             sparsifier = sparsify(reducedGraph, spanningTree);
 
-            childSolver = new KMPSolver(treeStrategy, baseCaseSolver, 5, 0, false);
+            childSolver = new KMPSolver(treeStrategy, baseCaseSolver, 20, 0, false);
             childSolver.init(sparsifier, reducedD, maxLevels - 1);
 
             recursiveSolver = new ConjugateGradientSolver(childSolver, maxIters, tolerance, watch);

@@ -18,7 +18,7 @@ function compLDLmat(graph)
     
     ldl = LDLDecomposition(g, X);
     ldlAns = ldl.solve(numRemoved);
-    serbanL = full(e2mat(ldlAns.L));
+    serbanL = full(e2mat(ldlAns.L.L));
     serbanD = full(e2mat(ldlAns.D));
     
     la = full(lap(g2a(g)) + diag(X));
