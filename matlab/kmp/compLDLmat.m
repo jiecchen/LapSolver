@@ -6,6 +6,15 @@ function compLDLmat(graph)
     import lapsolver.util.*;
     import lapsolver.*;
 
+    % multiply edge waits by some random values
+    mat = g2a(graph);
+    [u,v,w] = find(mat);
+    for i = 1:length(w)
+        w(i) = w(i) * rand(1,1);
+    end
+    mat = sparse(u,v,w);
+    graph = a2g(mat);
+    
     n = graph.nv;
 %    lagraph = full(lap(g2a(graph)));
     X = rand(1,n);
