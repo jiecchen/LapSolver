@@ -49,6 +49,9 @@ public class KMPSolver extends Solver {
     public ReturnPair ldlPair;
     public int[] gvrInversePerm;
 
+    public double oversampleScale = 10;
+    public double oversampleLogExponent = 2;
+
     // Initialize solver with a spanning tree strategy and a solver to run at the bottom level
     public KMPSolver(SpanningTreeStrategy treeStrategy, Solver baseCaseSolver, int maxIters, double tolerance, boolean watch) {
         this.treeStrategy = treeStrategy;
@@ -169,7 +172,7 @@ public class KMPSolver extends Solver {
     }
 
     //Construct a preconditioner for graph
-    public static Graph sparsify(Graph graph, Tree spanningTree) {
+    public Graph sparsify(Graph graph, Tree spanningTree) {
         EdgeList offEdges;
 
         //Get off-tree edges, find stretches
@@ -192,7 +195,7 @@ public class KMPSolver extends Solver {
         GraphUtils.reciprocateWeights(blownUpGraph);
 
         //Expect to grab q = O(m / log(m)) edges
-        double q = 50. * graph.ne / Math.pow( Math.log(graph.ne), 2 );
+        double q = oversampleScale * graph.ne / Math.pow( Math.log(graph.ne), oversampleLogExponent );
 
         //Assign p_e = stretch(e) / (total stretch)
         double[] p = blownUpStretch.allStretches.clone();
