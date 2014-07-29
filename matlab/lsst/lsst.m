@@ -1,5 +1,9 @@
 function [t, avgst] = lsst(g, strat)
-%LSST Gets a low-stretch spanning tree and its average edge stretch.
+%LSST Gets a low-stretch spanning tree and its average stretch.
+% t = the Tree object
+% avgst = average stretch
+% g = graph or adjacency matrix
+% strat = spanning tree strategy, default StarDecompositionTree
     import lapsolver.algorithms.*;
     import lapsolver.lsst.*;
     import lapsolver.util.*;
