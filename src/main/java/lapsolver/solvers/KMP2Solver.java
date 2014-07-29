@@ -27,10 +27,10 @@ import static lapsolver.algorithms.Stretch.StretchResult;
 public class KMP2Solver extends Solver {
     private static final double Cs = 10.0;
     private static final int cStop = 500;
-    private static final double kappaC = 2;
+    private static final double kappaC = 50.0;
     private static final double tolerance = 1e-14;
     private static final int maxIters = 100;
-    private static final int minIters = 50;
+    private static final int minIters = 5;
     private final SpanningTreeStrategy treeStrategy;
     public List<ChainEntry> chain;
     private int[] iterations;
@@ -59,9 +59,7 @@ public class KMP2Solver extends Solver {
         Graph g1 = new Graph(graph);
 
         // T = LowStretchTree(G)
-        GraphUtils.reciprocateWeights(graph);
         Tree t = treeStrategy.getTree(graph);
-        GraphUtils.reciprocateWeights(graph);
 
         // G2 = H1 = G1 + O~(log^2 n)T
         Graph h1_g2 = new Graph(g1);
@@ -191,9 +189,7 @@ public class KMP2Solver extends Solver {
         Graph reducedGraph = LDLDecomposition.getReducedGraph(ldl.D, gvr.numRemoved);
 
 //        Tree permutedTree = TreeUtils.permuteTree(tree, gvr.permutation);
-        GraphUtils.reciprocateWeights(reducedGraph);
         Tree updatedTree = treeStrategy.getTree(reducedGraph);
-        GraphUtils.reciprocateWeights(reducedGraph);
 //        Tree updatedTree = updateTree(permutedGraph, permutedTree, gvr.numRemoved);
 
         deltaRef[0] = Arrays.copyOfRange(deltaRef[0], gvr.numRemoved, gvr.numRemoved + reducedGraph.nv);
@@ -205,6 +201,12 @@ public class KMP2Solver extends Solver {
         for (int i = 0; i < ldl.D.ne; i++)
             if (ldl.D.u[i] == ldl.D.v[i])
                 result.diag[ldl.D.u[i]] += ldl.D.weight[i];
+
+        System.arraycopy(result.diag, gvr.numRemoved, deltaRef[0], 0, graph.nv - gvr.numRemoved);
+        for (int u = 0; u < reducedGraph.nv; u++)
+            for (int i = 0; i < reducedGraph.deg[u]; i++)
+                deltaRef[0][u] -= reducedGraph.weights[u][i];
+
         return result;
     }
 
@@ -315,7 +317,6 @@ public class KMP2Solver extends Solver {
     private double[] recSolve(double[] b, final List<ChainEntry> chain, final int level) {
         final ChainEntry current = chain.get(level);
         int effectiveIters = iterations[level];
-//        System.out.printf("level = %d, iters = %d\n", level, effectiveIters);
 
         if (level == chain.size() - 1) {
             Solver baseCaseSolver = new ConjugateGradientSolver(effectiveIters, tolerance);
