@@ -192,7 +192,7 @@ public class KMPSolver extends Solver {
         GraphUtils.reciprocateWeights(blownUpGraph);
 
         //Expect to grab q = O(m / log(m)) edges
-        double q = 10. * graph.ne / Math.pow( Math.log(graph.ne), 2 );
+        double q = 50. * graph.ne / Math.pow( Math.log(graph.ne), 2 );
 
         //Assign p_e = stretch(e) / (total stretch)
         double[] p = blownUpStretch.allStretches.clone();
