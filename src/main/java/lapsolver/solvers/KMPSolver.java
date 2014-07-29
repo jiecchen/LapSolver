@@ -18,6 +18,7 @@ import lapsolver.algorithms.LDLDecomposition;
 import lapsolver.algorithms.Stretch;
 import lapsolver.lsst.SpanningTreeStrategy;
 import lapsolver.lsst.StarDecompositionTree;
+import lapsolver.lsst.SimulPathTree;
 import lapsolver.util.GraphUtils;
 import lapsolver.util.LinearAlgebraUtils;
 import lapsolver.util.TreeUtils;
@@ -57,9 +58,9 @@ public class KMPSolver extends Solver {
         this.watch = watch;
     }
 
-    // Use PCG and StarDecompositionTree strategies
+    // Use PCG and SimulPathTree strategies
     public KMPSolver(int maxIters, double tolerance, boolean watch) {
-        this(new StarDecompositionTree(), new ConjugateGradientSolver(100, 1e-14), maxIters, tolerance, watch);
+        this(new SimulPathTree(), new ConjugateGradientSolver(100, 1e-14), maxIters, tolerance, watch);
     }
 
     public KMPSolver(SpanningTreeStrategy strat) {
@@ -68,7 +69,7 @@ public class KMPSolver extends Solver {
 
     // vanilla default parameters
     public KMPSolver() {
-        this(new StarDecompositionTree(), new ConjugateGradientSolver(100, 1e-14), 1000, 1e-8, false);
+        this(new SimulPathTree(), new ConjugateGradientSolver(100, 1e-14), 1000, 1e-8, false);
     }
 
     public void init(Graph graph, double[] d, int maxLevels) {
