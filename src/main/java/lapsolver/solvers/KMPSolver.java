@@ -76,14 +76,18 @@ public class KMPSolver extends Solver {
     }
 
     public void init(Graph graph, double[] d, int maxLevels) {
-        System.out.println("INIT: n=" + graph.nv + ", m=" + graph.ne);
+        System.out.printf("(%d, %d)", graph.nv, graph.ne);
 
         this.graph = graph;
         this.d = d;
 
         eliminate();
 
+        System.out.printf(" => (%d, %d)", reducedGraph.nv, reducedGraph.ne);
+
         if (maxLevels == 1 || reducedGraph.nv < 500) {
+            System.out.println();
+
             childSolver = null;
             baseCaseSolver.init(reducedGraph, reducedD);
         } else {
@@ -92,6 +96,8 @@ public class KMPSolver extends Solver {
             GraphUtils.reciprocateWeights(reducedGraph);
 
             sparsifier = sparsify(reducedGraph, spanningTree);
+
+            System.out.printf(" ~> ");
 
             childSolver = new KMPSolver(treeStrategy, baseCaseSolver, 5, 0, false);
             childSolver.init(sparsifier, reducedD, maxLevels - 1);
@@ -238,8 +244,8 @@ public class KMPSolver extends Solver {
             index++;
         }
 
-        System.out.println("Stretch: " + stretch.total + " -> " + blownUpStretch.total);
-        System.out.println("E[q] = " + q + ", q = " + edgesToAdd.size());
+        // System.out.println("Stretch: " + stretch.total + " -> " + blownUpStretch.total);
+        // System.out.println("E[q] = " + q + ", q = " + edgesToAdd.size());
 
         // checkSparsifier(graph, new Graph(sparsifierEdges));
 
