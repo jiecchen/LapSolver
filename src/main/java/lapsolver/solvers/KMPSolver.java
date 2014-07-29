@@ -202,8 +202,8 @@ public class KMPSolver extends Solver {
         }
 
         //nope. sample n/4 edges deterministically
-         q = graph.nv / 4;
-         p = HighStretchSampler.compute(blownUpStretch.allStretches, (int)q);
+        //q = graph.nv / 4;
+        //p = HighStretchSampler.compute(blownUpStretch.allStretches, (int)q);
 
         //Sample the edges
         ArrayList<Integer> edgesToAdd = new ArrayList<>();
