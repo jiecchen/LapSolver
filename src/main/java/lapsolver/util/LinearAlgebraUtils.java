@@ -71,12 +71,23 @@ public class LinearAlgebraUtils {
          return res;
      }
 
-    public static double[] applyPerm(int[] perm, double[] x) {
-        double[] answer = new double[perm.length];
-
+    /**
+     * Permutes a list of integers.
+     */
+    public static int[] applyPerm(int[] perm, int[] x) {
+        int[] answer = new int[perm.length];
         for (int i = 0; i < x.length; i++)
             answer[i] = x[perm[i]];
+        return answer;
+    }
 
+    /**
+     * Permutes a list of doubles.
+     */
+    public static double[] applyPerm(int[] perm, double[] x) {
+        double[] answer = new double[perm.length];
+        for (int i = 0; i < x.length; i++)
+            answer[i] = x[perm[i]];
         return answer;
     }
 }

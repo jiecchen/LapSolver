@@ -49,6 +49,7 @@ public class KMPSolver extends Solver {
 
     public double oversampleScale = 10;
     public double oversampleLogExponent = 2;
+    public boolean preserveTree = true;
 
     // Initialize solver with a spanning tree strategy and a solver to run at the bottom level
     public KMPSolver(SpanningTreeStrategy treeStrategy, Solver baseCaseSolver, int maxIters, double tolerance, boolean watch) {
@@ -73,13 +74,13 @@ public class KMPSolver extends Solver {
         this(new SimulPathTree(), new ConjugateGradientSolver(100, 1e-14), 1000, 1e-8, false);
     }
 
-    public void init(Graph graph, double[] d, int maxLevels) {
+    public void init(Graph graph, double[] d, int maxLevels, Tree outerTree) {
         System.out.printf("(%d, %d)", graph.nv, graph.ne);
 
         this.graph = graph;
         this.d = d;
 
-        eliminate();
+        eliminateGraph();
 
         System.out.printf(" => (%d, %d)", reducedGraph.nv, reducedGraph.ne);
 
@@ -89,28 +90,37 @@ public class KMPSolver extends Solver {
             childSolver = null;
             baseCaseSolver.init(reducedGraph, reducedD);
         } else {
-            GraphUtils.reciprocateWeights(reducedGraph);
-            spanningTree = treeStrategy.getTree(reducedGraph);
-            GraphUtils.reciprocateWeights(reducedGraph);
+            if (outerTree == null) { // rebuild the tree
+                GraphUtils.reciprocateWeights(reducedGraph);
+                spanningTree = treeStrategy.getTree(reducedGraph);
+                GraphUtils.reciprocateWeights(reducedGraph);
+            }
+            else { // contract the tree according to partial Cholesky
+                spanningTree = eliminateTree(outerTree);
+            }
 
             sparsifier = sparsify(reducedGraph, spanningTree);
 
             System.out.printf(" ~> ");
 
             childSolver = new KMPSolver(treeStrategy, baseCaseSolver, 5, 0, false);
-            childSolver.init(sparsifier, reducedD, maxLevels - 1);
+            childSolver.init(sparsifier, reducedD, maxLevels - 1, preserveTree ? spanningTree : null);
 
             recursiveSolver = new ConjugateGradientSolver(childSolver, maxIters, tolerance, watch);
             recursiveSolver.init(reducedGraph, reducedD);
         }
     }
 
-    public void init(Graph graph, double[] d) {
-        init(graph, d, -1);
+    public void init(Graph graph, double[] d, int maxLevels) {
+        init(graph, d, maxLevels, null);
     }
 
-    // eliminate low-degree vertices
-    public void eliminate() {
+    public void init(Graph graph, double[] d) {
+        init(graph, d, -1, null);
+    }
+
+    // eliminate low-degree vertices from graph
+    public void eliminateGraph() {
         // prepare graph for elimination
         GraphVertexRemoval gvr = new GraphVertexRemoval(graph);
         gvrPair = gvr.solve();
@@ -145,6 +155,49 @@ public class KMPSolver extends Solver {
                 reducedD[u] -= reducedGraph.weights[u][i];
             }
         }
+    }
+
+    // eliminate low-degree vertices from a tree
+    public Tree eliminateTree(Tree outerTree) {
+        // permute the tree, get BFS order
+        Tree permutedTree = TreeUtils.permuteTree(outerTree, gvrPair.permutation);
+        int[] order = TreeUtils.bfsOrder(permutedTree);
+
+        // go down the tree
+        int[] parent = permutedTree.parent.clone();
+        for (int v : order) {
+            if (v < gvrPair.numRemoved) { // remove this vertex
+                if (parent[v] == v) { // remove the root
+                    for (int ch : permutedTree.children[v]) {
+                        parent[ch] = permutedTree.children[v][0];
+                    }
+                }
+                else { // not the root
+                    for (int ch : permutedTree.children[v]) {
+                        parent[ch] = parent[v];
+                    }
+                }
+            }
+        }
+
+        // build reduced parent array
+        int[] reducedParent = new int[reducedGraph.nv];
+        double[] reducedWeight = new double[reducedGraph.nv];
+        for (int i = gvrPair.numRemoved; i < graph.nv; i++) {
+            reducedParent[i - gvrPair.numRemoved] = parent[i] - gvrPair.numRemoved;
+        }
+
+        // copy weights from reduced graph
+        for (int u = 0; u < reducedGraph.nv; u++) {
+            for (int i = 0; i < reducedGraph.deg[u]; i++) {
+                int v = reducedGraph.nbrs[u][i];
+                if (reducedParent[u] == v) {
+                    reducedWeight[u] = 1 / reducedGraph.weights[u][i] ;
+                }
+            }
+        }
+
+        return new Tree(reducedParent, reducedWeight);
     }
 
     public double[] solve(double[] b) {
