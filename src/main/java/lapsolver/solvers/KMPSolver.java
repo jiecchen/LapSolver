@@ -167,15 +167,24 @@ public class KMPSolver extends Solver {
         int[] parent = permutedTree.parent.clone();
         for (int v : order) {
             if (v < gvrPair.numRemoved) { // remove this vertex
-                if (parent[v] == v) { // remove the root
-                    for (int ch : permutedTree.children[v]) {
-                        parent[ch] = permutedTree.children[v][0];
-                    }
-                }
-                else { // not the root
+                if (parent[v] != v) { // ignore the root for now
                     for (int ch : permutedTree.children[v]) {
                         parent[ch] = parent[v];
                     }
+                }
+            }
+        }
+
+        // now, pick a new uneliminated root
+        int newRoot = -1;
+        for (int i = gvrPair.numRemoved; i < graph.nv; i++) {
+            if (parent[i] == permutedTree.root) {
+                if (newRoot == -1) { // first child of root gets to be root
+                    newRoot = i;
+                    parent[i] = newRoot;
+                }
+                else { // other children of root must point to newRoot
+                    parent[i] = newRoot;
                 }
             }
         }
