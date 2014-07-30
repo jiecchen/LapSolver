@@ -27,15 +27,19 @@ import static lapsolver.algorithms.Stretch.StretchResult;
 public class KMP2Solver extends Solver {
     private static final double Cs = 10.0;
     private static final int cStop = 500;
-    private static final double kappaC = 2.0;
+    private static final double kappaC = 3.0;
     private static final double tolerance = 1e-14;
-    private static final int maxIters = 100;
+    private final int maxIters;
     private static final int minIters = 5;
     private final SpanningTreeStrategy treeStrategy;
     public List<ChainEntry> chain;
 
-    public KMP2Solver(SpanningTreeStrategy strategy) {
+    public KMP2Solver(SpanningTreeStrategy strategy, int maxIters) {
         treeStrategy = strategy;
+        this.maxIters = maxIters;
+    }
+    public KMP2Solver(SpanningTreeStrategy strategy) {
+        this(strategy, 650);
     }
 
     @Override
@@ -76,10 +80,12 @@ public class KMP2Solver extends Solver {
                     }
 
         // Initialize the chain
+//        chain.add(new ChainEntry(g1, t, delta));
+//        chain.getLast().sparsifier = h1_g2;
+//        chain.add(new ChainEntry(h1_g2, t, delta));
+//        chain.getLast().lMatrix = new LDLDecomposition(h1_g2, delta).solve(0).L;
         chain.add(new ChainEntry(g1, t, delta));
-        chain.getLast().sparsifier = h1_g2;
-        chain.add(new ChainEntry(h1_g2, t, delta));
-        chain.getLast().lMatrix = new LDLDecomposition(h1_g2, delta).solve(0).L;
+        chain.getLast().lMatrix = new LDLDecomposition(g1, delta).solve(0).L;
 
         double[][] deltaRef = new double[1][];
         deltaRef[0] = delta;
@@ -145,7 +151,7 @@ public class KMP2Solver extends Solver {
         final EdgeList offTreeEdges = TreeUtils.getOffTreeEdges(gPrime, tPrime);
 
         // Sanity check
-        System.out.printf("%f (new) == %f (old) with k = %f\n",
+        System.out.printf("sparsify: %f (new) == %f (old) with k = %f\n",
                           computeOffTreeStretch(gPrime, tPrime).total,
                           totalStretch / kappaC,
                           kappaC);
@@ -312,7 +318,6 @@ public class KMP2Solver extends Solver {
 
     private double[] recSolve(double[] b, final List<ChainEntry> chain, final int level) {
         final ChainEntry current = chain.get(level);
-//        final int effectiveIters = iterations[level];
         int effectiveIters = (level == 0) ? maxIters : minIters;
 
         if (level == chain.size() - 1) {
@@ -349,6 +354,14 @@ public class KMP2Solver extends Solver {
         return pcg.solve(b);
     }
 
+    private double avgWeight(Graph g) {
+        double accum = 0.0;
+        for (double[] weight : g.weights)
+            for (double v : weight)
+                accum += v;
+        return accum / (2.0 * g.ne);
+    }
+
     public static class ChainEntry {
         public final Graph graph;
         public final Tree tree;
@@ -371,8 +384,14 @@ public class KMP2Solver extends Solver {
 
     @Override
     public double[] solve(double[] b) {
-        for (ChainEntry chainEntry : this.chain)
-            System.out.printf("(%d, %d, %d) => ", chainEntry.graph.nv, chainEntry.graph.ne, chainEntry.sparsifier.ne);
+        for (ChainEntry chainEntry : this.chain) {
+            System.out.printf("(%d, %d:%.2f, %d:%.2f) => ",
+                              chainEntry.graph.nv,
+                              chainEntry.graph.ne,
+                              avgWeight(chainEntry.graph),
+                              chainEntry.sparsifier.ne,
+                              avgWeight(chainEntry.sparsifier));
+        }
         System.out.println("done!");
 
 //        int[] iterations = new int[chain.size()];
