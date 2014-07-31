@@ -22,6 +22,7 @@ import lapsolver.algorithms.UnionFind;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.Random;
+import java.util.TreeSet;
 
 public class SimulPathTree implements SpanningTreeStrategy {
     // times[node] is time at which node should fire
@@ -71,9 +72,9 @@ public class SimulPathTree implements SpanningTreeStrategy {
 //                logger.write("(" + u + ", " + graph.nbrs[u][i] + "), " + edgeNums[u][i]);
 
 
-        PriorityQueue<EdgeEvent> pq = new PriorityQueue<>(graph.ne, new Comparator<EdgeEvent>() {
+        TreeSet<EdgeEvent> pq = new TreeSet<>(new Comparator<EdgeEvent>() {
             public int compare(EdgeEvent X, EdgeEvent Y) {
-                return (X.time > Y.time ? 1 : -1);
+                return (X.time < Y.time ? 1 : -1);
             }
         });
 
@@ -99,7 +100,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
         UnionFind uf = new UnionFind(graph.nv);
 
         while (ijvInd < graph.nv - 1) {
-            EdgeEvent ev = pq.poll();
+            EdgeEvent ev = pq.pollFirst();
 
             int u = ev.u;
             int v = ev.v;
