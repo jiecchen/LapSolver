@@ -67,6 +67,8 @@ public class SimulPathTree implements SpanningTreeStrategy {
             }
         }
 
+        double perturbEpsilon = 1. / graph.ne;
+
 //        for (int u = 0; u < graph.nv; u++)
 //            for (int i = 0; i < graph.deg[u]; i++)
 //                logger.write("(" + u + ", " + graph.nbrs[u][i] + "), " + edgeNums[u][i]);
@@ -128,6 +130,9 @@ public class SimulPathTree implements SpanningTreeStrategy {
                 int e = edgeNums[u][i];
                 double wt = graph.weights[u][i];
                 double t = ev.time + ev.rate * wt;
+
+                t += rand.nextDouble() * perturbEpsilon;
+
                 if (t < times[e]) {
                     times[e] = t;
 
@@ -146,6 +151,9 @@ public class SimulPathTree implements SpanningTreeStrategy {
                 int e = edgeNums[v][i];
                 double wt = graph.weights[v][i];
                 double t = ev.time + ev.rate * wt;
+
+                t += rand.nextDouble() * perturbEpsilon;
+
                 if (t < times[e]) {
                     times[e] = t;
 
