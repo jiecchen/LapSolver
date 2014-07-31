@@ -17,6 +17,7 @@ import lapsolver.algorithms.LDLDecomposition;
 import lapsolver.algorithms.Stretch;
 import lapsolver.lsst.SimulPathTree;
 import lapsolver.lsst.SpanningTreeStrategy;
+import lapsolver.lsst.StarDecompositionTree;
 import lapsolver.util.GraphUtils;
 import lapsolver.util.LinearAlgebraUtils;
 import lapsolver.util.TreeUtils;
@@ -49,6 +50,8 @@ public class KMPSolver extends Solver {
 
     public double oversampleScale = 10;
     public double oversampleLogExponent = 2;
+    public double blowUpScale = 1;
+    public double blowUpLogExponent = 0;
     public boolean preserveTree = true;
 
     // Initialize solver with a spanning tree strategy and a solver to run at the bottom level
@@ -61,8 +64,8 @@ public class KMPSolver extends Solver {
     }
 
     // Use PCG and SimulPathTree strategies
-    public KMPSolver(int maxIters, double tolerance, boolean watch) {
-        this(new SimulPathTree(), new ConjugateGradientSolver(100, 1e-14), maxIters, tolerance, watch);
+    public KMPSolver(SpanningTreeStrategy treeStrategy, int maxIters, double tolerance, boolean watch) {
+        this(treeStrategy, new ConjugateGradientSolver(100, 1e-14), maxIters, tolerance, watch);
     }
 
     public KMPSolver(SpanningTreeStrategy strat) {
@@ -71,7 +74,7 @@ public class KMPSolver extends Solver {
 
     // vanilla default parameters
     public KMPSolver() {
-        this(new SimulPathTree(), new ConjugateGradientSolver(100, 1e-14), 1000, 1e-8, false);
+        this(new StarDecompositionTree(), new ConjugateGradientSolver(100, 1e-14), 1000, 1e-8, false);
     }
 
     public void init(Graph graph, double[] d, int maxLevels, Tree outerTree) {
@@ -249,10 +252,7 @@ public class KMPSolver extends Solver {
         GraphUtils.reciprocateWeights(graph);
 
         //Blow up graph by 4 * avgstretch * log(numRemoved)
-        double k = 4. * (stretch.total / (offEdges.ne + 1) * (Math.log(graph.nv) + 1)) *
-                (stretch.total / (offEdges.ne + 1) * (Math.log(graph.nv) + 1)) + 1;
-
-        k = 1;
+        double k = blowUpScale * Math.pow(graph.nv, blowUpLogExponent);
         Graph blownUpGraph = blowUpTreeEdges(graph, spanningTree, k);
 
         // find stretches in blown-up graph
