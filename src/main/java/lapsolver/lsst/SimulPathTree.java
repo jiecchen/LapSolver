@@ -74,7 +74,11 @@ public class SimulPathTree implements SpanningTreeStrategy {
 
         TreeSet<EdgeEvent> pq = new TreeSet<>(new Comparator<EdgeEvent>() {
             public int compare(EdgeEvent X, EdgeEvent Y) {
-                return (X.time < Y.time ? 1 : -1);
+                if (X.time == Y.time) {
+                    if (X.u == Y.u) return Integer.compare(X.v, Y.v);
+                    return Integer.compare(X.u, Y.u);
+                }
+                return Double.compare(X.time, Y.time);
             }
         });
 
