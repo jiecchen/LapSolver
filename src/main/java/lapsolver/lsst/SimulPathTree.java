@@ -136,7 +136,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
                 }
             }
 
-            // for each edge attached to permutation, see if gives a lower time
+            // for each edge attached to v, see if gives a lower time
             for (int i = 0; i < graph.deg[v]; i++) {
                 int e = edgeNums[v][i];
                 double wt = graph.weights[v][i];
