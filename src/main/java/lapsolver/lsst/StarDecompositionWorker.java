@@ -183,8 +183,9 @@ public class StarDecompositionWorker {
 
         // expand node that would cause cone to have smallest radius
         // similar to Dijkstra's algorithm
-        PriorityQueue<Integer> toGrow = new PriorityQueue<>(graph.nv, new Comparator<Integer>() {
+        TreeSet<Integer> toGrow = new TreeSet<>(new Comparator<Integer>() {
             public int compare(Integer x, Integer y) {
+                if (coneCost[x] == coneCost[y]) return Integer.compare(x, y);
                 return Double.compare(coneCost[x], coneCost[y]);
             }
         });
@@ -199,7 +200,7 @@ public class StarDecompositionWorker {
         ArrayList<int[]> ideals = new ArrayList<>();
 
         while (!toGrow.isEmpty()) {
-            int next = toGrow.poll();
+            int next = toGrow.pollFirst();
             if (colors[next] != -1) continue;
 
             int[] ideal = getIdeal(shortestPathTree, next);
@@ -257,10 +258,11 @@ public class StarDecompositionWorker {
 
                     // add new vertex with priority equal to radius of cone
                     // if we were to add it
-                    if (coneCost[v] == Double.POSITIVE_INFINITY) {
+                    if (coneCost[u] + w < coneCost[v]) {
+                        toGrow.remove(v);
+                        coneCost[v] = coneCost[u] + w;
                         toGrow.add(v);
                     }
-                    coneCost[v] = Math.min(coneCost[v], coneCost[u] + w);
                 }
             }
 
