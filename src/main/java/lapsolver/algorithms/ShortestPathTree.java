@@ -12,8 +12,10 @@ package lapsolver.algorithms;
 import lapsolver.Graph;
 import lapsolver.Tree;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.PriorityQueue;
+import java.util.TreeSet;
 
 
 public class ShortestPathTree {
@@ -49,25 +51,26 @@ public class ShortestPathTree {
         parentWeight = new double[G.nv];
         double radius = 0.0;
 
-        PriorityQueue<Integer> nextNodes = new PriorityQueue<>(G.nv, new Comparator<Integer>() {
+        TreeSet<Integer> nextNodes = new TreeSet<>(new Comparator<Integer>() {
             @Override
             public int compare(Integer o1, Integer o2) {
-                return Double.compare(dist[o1], dist[o2]);
+            if (dist[o1] == dist[o2]) return Integer.compare(o1, o2);
+            return Double.compare(dist[o1], dist[o2]);
             }
         });
 
+        Arrays.fill(dist, Double.POSITIVE_INFINITY);
+        Arrays.fill(parent, -1);
         dist[source] = 0;
+        parent[source] = source;
+
         for (int i = 0; i < G.nv; i++) {
-            if (i != source) {
-                dist[i] = Double.POSITIVE_INFINITY;
-                parent[i] = -1;
-            }
             nextNodes.add(i);
         }
 
         boolean[] settled = new boolean[G.nv];
         while (!nextNodes.isEmpty()) {
-            int u = nextNodes.poll();
+            int u = nextNodes.pollFirst();
             if (ignore == null || ignore[u] == -1) {
                 for (int i = 0; i < G.deg[u]; i++) {
                     int v = G.nbrs[u][i];
@@ -90,7 +93,6 @@ public class ShortestPathTree {
         }
 
         this.radius = radius;
-        parent[source] = source; // Follow parent array convention
     }
 
     /**
