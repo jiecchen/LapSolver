@@ -60,9 +60,13 @@ public class KMP2Solver extends Solver {
         final Solver nextSolver = buildRecursiveSolver(chain, level + 1);
 
         return new ConjugateGradientSolver(new Solver() {
+            private int[] invPerm;
+
             @Override public void init(Graph graph, double[] d) {
                 this.graph = graph;
                 this.d = d;
+                invPerm = new int[graph.nv];
+                for (int i = 0; i < current.sparsifier.nv; i++) invPerm[next.perm[i]] = i;
             }
 
             @Override public double[] solve(double[] b) {
@@ -73,8 +77,6 @@ public class KMP2Solver extends Solver {
                 for (int i = 0; i < numRemoved; i++)
                     outerX[i] = outerB[i] / next.diag[i];
                 System.arraycopy(innerX, 0, outerX, numRemoved, graph.nv - numRemoved);
-                int[] invPerm = new int[graph.nv];
-                for (int i = 0; i < graph.nv; i++) invPerm[next.perm[i]] = i;
                 return LinearAlgebraUtils.applyPerm(invPerm, next.lMatrix.applyLTransInv(outerX));
             }
         }.initialize(current.sparsifier, current.delta), nIters, tol).initialize(current.graph, current.delta);
