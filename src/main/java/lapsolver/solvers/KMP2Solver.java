@@ -50,9 +50,9 @@ public class KMP2Solver extends Solver {
      */
     private static StretchResult computeOffTreeStretch(Graph inG, Tree inT) {
         GraphUtils.reciprocateWeights(inG);
-        for (int i = 0; i < inT.weight.length; i++) inT.weight[i] = 1 / inT.weight[i];
+//        for (int i = 0; i < inT.weight.length; i++) inT.weight[i] = 1 / inT.weight[i];
         StretchResult stretch = Stretch.compute(inG, inT, TreeUtils.getOffTreeEdges(inG, inT));
-        for (int i = 0; i < inT.weight.length; i++) inT.weight[i] = 1 / inT.weight[i];
+//        for (int i = 0; i < inT.weight.length; i++) inT.weight[i] = 1 / inT.weight[i];
         GraphUtils.reciprocateWeights(inG);
         return stretch;
     }
@@ -159,10 +159,6 @@ public class KMP2Solver extends Solver {
             return new Graph(tPrime);
         } // Step 4: end if
 
-        // Step 5: T' := kT
-        for (int i = 0; i < tPrime.weight.length; i++)
-            tPrime.weight[i] *= kappaC;
-
         // Step 6: G' := G + (k-1)T  ie. replace T with T'
         Graph gPrime = new Graph(inG);
         for (int u = 0; u < tPrime.parent.length; u++) {
@@ -170,12 +166,16 @@ public class KMP2Solver extends Solver {
             if (u != v)
                 for (int iV = 0; iV < gPrime.nbrs[u].length; iV++)
                     if (gPrime.nbrs[u][iV] == v) { // this is our edge -- update both sides
-                        final double trWt = tPrime.weight[u];
+                        final double trWt = tPrime.weight[u] * kappaC;
                         final int iU = gPrime.backInd[u][iV];
                         gPrime.weights[u][iV] = trWt;
                         gPrime.weights[v][iU] = trWt;
                     }
         }
+
+        // Step 5: T' := kT
+        for (int i = 0; i < tPrime.weight.length; i++)
+            tPrime.weight[i] /= kappaC;
 
         // Implementation step: need off-tree edges:
         final EdgeList offTreeEdges = TreeUtils.getOffTreeEdges(gPrime, tPrime);
@@ -198,14 +198,14 @@ public class KMP2Solver extends Solver {
         for (int i = 0; i < nOffTree; i++) {
             H.u[i] = hSquiggle.u[i];
             H.v[i] = hSquiggle.v[i];
-            H.weight[i] = hSquiggle.weight[i] / 4;
+            H.weight[i] = hSquiggle.weight[i];
         }
 
         // 12T'
         for (int i = 0; i < tEdges.ne; i++) {
             H.u[nOffTree + i] = tEdges.u[i];
             H.v[nOffTree + i] = tEdges.v[i];
-            H.weight[nOffTree + i] = tEdges.weight[i] / 12;
+            H.weight[nOffTree + i] = 1 / tEdges.weight[i];
         }
 
         return new Graph(H);
@@ -307,7 +307,7 @@ public class KMP2Solver extends Solver {
             for (int i = 0; i < graph.deg[u]; i++) {
                 int v = graph.nbrs[u][i];
                 if (reducedParent[u] == v)
-                    reducedWeight[u] = graph.weights[u][i];
+                    reducedWeight[u] = 1 / graph.weights[u][i];
             }
 
         return new Tree(reducedParent, reducedWeight);
