@@ -1,4 +1,4 @@
-function [t, avgst] = lsst(g, strat)
+function [t, avgst, allst] = lsst(g, strat)
 %LSST Gets a low-stretch spanning tree and its average stretch.
 % t = the Tree object
 % avgst = average stretch
@@ -23,6 +23,7 @@ function [t, avgst] = lsst(g, strat)
     if nargout >= 2
         st = Stretch.compute(g,t);
         avgst = st.total / g.ne;
+        allst = st.allStretches;
     end
 end
 
