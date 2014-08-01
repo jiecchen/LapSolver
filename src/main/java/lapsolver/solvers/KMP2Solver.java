@@ -24,7 +24,7 @@ import static lapsolver.algorithms.Stretch.StretchResult;
 public class KMP2Solver extends Solver {
     private static final double Cs = 10.0;
     private static final int cStop = 1000;
-    private static final double kappaC = 3.0;
+    private static final double kappaC = 1.0;
     private static final double tolerance = 1e-8;
     private static final int minIters = 5;
     private final int maxIters;
@@ -68,7 +68,7 @@ public class KMP2Solver extends Solver {
         int effectiveIters = (level == 0) ? maxIters : minIters;
 
         if (level == chain.size() - 1) {
-            Solver baseCaseSolver = new ConjugateGradientSolver(minIters, 1e-14);
+            Solver baseCaseSolver = new ConjugateGradientSolver(effectiveIters, 1e-14);
             baseCaseSolver.init(current.graph, current.delta);
             return baseCaseSolver;
         }
