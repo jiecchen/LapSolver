@@ -26,20 +26,22 @@ import static lapsolver.algorithms.Stretch.StretchResult;
 
 public class KMP2Solver extends Solver {
     private static final double Cs = 10.0;
-    private static final int cStop = 500;
+    private static final int cStop = 1000;
     private static final double kappaC = 3.0;
-    private static final double tolerance = 1e-14;
-    private final int maxIters;
+    private static final double tolerance = 1e-8;
     private static final int minIters = 5;
+    private final int maxIters;
     private final SpanningTreeStrategy treeStrategy;
-    public List<ChainEntry> chain;
+    public LinkedList<ChainEntry> chain;
+    private Solver baseCaseSolver;
+
+    public KMP2Solver(SpanningTreeStrategy strategy) {
+        this(strategy, 1000);
+    }
 
     public KMP2Solver(SpanningTreeStrategy strategy, int maxIters) {
         treeStrategy = strategy;
         this.maxIters = maxIters;
-    }
-    public KMP2Solver(SpanningTreeStrategy strategy) {
-        this(strategy, 650);
     }
 
     @Override
@@ -54,7 +56,7 @@ public class KMP2Solver extends Solver {
      * @param delta The
      * @return Chain of Graphs C = {G1, H1, G2, H2, ..., Gd}
      */
-    private List<ChainEntry> buildChain(Graph graph, double[] delta) {
+    private LinkedList<ChainEntry> buildChain(Graph graph, double[] delta) {
         // C := 0
         LinkedList<ChainEntry> chain = new LinkedList<>();
 
@@ -190,13 +192,12 @@ public class KMP2Solver extends Solver {
 
         Graph reducedGraph = LDLDecomposition.getReducedGraph(ldl.D, gvr.numRemoved);
 
-//        Tree permutedTree = TreeUtils.permuteTree(tree, gvr.permutation);
-        Tree updatedTree = treeStrategy.getTree(reducedGraph);
-//        Tree updatedTree = updateTree(permutedGraph, permutedTree, gvr.numRemoved);
+        Tree permutedTree = TreeUtils.permuteTree(tree, gvr.permutation);
+        Tree reducedTree = updateTree(reducedGraph, permutedTree, gvr.numRemoved);
 
         deltaRef[0] = Arrays.copyOfRange(deltaRef[0], gvr.numRemoved, gvr.numRemoved + reducedGraph.nv);
 
-        ChainEntry result = new ChainEntry(reducedGraph, updatedTree, deltaRef[0].clone());
+        ChainEntry result = new ChainEntry(reducedGraph, reducedTree, deltaRef[0].clone());
         result.perm = gvr.permutation;
         result.lMatrix = ldl.L;
         result.diag = new double[graph.nv];
@@ -237,6 +238,7 @@ public class KMP2Solver extends Solver {
      */
     private EdgeList sample(EdgeList edges, StretchResult pp) {
         final double q = Cs * edges.ne / Math.pow(Math.log(edges.ne), 2.0);
+        System.out.println("sample: q = " + q);
 
         double[] p = new double[pp.allStretches.length];
         for (int i = 0; i < p.length; i++)
@@ -269,62 +271,45 @@ public class KMP2Solver extends Solver {
      * @return The spanning tree with appropriately-weighted edges
      */
     private Tree updateTree(Graph graph, Tree tree, int numRemoved) {
-        int[] deg = new int[numRemoved];
-        for (int i = 0; i < numRemoved; i++)
-            deg[i] = graph.nbrs[i].length;
+        int[] bfsOrder = TreeUtils.bfsOrder(tree);
+        int[] newParent = tree.parent.clone();
 
-        // Remove the degree 1's
-        for (int u = 0; u < deg.length; u++)
-            if (deg[u] == 1) {
-                int v = graph.nbrs[u][0];
-                if (v < numRemoved)
-                    deg[v]--;
-            }
+        // Remove all the non-root vertices below numRemoved
+        for (int u : bfsOrder)
+            if (u < numRemoved && newParent[u] != u)
+                for (int v : tree.children[u])
+                    newParent[v] = newParent[u];
 
-        int index = 0;
-        EdgeList updatedTree = new EdgeList(tree.nv - numRemoved);
+        // Assign first non-eliminated child of root as root
+        int newRoot = -1;
         for (int i = numRemoved; i < tree.nv; i++)
-            if (tree.parent[i] >= numRemoved && tree.parent[i] != i) {
-                updatedTree.u[index] = Math.min(i, tree.parent[i]) - numRemoved;
-                updatedTree.v[index] = Math.max(i, tree.parent[i]) - numRemoved;
-                updatedTree.weight[index++] = tree.weight[index];
+            if (newParent[i] == tree.root) {
+                if (newRoot == -1)
+                    newRoot = i;
+                newParent[i] = newRoot;
             }
 
-        for (int u = 0; u < deg.length; u++)
-            if (deg[u] == 2) {
-                int v1 = graph.nbrs[u][0];
-                int v2 = graph.nbrs[u][1];
+        int[] reducedParent = Arrays.copyOfRange(newParent, numRemoved, newParent.length);
+        double[] reducedWeight = new double[reducedParent.length];
+        for (int i = 0; i < reducedParent.length; i++)
+            reducedParent[i] -= numRemoved;
 
-                boolean u_v1 = tree.parent[u] == v1 || tree.parent[v1] == u;
-                boolean u_v2 = tree.parent[u] == v2 || tree.parent[v2] == u;
-
-                assert u_v1 || u_v2;
-
-                // Make sure both endpoints were preserved
-                if (u_v1 && u_v2 && !(v1 < numRemoved || v2 < numRemoved)) {
-                    updatedTree.u[index] = Math.min(v1, v2) - numRemoved;
-                    updatedTree.v[index] = Math.max(v1, v2) - numRemoved;
-                    double w1 = graph.weights[u][0];
-                    double w2 = graph.weights[u][1];
-                    updatedTree.weight[index++] = (w1 * w2) / (w1 + w2);
-                }
+        for (int u = 0; u < graph.nv; u++)
+            for (int i = 0; i < graph.deg[u]; i++) {
+                int v = graph.nbrs[u][i];
+                if (reducedParent[u] == v)
+                    reducedWeight[u] = graph.weights[u][i];
             }
 
-        // Confirm we added back all the edges
-        System.out.printf("*** Removed %d vertices from G with %d.\n", numRemoved, tree.nv);
-        System.out.printf("*** %d (actual) == %d (expected)\n", index, tree.nv - numRemoved - 1);
-        return new Tree(updatedTree);
+        return new Tree(reducedParent, reducedWeight);
     }
 
     private double[] recSolve(double[] b, final List<ChainEntry> chain, final int level) {
         final ChainEntry current = chain.get(level);
         int effectiveIters = (level == 0) ? maxIters : minIters;
 
-        if (level == chain.size() - 1) {
-            Solver baseCaseSolver = new ConjugateGradientSolver(effectiveIters, tolerance);
-            baseCaseSolver.init(current.graph, current.delta);
+        if (level == chain.size() - 1)
             return baseCaseSolver.solve(b);
-        }
 
         final ChainEntry next = chain.get(level + 1);
         final int numRemoved = current.graph.nv - next.graph.nv;
@@ -393,12 +378,8 @@ public class KMP2Solver extends Solver {
                               avgWeight(chainEntry.sparsifier));
         }
         System.out.println("done!");
-
-//        int[] iterations = new int[chain.size()];
-//        for (int i = 0; i < iterations.length; i++) {
-//            double t = -(chain.size() - 1) / Math.log((double) minIters / maxIters);
-//            iterations[i] = (int) Math.round(maxIters * Math.exp(-i / t));
-//        }
+        baseCaseSolver = new ConjugateGradientSolver(minIters, 1e-14);
+        baseCaseSolver.init(chain.getLast().graph, chain.getLast().delta);
         return recSolve(b, chain, 0);
     }
 
