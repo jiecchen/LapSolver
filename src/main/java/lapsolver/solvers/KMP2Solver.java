@@ -198,14 +198,14 @@ public class KMP2Solver extends Solver {
         for (int i = 0; i < nOffTree; i++) {
             H.u[i] = hSquiggle.u[i];
             H.v[i] = hSquiggle.v[i];
-            H.weight[i] = hSquiggle.weight[i] * 4;
+            H.weight[i] = hSquiggle.weight[i] / 4;
         }
 
         // 12T'
         for (int i = 0; i < tEdges.ne; i++) {
             H.u[nOffTree + i] = tEdges.u[i];
             H.v[nOffTree + i] = tEdges.v[i];
-            H.weight[nOffTree + i] = tEdges.weight[i] * 12;
+            H.weight[nOffTree + i] = tEdges.weight[i] / 12;
         }
 
         return new Graph(H);
@@ -265,7 +265,7 @@ public class KMP2Solver extends Solver {
             int e = edgesToAdd.get(i);
             sampledEdges.u[i] = edges.u[e];
             sampledEdges.v[i] = edges.v[e];
-            sampledEdges.weight[i] = edges.weight[e] / p[e];
+            sampledEdges.weight[i] = edges.weight[e];// / p[e];
         }
 
         return sampledEdges;
