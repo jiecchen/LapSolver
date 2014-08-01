@@ -35,11 +35,10 @@ public class SimulPathTree implements SpanningTreeStrategy {
 
     @Override
     public Tree getTree(Graph graph) {
-        return GraphUtils.toTree(edgeGrow(graph));
+        return new Tree(getTreeEdges(graph));
     }
 
-
-    public Graph edgeGrow(Graph graph) {
+    public EdgeList getTreeEdges(Graph graph) {
 //        Logger logger = new Logger();
 //        logger.start("SimulPathTree.log");
 
@@ -169,7 +168,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
 
         }
 
-        return new Graph(new EdgeList(ijvI, ijvJ, ijvV));
+        return new EdgeList(ijvI, ijvJ, ijvV);
     }
 
     public class NodeEvent {
