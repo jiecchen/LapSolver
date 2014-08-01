@@ -29,8 +29,8 @@ public class KMP2Solver extends Solver {
     private static final int minIters = 5;
     private final int maxIters;
     private final SpanningTreeStrategy treeStrategy;
-    private Solver recSolver;
     public LinkedList<ChainEntry> chain;
+    private Solver recSolver;
 
     public KMP2Solver(SpanningTreeStrategy strategy) {
         this(strategy, 1000);
@@ -39,22 +39,6 @@ public class KMP2Solver extends Solver {
     public KMP2Solver(SpanningTreeStrategy strategy, int maxIters) {
         treeStrategy = strategy;
         this.maxIters = maxIters;
-    }
-
-    /**
-     * Computes the off-tree stretch of the graph inG with respect to inT
-     *
-     * @param inG the graph containing the tree
-     * @param inT the tree whose stretch we want to compute
-     * @return the total stretch and individual edge stretches
-     */
-    private static StretchResult computeOffTreeStretch(Graph inG, Tree inT) {
-        GraphUtils.reciprocateWeights(inG);
-//        for (int i = 0; i < inT.weight.length; i++) inT.weight[i] = 1 / inT.weight[i];
-        StretchResult stretch = Stretch.compute(inG, inT, TreeUtils.getOffTreeEdges(inG, inT));
-//        for (int i = 0; i < inT.weight.length; i++) inT.weight[i] = 1 / inT.weight[i];
-        GraphUtils.reciprocateWeights(inG);
-        return stretch;
     }
 
     @Override
@@ -145,19 +129,8 @@ public class KMP2Solver extends Solver {
      * @return the sparsified graph
      */
     private Graph incrementalSparsify(Graph inG, Tree inT) {
-        // Step 1: Compute stretch_T(G)
-        double totalStretch = computeOffTreeStretch(inG, inT).total;
-
         // Copy the original graph, so we can blow it up
         Tree tPrime = new Tree(inT);
-
-        // Step 2: if |stretch_T(G)| <= 1
-        if (totalStretch <= 1) {
-            // Step 3: return 2T
-            for (int i = 0; i < tPrime.weight.length; i++)
-                tPrime.weight[i] *= 2;
-            return new Graph(tPrime);
-        } // Step 4: end if
 
         // Step 6: G' := G + (k-1)T  ie. replace T with T'
         Graph gPrime = new Graph(inG);
@@ -180,14 +153,11 @@ public class KMP2Solver extends Solver {
         // Implementation step: need off-tree edges:
         final EdgeList offTreeEdges = TreeUtils.getOffTreeEdges(gPrime, tPrime);
 
-        // Sanity check
-        System.out.printf("sparsify: %f (new) == %f (old) with k = %f\n",
-                          computeOffTreeStretch(gPrime, tPrime).total,
-                          totalStretch / kappaC,
-                          kappaC);
-
         // Step 9: H~ = (V, L~) := SAMPLE(G', stretch_T'(E'), \xi)
-        EdgeList hSquiggle = sample(offTreeEdges, computeOffTreeStretch(gPrime, tPrime));
+        GraphUtils.reciprocateWeights(gPrime);
+        StretchResult stretch = Stretch.compute(gPrime, tPrime, TreeUtils.getOffTreeEdges(gPrime, tPrime));
+        GraphUtils.reciprocateWeights(gPrime);
+        EdgeList hSquiggle = sample(offTreeEdges, stretch);
 
         // Step 14+15: H := 4(L + 3T') = 4L + 12T'
         int nOffTree = hSquiggle.ne;
