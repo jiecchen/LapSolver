@@ -14,10 +14,7 @@ import lapsolver.util.GraphUtils;
 import lapsolver.util.LinearAlgebraUtils;
 import lapsolver.util.TreeUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import static lapsolver.algorithms.GraphVertexRemoval.AnswerPair;
 import static lapsolver.algorithms.LDLDecomposition.LMatrix;
@@ -32,8 +29,8 @@ public class KMP2Solver extends Solver {
     private static final int minIters = 5;
     private final int maxIters;
     private final SpanningTreeStrategy treeStrategy;
+    private Solver recSolver;
     public LinkedList<ChainEntry> chain;
-    private Solver baseCaseSolver;
 
     public KMP2Solver(SpanningTreeStrategy strategy) {
         this(strategy, 1000);
@@ -44,16 +41,72 @@ public class KMP2Solver extends Solver {
         this.maxIters = maxIters;
     }
 
+    /**
+     * Computes the off-tree stretch of the graph inG with respect to inT
+     *
+     * @param inG the graph containing the tree
+     * @param inT the tree whose stretch we want to compute
+     * @return the total stretch and individual edge stretches
+     */
+    private static StretchResult computeOffTreeStretch(Graph inG, Tree inT) {
+        GraphUtils.reciprocateWeights(inG);
+        for (int i = 0; i < inT.weight.length; i++) inT.weight[i] = 1 / inT.weight[i];
+        StretchResult stretch = Stretch.compute(inG, inT, TreeUtils.getOffTreeEdges(inG, inT));
+        for (int i = 0; i < inT.weight.length; i++) inT.weight[i] = 1 / inT.weight[i];
+        GraphUtils.reciprocateWeights(inG);
+        return stretch;
+    }
+
     @Override
-    public void init(Graph graph, double[] delta) {
-        chain = buildChain(this.graph = graph, this.d = delta);
+    public void init(Graph graph, double[] d) {
+        chain = buildChain(this.graph = graph, this.d = d);
+        recSolver = buildRecursiveSolver(chain, 0);
+    }
+
+    private Solver buildRecursiveSolver(List<ChainEntry> chain, int level) {
+        final ChainEntry current = chain.get(level);
+        int effectiveIters = (level == 0) ? maxIters : minIters;
+
+        if (level == chain.size() - 1) {
+            Solver baseCaseSolver = new ConjugateGradientSolver(minIters, 1e-14);
+            baseCaseSolver.init(current.graph, current.delta);
+            return baseCaseSolver;
+        }
+
+        final ChainEntry next = chain.get(level + 1);
+        final int numRemoved = current.graph.nv - next.graph.nv;
+        final Solver nextSolver = buildRecursiveSolver(chain, level + 1);
+
+        Solver preconditioner = new Solver() {
+            @Override public void init(Graph graph, double[] d) {
+                this.graph = graph;
+                this.d = d;
+            }
+
+            @Override public double[] solve(double[] b) {
+                double[] outerB = next.lMatrix.applyLInv(LinearAlgebraUtils.applyPerm(next.perm, b));
+                double[] innerB = Arrays.copyOfRange(outerB, numRemoved, outerB.length);
+                double[] innerX = nextSolver.solve(innerB);
+                double[] outerX = new double[graph.nv];
+                for (int i = 0; i < numRemoved; i++)
+                    outerX[i] = outerB[i] / next.diag[i];
+                System.arraycopy(innerX, 0, outerX, numRemoved, graph.nv - numRemoved);
+                int[] invPerm = new int[graph.nv];
+                for (int i = 0; i < graph.nv; i++) invPerm[next.perm[i]] = i;
+                return LinearAlgebraUtils.applyPerm(invPerm, next.lMatrix.applyLTransInv(outerX));
+            }
+        };
+        preconditioner.init(current.sparsifier, current.delta);
+        ConjugateGradientSolver pcg = new ConjugateGradientSolver(preconditioner, effectiveIters, tolerance);
+        pcg.init(current.graph, current.delta);
+        return pcg;
     }
 
     /**
      * BuildChain from KMP2 - Algorithm BuildChain generates the chain of graphs.
      *
      * @param graph The graph to precondition (weights on edges)
-     * @param delta The
+     * @param delta The diagonal vector to add to make the laplacian non-singular
      * @return Chain of Graphs C = {G1, H1, G2, H2, ..., Gd}
      */
     private LinkedList<ChainEntry> buildChain(Graph graph, double[] delta) {
@@ -63,11 +116,8 @@ public class KMP2Solver extends Solver {
         // G1 = G
         Graph g1 = new Graph(graph);
 
-        // T = LowStretchTree(G)
-        Tree t = treeStrategy.getTree(graph);
-
         // Initialize the chain
-        chain.add(new ChainEntry(g1, t, delta));
+        chain.add(new ChainEntry(g1, treeStrategy.getTree(graph), delta));
         chain.getLast().lMatrix = new LDLDecomposition(g1, delta).solve(0).L;
 
         double[][] deltaRef = new double[1][];
@@ -81,6 +131,7 @@ public class KMP2Solver extends Solver {
             chainEnd = chain.getLast();
         }
 
+        // Don't precondition at the end
         chain.getLast().sparsifier = chain.getLast().graph;
 
         return chain;
@@ -94,10 +145,6 @@ public class KMP2Solver extends Solver {
      * @return the sparsified graph
      */
     private Graph incrementalSparsify(Graph inG, Tree inT) {
-        if (inG.nv != inT.nv)
-            throw new IllegalArgumentException("Graph (" + inG.nv + ") and Tree (" +
-                                                       inT.nv + ") must have same number of vertices!");
-
         // Step 1: Compute stretch_T(G)
         double totalStretch = computeOffTreeStretch(inG, inT).total;
 
@@ -172,10 +219,9 @@ public class KMP2Solver extends Solver {
         ReturnPair ldl = new LDLDecomposition(permutedGraph, deltaRef[0]).solve(gvr.numRemoved);
 
         Graph reducedGraph = LDLDecomposition.getReducedGraph(ldl.D, gvr.numRemoved);
-
         Tree reducedTree = updateTree(reducedGraph, TreeUtils.permuteTree(tree, gvr.permutation), gvr.numRemoved);
 
-        deltaRef[0] = Arrays.copyOfRange(deltaRef[0], gvr.numRemoved, gvr.numRemoved + reducedGraph.nv);
+        deltaRef[0] = Arrays.copyOfRange(deltaRef[0], gvr.numRemoved, deltaRef[0].length);
 
         ChainEntry result = new ChainEntry(reducedGraph, reducedTree, deltaRef[0].clone());
         result.perm = gvr.permutation;
@@ -191,22 +237,6 @@ public class KMP2Solver extends Solver {
                 deltaRef[0][u] -= reducedGraph.weights[u][i];
 
         return result;
-    }
-
-    /**
-     * Computes the off-tree stretch of the graph inG with respect to inT
-     *
-     * @param inG the graph containing the tree
-     * @param inT the tree whose stretch we want to compute
-     * @return the total stretch and individual edge stretches
-     */
-    private static StretchResult computeOffTreeStretch(Graph inG, Tree inT) {
-        GraphUtils.reciprocateWeights(inG);
-        for (int i = 0; i < inT.weight.length; i++) inT.weight[i] = 1 / inT.weight[i];
-        StretchResult stretch = Stretch.compute(inG, inT, TreeUtils.getOffTreeEdges(inG, inT));
-        for (int i = 0; i < inT.weight.length; i++) inT.weight[i] = 1 / inT.weight[i];
-        GraphUtils.reciprocateWeights(inG);
-        return stretch;
     }
 
     /**
@@ -242,7 +272,7 @@ public class KMP2Solver extends Solver {
     }
 
     /**
-     * Removes numRemoved vertices from the Tree as per the procedure in KMP2.
+     * Removes numRemoved vertices from the Tree.
      *
      * @param graph      The graph of which tree is a spanning tree
      * @param tree       The spanning tree to update
@@ -283,41 +313,6 @@ public class KMP2Solver extends Solver {
         return new Tree(reducedParent, reducedWeight);
     }
 
-    private double[] recSolve(double[] b, final List<ChainEntry> chain, final int level) {
-        final ChainEntry current = chain.get(level);
-        int effectiveIters = (level == 0) ? maxIters : minIters;
-
-        if (level == chain.size() - 1)
-            return baseCaseSolver.solve(b);
-
-        final ChainEntry next = chain.get(level + 1);
-        final int numRemoved = current.graph.nv - next.graph.nv;
-
-        Solver preconditioner = new Solver() {
-            @Override public void init(Graph graph, double[] d) {
-                this.graph = graph;
-                this.d = d;
-            }
-
-            @Override public double[] solve(double[] b) {
-                double[] outerB = next.lMatrix.applyLInv(LinearAlgebraUtils.applyPerm(next.perm, b));
-                double[] innerB = Arrays.copyOfRange(outerB, numRemoved, outerB.length);
-                double[] innerX = recSolve(innerB, chain, level + 1);
-                double[] outerX = new double[graph.nv];
-                for (int i = 0; i < numRemoved; i++)
-                    outerX[i] = outerB[i] / next.diag[i];
-                System.arraycopy(innerX, 0, outerX, numRemoved, graph.nv - numRemoved);
-                int[] invPerm = new int[graph.nv];
-                for (int i = 0; i < graph.nv; i++) invPerm[next.perm[i]] = i;
-                return LinearAlgebraUtils.applyPerm(invPerm, next.lMatrix.applyLTransInv(outerX));
-            }
-        };
-        preconditioner.init(current.sparsifier, current.delta);
-        ConjugateGradientSolver pcg = new ConjugateGradientSolver(preconditioner, effectiveIters, tolerance);
-        pcg.init(current.graph, current.delta);
-        return pcg.solve(b);
-    }
-
     public static class ChainEntry {
         public final Graph graph;
         public final Tree tree;
@@ -340,10 +335,7 @@ public class KMP2Solver extends Solver {
 
     @Override
     public double[] solve(double[] b) {
-        baseCaseSolver = new ConjugateGradientSolver(minIters, 1e-14);
-        baseCaseSolver.init(chain.getLast().graph, chain.getLast().delta);
-        return recSolve(b, chain, 0);
+        return recSolver.solve(b);
     }
-
 
 }
