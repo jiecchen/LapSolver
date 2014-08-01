@@ -27,24 +27,17 @@ public class KMP2Solver extends Solver {
     private static final double kappaC = 1.0;
     private static final double tolerance = 1e-8;
     private static final int minIters = 5;
-    private final int maxIters;
+    private static final int maxIters = 1000;
     private final SpanningTreeStrategy treeStrategy;
-    public LinkedList<ChainEntry> chain;
     private Solver recSolver;
 
     public KMP2Solver(SpanningTreeStrategy strategy) {
-        this(strategy, 1000);
-    }
-
-    public KMP2Solver(SpanningTreeStrategy strategy, int maxIters) {
         treeStrategy = strategy;
-        this.maxIters = maxIters;
     }
 
     @Override
     public void init(Graph graph, double[] d) {
-        chain = buildChain(this.graph = graph, this.d = d);
-        recSolver = buildRecursiveSolver(chain, 0);
+        recSolver = buildRecursiveSolver(buildChain(this.graph = graph, this.d = d), 0);
     }
 
     private Solver buildRecursiveSolver(List<ChainEntry> chain, int level) {
@@ -101,8 +94,10 @@ public class KMP2Solver extends Solver {
         Graph g1 = new Graph(graph);
 
         // Initialize the chain
+        GraphUtils.reciprocateWeights(graph);
         chain.add(new ChainEntry(g1, treeStrategy.getTree(graph), delta));
         chain.getLast().lMatrix = new LDLDecomposition(g1, delta).solve(0).L;
+        GraphUtils.reciprocateWeights(graph);
 
         double[][] deltaRef = new double[1][];
         deltaRef[0] = delta;
@@ -159,19 +154,17 @@ public class KMP2Solver extends Solver {
         GraphUtils.reciprocateWeights(gPrime);
         EdgeList hSquiggle = sample(offTreeEdges, stretch);
 
-        // Step 14+15: H := 4(L + 3T') = 4L + 12T'
+        // Step 14+15: H := 4(L + 3T') = 4L + 12T' Implemented here as L+T'
         int nOffTree = hSquiggle.ne;
         EdgeList tEdges = new EdgeList(tPrime);
         EdgeList H = new EdgeList(nOffTree + tEdges.ne);
 
-        // 4L
         for (int i = 0; i < nOffTree; i++) {
             H.u[i] = hSquiggle.u[i];
             H.v[i] = hSquiggle.v[i];
             H.weight[i] = hSquiggle.weight[i];
         }
 
-        // 12T'
         for (int i = 0; i < tEdges.ne; i++) {
             H.u[nOffTree + i] = tEdges.u[i];
             H.v[nOffTree + i] = tEdges.v[i];
