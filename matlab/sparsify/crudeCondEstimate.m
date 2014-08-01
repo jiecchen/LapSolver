@@ -1,4 +1,4 @@
-function kappa = condEstimate(a,b,solvea,solveb)
+function kappa = crudeCondEstimate(a,b,solvea,solveb)
 % function kappa = condEstimate(a,b,solvea,solveb)
 %
 % estimate the relative condition number between a and b,

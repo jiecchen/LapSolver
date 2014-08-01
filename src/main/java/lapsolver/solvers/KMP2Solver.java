@@ -66,26 +66,7 @@ public class KMP2Solver extends Solver {
         // T = LowStretchTree(G)
         Tree t = treeStrategy.getTree(graph);
 
-        // G2 = H1 = G1 + O~(log^2 n)T
-        Graph h1_g2 = new Graph(g1);
-        double logSquaredFactor = Math.pow(Math.log(t.nv) * Math.log(Math.log(t.nv)), 2.0);
-        int[] parent = t.parent;
-        for (int u = 0; u < parent.length; u++)
-            if (u != t.parent[u])
-                for (int iV = 0; iV < h1_g2.nbrs[u].length; iV++)
-                    if (h1_g2.nbrs[u][iV] == t.parent[u]) {
-                        int v = h1_g2.nbrs[u][iV];
-                        double adjustedWeight = t.weight[u] * logSquaredFactor;
-                        int iU = h1_g2.backInd[u][iV];
-                        h1_g2.weights[u][iV] = adjustedWeight;
-                        h1_g2.weights[v][iU] = adjustedWeight;
-                    }
-
         // Initialize the chain
-//        chain.add(new ChainEntry(g1, t, delta));
-//        chain.getLast().sparsifier = h1_g2;
-//        chain.add(new ChainEntry(h1_g2, t, delta));
-//        chain.getLast().lMatrix = new LDLDecomposition(h1_g2, delta).solve(0).L;
         chain.add(new ChainEntry(g1, t, delta));
         chain.getLast().lMatrix = new LDLDecomposition(g1, delta).solve(0).L;
 
@@ -192,8 +173,7 @@ public class KMP2Solver extends Solver {
 
         Graph reducedGraph = LDLDecomposition.getReducedGraph(ldl.D, gvr.numRemoved);
 
-        Tree permutedTree = TreeUtils.permuteTree(tree, gvr.permutation);
-        Tree reducedTree = updateTree(reducedGraph, permutedTree, gvr.numRemoved);
+        Tree reducedTree = updateTree(reducedGraph, TreeUtils.permuteTree(tree, gvr.permutation), gvr.numRemoved);
 
         deltaRef[0] = Arrays.copyOfRange(deltaRef[0], gvr.numRemoved, gvr.numRemoved + reducedGraph.nv);
 
@@ -238,7 +218,6 @@ public class KMP2Solver extends Solver {
      */
     private EdgeList sample(EdgeList edges, StretchResult pp) {
         final double q = Cs * edges.ne / Math.pow(Math.log(edges.ne), 2.0);
-        System.out.println("sample: q = " + q);
 
         double[] p = new double[pp.allStretches.length];
         for (int i = 0; i < p.length; i++)
@@ -339,14 +318,6 @@ public class KMP2Solver extends Solver {
         return pcg.solve(b);
     }
 
-    private double avgWeight(Graph g) {
-        double accum = 0.0;
-        for (double[] weight : g.weights)
-            for (double v : weight)
-                accum += v;
-        return accum / (2.0 * g.ne);
-    }
-
     public static class ChainEntry {
         public final Graph graph;
         public final Tree tree;
@@ -369,15 +340,6 @@ public class KMP2Solver extends Solver {
 
     @Override
     public double[] solve(double[] b) {
-        for (ChainEntry chainEntry : this.chain) {
-            System.out.printf("(%d, %d:%.2f, %d:%.2f) => ",
-                              chainEntry.graph.nv,
-                              chainEntry.graph.ne,
-                              avgWeight(chainEntry.graph),
-                              chainEntry.sparsifier.ne,
-                              avgWeight(chainEntry.sparsifier));
-        }
-        System.out.println("done!");
         baseCaseSolver = new ConjugateGradientSolver(minIters, 1e-14);
         baseCaseSolver.init(chain.getLast().graph, chain.getLast().delta);
         return recSolve(b, chain, 0);
