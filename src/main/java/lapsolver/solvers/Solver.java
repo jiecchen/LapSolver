@@ -30,6 +30,15 @@ public abstract class Solver implements LinearOperator {
         init (graph, null);
     }
 
+    public Solver initialize(Graph graph, double[] d) {
+        init(graph, d);
+        return this;
+    }
+
+    public Solver initialize(Graph graph) {
+        return initialize(graph, null);
+    }
+
     /**
      * Solve the system (L+D)x = b.
      * @param b The boundary condition b.
