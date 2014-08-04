@@ -26,11 +26,11 @@ public class KMP2Solver extends Solver {
     private static final int cStop = 1000;
     private static final double kappaC = 1.0;
     private static final int minIters = 5;
+    private static final int baseIters = 100;
     private final SpanningTreeStrategy treeStrategy;
     public ConjugateGradientSolver recursiveSolver;
     private int maxIters;
     private double tol;
-    public LinkedList<ChainEntry> chain;
 
     public KMP2Solver(SpanningTreeStrategy strategy) {
         this(strategy, 1000);
@@ -48,8 +48,7 @@ public class KMP2Solver extends Solver {
 
     @Override
     public void init(Graph graph, double[] d) {
-        chain = buildChain(this.graph = graph, this.d = d);
-        recursiveSolver = buildRecursiveSolver(chain, 0);
+        recursiveSolver = buildRecursiveSolver(buildChain(this.graph = new Graph(graph), this.d = d.clone()), 0);
     }
 
     @Override
@@ -62,7 +61,7 @@ public class KMP2Solver extends Solver {
         final int nIters = (level == 0) ? maxIters : minIters;
 
         if (level == chain.size() - 1)
-            return new ConjugateGradientSolver(nIters, 1e-14).initialize(current.graph, current.delta);
+            return new ConjugateGradientSolver(baseIters, 1e-14).initialize(current.graph, current.delta);
 
         final ChainEntry next = chain.get(level + 1);
         final int numRemoved = current.graph.nv - next.graph.nv;
@@ -192,7 +191,7 @@ public class KMP2Solver extends Solver {
 
         d = Arrays.copyOfRange(d, gvr.numRemoved, d.length);
 
-        ChainEntry result = new ChainEntry(reducedGraph, reducedTree, d.clone());
+        ChainEntry result = new ChainEntry(reducedGraph, reducedTree, d);
         result.perm = gvr.permutation;
         result.lMatrix = ldl.L;
         result.diag = new double[graph.nv];
@@ -205,6 +204,7 @@ public class KMP2Solver extends Solver {
             for (int i = 0; i < reducedGraph.deg[u]; i++)
                 d[u] -= reducedGraph.weights[u][i];
 
+        d = d.clone();
         return result;
     }
 
@@ -224,7 +224,6 @@ public class KMP2Solver extends Solver {
 
         ArrayList<Integer> edgesToAdd = new ArrayList<>((int) q);
 
-        // Using Dan's sampling method.
         for (int i = 0; i < p.length; i++)
             if (Math.random() < p[i])
                 edgesToAdd.add(i);
@@ -234,7 +233,7 @@ public class KMP2Solver extends Solver {
             int e = edgesToAdd.get(i);
             sampledEdges.u[i] = edges.u[e];
             sampledEdges.v[i] = edges.v[e];
-            sampledEdges.weight[i] = edges.weight[e]; // supposed to scale by 1/p[i]
+            sampledEdges.weight[i] = edges.weight[e];
         }
 
         return sampledEdges;

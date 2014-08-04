@@ -18,10 +18,12 @@ public class EdgeList {
     public double[] weight;
 
     // an empty EdgeList
-    public EdgeList() {}
+    public EdgeList() {
+        this(0);
+    }
 
     // EdgeList from a number of elements
-    public EdgeList (int ne) {
+    public EdgeList(int ne) {
         this.ne = ne;
         u = new int[ne];
         v = new int[ne];
@@ -29,7 +31,7 @@ public class EdgeList {
     }
 
     // copy constructor
-    public EdgeList (EdgeList other) {
+    public EdgeList(EdgeList other) {
         ne = other.ne;
         u = other.u.clone();
         v = other.v.clone();
@@ -37,7 +39,7 @@ public class EdgeList {
     }
 
     // EdgeList from two lists of length N (consider the weights = 1)
-    public EdgeList (int[] u, int[] v) {
+    public EdgeList(int[] u, int[] v) {
         ne = u.length;
         this.u = u;
         this.v = v;
@@ -47,7 +49,7 @@ public class EdgeList {
     }
 
     // EdgeList from a three lists of length N
-    public EdgeList (int[] u, int[] v, double[] weight) {
+    public EdgeList(int[] u, int[] v, double[] weight) {
         ne = u.length;
         this.u = u;
         this.v = v;
@@ -55,7 +57,7 @@ public class EdgeList {
     }
 
     // return an EdgeList from a tree
-    public EdgeList (Tree tree) {
+    public EdgeList(Tree tree) {
         ne = tree.nv - 1;
         u = new int[ne];
         v = new int[ne];
@@ -74,7 +76,7 @@ public class EdgeList {
     }
 
     // EdgeList from a graph
-    public EdgeList (Graph graph) {
+    public EdgeList(Graph graph) {
         ne = graph.ne;
 
         u = new int[ne];
