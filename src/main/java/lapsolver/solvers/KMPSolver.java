@@ -15,7 +15,6 @@ import lapsolver.Tree;
 import lapsolver.algorithms.GraphVertexRemoval;
 import lapsolver.algorithms.LDLDecomposition;
 import lapsolver.algorithms.Stretch;
-import lapsolver.lsst.SimulPathTree;
 import lapsolver.lsst.SpanningTreeStrategy;
 import lapsolver.lsst.StarDecompositionTree;
 import lapsolver.util.GraphUtils;
@@ -97,8 +96,7 @@ public class KMPSolver extends Solver {
                 GraphUtils.reciprocateWeights(reducedGraph);
                 spanningTree = treeStrategy.getTree(reducedGraph);
                 GraphUtils.reciprocateWeights(reducedGraph);
-            }
-            else { // contract the tree according to partial Cholesky
+            } else { // contract the tree according to partial Cholesky
                 spanningTree = eliminateTree(outerTree);
             }
 
@@ -185,8 +183,7 @@ public class KMPSolver extends Solver {
                 if (newRoot == -1) { // first child of root gets to be root
                     newRoot = i;
                     parent[i] = newRoot;
-                }
-                else { // other children of root must point to newRoot
+                } else { // other children of root must point to newRoot
                     parent[i] = newRoot;
                 }
             }
@@ -204,7 +201,7 @@ public class KMPSolver extends Solver {
             for (int i = 0; i < reducedGraph.deg[u]; i++) {
                 int v = reducedGraph.nbrs[u][i];
                 if (reducedParent[u] == v) {
-                    reducedWeight[u] = 1 / reducedGraph.weights[u][i] ;
+                    reducedWeight[u] = 1 / reducedGraph.weights[u][i];
                 }
             }
         }
@@ -224,8 +221,7 @@ public class KMPSolver extends Solver {
         if (childSolver == null) {
             // we are at the bottom level
             innerX = baseCaseSolver.solve(innerB);
-        }
-        else {
+        } else {
             innerX = recursiveSolver.solve(innerB);
         }
 
@@ -248,7 +244,7 @@ public class KMPSolver extends Solver {
         offEdges = TreeUtils.getOffTreeEdges(graph, spanningTree);
 
         GraphUtils.reciprocateWeights(graph);
-        StretchResult stretch = Stretch.compute(graph, spanningTree, offEdges);
+        StretchResult stretch = Stretch.compute(spanningTree, offEdges);
         GraphUtils.reciprocateWeights(graph);
 
         //Blow up graph by 4 * avgstretch * log(numRemoved)
@@ -257,11 +253,11 @@ public class KMPSolver extends Solver {
 
         // find stretches in blown-up graph
         GraphUtils.reciprocateWeights(blownUpGraph);
-        StretchResult blownUpStretch = Stretch.compute(blownUpGraph, spanningTree, offEdges);
+        StretchResult blownUpStretch = Stretch.compute(spanningTree, offEdges);
         GraphUtils.reciprocateWeights(blownUpGraph);
 
         //Expect to grab q = O(m / log(m)) edges
-        double q = oversampleScale * graph.ne / Math.pow( Math.log(graph.ne), oversampleLogExponent );
+        double q = oversampleScale * graph.ne / Math.pow(Math.log(graph.ne), oversampleLogExponent);
 
         //Assign p_e = stretch(e) / (total stretch)
         double[] p = blownUpStretch.allStretches.clone();

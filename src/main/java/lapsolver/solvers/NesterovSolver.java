@@ -9,10 +9,8 @@
 
 package lapsolver.solvers;
 
-import java.lang.Math;
 import lapsolver.algorithms.DiscreteSampler;
 import lapsolver.algorithms.Stretch;
-import lapsolver.solvers.Solver;
 import lapsolver.Graph;
 import lapsolver.Tree;
 import lapsolver.EdgeList;
@@ -20,7 +18,6 @@ import lapsolver.lsst.SpanningTreeStrategy;
 import lapsolver.solvers.kelner.DirectFlowTree;
 import lapsolver.solvers.kelner.FlowTree;
 import lapsolver.util.TreeUtils;
-import lapsolver.solvers.TreeSolver;
 
 public class NesterovSolver extends Solver {
     public Tree spanningTree;
@@ -54,7 +51,7 @@ public class NesterovSolver extends Solver {
 
         // get off-tree edges, find stretches, initialize sampler
         offEdges = TreeUtils.getOffTreeEdges(graph, spanningTree);
-        offStretch = Stretch.compute(graph, spanningTree, offEdges).allStretches;
+        offStretch = Stretch.compute(spanningTree, offEdges).allStretches;
         edgeSampler = new DiscreteSampler(offStretch);
 
         // initialize feasible flow finder for spanning tree
@@ -68,7 +65,7 @@ public class NesterovSolver extends Solver {
     // solve for x in Lx = b, with default parameters
     @Override
     public double[] solve(double[] b) {
-        return solve (b, spanningTree.nv + offEdges.ne);
+        return solve(b, spanningTree.nv + offEdges.ne);
     }
 
     // solve for x in Lx = b, with number of iterations
@@ -111,7 +108,7 @@ public class NesterovSolver extends Solver {
             double len = spanningTree.weight[v];
 
             // V = IR
-            voltages[v] = voltages[parent] - currentFlow[v]*len;
+            voltages[v] = voltages[parent] - currentFlow[v] * len;
         }
 
         // subtract mean voltage
@@ -138,14 +135,14 @@ public class NesterovSolver extends Solver {
 
             double f = currentFlow[i];
             double r = spanningTree.weight[i];
-            energy += f*f*r;
+            energy += f * f * r;
         }
 
         // sum off-tree energies
         for (int i = 0; i < offEdges.ne; i++) {
             double f = flowTree.offFlow[i];
             double r = flowTree.offEdges.weight[i];
-            energy += f*f*r;
+            energy += f * f * r;
         }
 
         return energy;

@@ -52,6 +52,10 @@ public class ConjugateGradientSolver extends Solver {
         }
     }
 
+    public ConjugateGradientSolver initialize(Graph g, double[] d) {
+        return (ConjugateGradientSolver) super.initialize(g, d);
+    }
+
     /**
      * Constructor with no preconditioner and no introspection.
      */

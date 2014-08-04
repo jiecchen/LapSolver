@@ -25,35 +25,44 @@ public class KMP2Solver extends Solver {
     private static final double Cs = 10.0;
     private static final int cStop = 1000;
     private static final double kappaC = 1.0;
-    private static final double tol = 1e-8;
     private static final int minIters = 5;
-    private static final int maxIters = 1000;
     private final SpanningTreeStrategy treeStrategy;
-    private Solver recSolver;
+    public ConjugateGradientSolver recursiveSolver;
+    private int maxIters;
+    private double tol;
+    public LinkedList<ChainEntry> chain;
 
     public KMP2Solver(SpanningTreeStrategy strategy) {
+        this(strategy, 1000);
+    }
+
+    public KMP2Solver(SpanningTreeStrategy strategy, int maxIters) {
+        this(strategy, maxIters, 1e-14);
+    }
+
+    public KMP2Solver(SpanningTreeStrategy strategy, int maxIters, double tolerance) {
         treeStrategy = strategy;
+        this.maxIters = maxIters;
+        this.tol = tolerance;
     }
 
     @Override
     public void init(Graph graph, double[] d) {
-        recSolver = buildRecursiveSolver(buildChain(this.graph = graph, this.d = d), 0);
+        chain = buildChain(this.graph = graph, this.d = d);
+        recursiveSolver = buildRecursiveSolver(chain, 0);
     }
 
     @Override
     public double[] solve(double[] b) {
-        return recSolver.solve(b);
+        return recursiveSolver.solve(b);
     }
 
-    private Solver buildRecursiveSolver(List<ChainEntry> chain, int level) {
+    private ConjugateGradientSolver buildRecursiveSolver(List<ChainEntry> chain, int level) {
         final ChainEntry current = chain.get(level);
         final int nIters = (level == 0) ? maxIters : minIters;
 
-        if (level == chain.size() - 1) {
-            Solver baseCaseSolver = new ConjugateGradientSolver(nIters, 1e-14);
-            baseCaseSolver.init(current.graph, current.delta);
-            return baseCaseSolver;
-        }
+        if (level == chain.size() - 1)
+            return new ConjugateGradientSolver(nIters, 1e-14).initialize(current.graph, current.delta);
 
         final ChainEntry next = chain.get(level + 1);
         final int numRemoved = current.graph.nv - next.graph.nv;
@@ -79,7 +88,7 @@ public class KMP2Solver extends Solver {
                 System.arraycopy(innerX, 0, outerX, numRemoved, graph.nv - numRemoved);
                 return LinearAlgebraUtils.applyPerm(invPerm, next.lMatrix.applyLTransInv(outerX));
             }
-        }.initialize(current.sparsifier, current.delta), nIters, tol).initialize(current.graph, current.delta);
+        }.initialize(current.sparsifier, current.delta), nIters, tol, true).initialize(current.graph, current.delta);
     }
 
     /**
@@ -98,16 +107,13 @@ public class KMP2Solver extends Solver {
 
         // Initialize the chain
         GraphUtils.reciprocateWeights(graph);
-        chain.add(new ChainEntry(g1, treeStrategy.getTree(graph), delta));
-        chain.getLast().lMatrix = new LDLDecomposition(g1, delta).solve(0).L;
+        chain.add(new ChainEntry(g1, treeStrategy.getTree(graph), d));
+        chain.getLast().lMatrix = new LDLDecomposition(g1, d).solve(0).L;
         GraphUtils.reciprocateWeights(graph);
 
-        ChainEntry chainEnd = chain.getLast();
-        while (chainEnd.graph.nv > cStop) {
-            Graph hGraph = incrementalSparsify(chainEnd.graph, chainEnd.tree);
-            chainEnd.sparsifier = hGraph;
-            chain.add(greedyElimination(hGraph, chainEnd.tree));
-            chainEnd = chain.getLast();
+        for (ChainEntry chainEnd = chain.getLast(); chainEnd.graph.nv > cStop; chainEnd = chain.getLast()) {
+            chainEnd.sparsifier = incrementalSparsify(chainEnd.graph, chainEnd.tree);
+            chain.add(greedyElimination(chainEnd.sparsifier, chainEnd.tree));
         }
 
         // Don't precondition at the end
@@ -150,7 +156,7 @@ public class KMP2Solver extends Solver {
 
         // Step 9: H~ = (V, L~) := SAMPLE(G', stretch_T'(E'), \xi)
         GraphUtils.reciprocateWeights(gPrime);
-        StretchResult stretch = Stretch.compute(gPrime, tPrime, TreeUtils.getOffTreeEdges(gPrime, tPrime));
+        StretchResult stretch = Stretch.compute(tPrime, TreeUtils.getOffTreeEdges(gPrime, tPrime));
         GraphUtils.reciprocateWeights(gPrime);
         EdgeList hSquiggle = sample(offTreeEdges, stretch);
 

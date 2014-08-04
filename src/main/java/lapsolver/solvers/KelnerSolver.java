@@ -12,17 +12,14 @@ import java.lang.Math;
 
 import lapsolver.algorithms.DiscreteSampler;
 import lapsolver.algorithms.Stretch;
-import lapsolver.solvers.Solver;
 import lapsolver.Graph;
 import lapsolver.Tree;
 import lapsolver.EdgeList;
 import lapsolver.lsst.SpanningTreeStrategy;
 import lapsolver.solvers.kelner.DirectFlowTree;
 import lapsolver.solvers.kelner.FlowTree;
-import lapsolver.solvers.kelner.KelnerFlowTree;
 import lapsolver.util.GraphUtils;
 import lapsolver.util.TreeUtils;
-import lapsolver.solvers.TreeSolver;
 
 public class KelnerSolver extends Solver {
     public Tree spanningTree;
@@ -60,7 +57,7 @@ public class KelnerSolver extends Solver {
 
         // get off-tree edges, find stretches, initialize sampler
         offEdges = TreeUtils.getOffTreeEdges(this.graph, spanningTree);
-        Stretch.StretchResult stretchResult = Stretch.compute(this.graph, spanningTree, offEdges);
+        Stretch.StretchResult stretchResult = Stretch.compute(spanningTree, offEdges);
         offStretch = stretchResult.allStretches;
         totalStretch = stretchResult.total + graph.ne;
         edgeSampler = new DiscreteSampler(offStretch);
@@ -78,7 +75,7 @@ public class KelnerSolver extends Solver {
     public double[] solve(double[] b) {
         int iters = (int) Math.ceil(totalStretch * Math.log(totalStretch));
         System.out.println("KelnerSolver: " + iters + " iterations");
-        return solve (b, iters);
+        return solve(b, iters);
     }
 
     // solve for x in Lx = b, with number of iterations
@@ -121,7 +118,7 @@ public class KelnerSolver extends Solver {
             double len = spanningTree.weight[v];
 
             // V = IR
-            voltages[v] = voltages[parent] - currentFlow[v]*len;
+            voltages[v] = voltages[parent] - currentFlow[v] * len;
         }
 
         // subtract mean voltage
@@ -148,14 +145,14 @@ public class KelnerSolver extends Solver {
 
             double f = currentFlow[i];
             double r = spanningTree.weight[i];
-            energy += f*f*r;
+            energy += f * f * r;
         }
 
         // sum off-tree energies
         for (int i = 0; i < offEdges.ne; i++) {
             double f = flowTree.offFlow[i];
             double r = flowTree.offEdges.weight[i];
-            energy += f*f*r;
+            energy += f * f * r;
         }
 
         return energy;
