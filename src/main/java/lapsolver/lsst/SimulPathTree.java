@@ -46,8 +46,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
         ijvJ = new int[graph.nv - 1];
         ijvV = new double[graph.nv - 1];
 
-        Random rand;
-        rand = new Random();
+        Random rand = new Random();
 
         times = new double[graph.ne];
         rates = new double[graph.ne];
