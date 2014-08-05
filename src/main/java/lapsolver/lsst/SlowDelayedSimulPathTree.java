@@ -109,10 +109,11 @@ public class SlowDelayedSimulPathTree implements SpanningTreeStrategy {
 
                 for (int i = 0; i < graph.ne; i++) {
                     if (events[i] == null) continue;
-                    if ( (uf.find(events[i].u) == comp) ^ (uf.find(events[i].v) == comp) ) {
-                        double t = events[i].time + events[i].rate * Math.log(componentSizes[comp]) * events[i].wt;
+                    if ( (uf.find(events[i].u) == comp) || (uf.find(events[i].v) == comp) ) {
+                        double t = events[i].time + events[i].rate * componentSizes[comp] * events[i].wt;
+                        times[i] = t;
                         pq.remove(events[i]);
-                        EdgeEvent ev2 = new EdgeEvent(events[i].u, events[i].v, t, ev.rate, events[i].wt);
+                        EdgeEvent ev2 = new EdgeEvent(events[i].u, events[i].v, t, events[i].rate, events[i].wt);
                         pq.add(ev2);
                         events[i] = ev2;
                     }
