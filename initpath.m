@@ -10,5 +10,5 @@ paths = strsplit(genpath('matlab'), ':');
 paths = paths(1:end-1); % get rid of the terminating ''
 
 for i = 1:length(paths)
-    addpath([root, paths(i)]);
+    addpath([root, paths{i}]);
 end
