@@ -196,7 +196,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
 	ijvI = new int[graph.nv-1];
 	ijvJ = new int[graph.nv-1];
 	ijvV = new double[graph.nv-1];
-	
+
 	Random rand;
 	rand = new Random();
 
@@ -209,13 +209,13 @@ public class SimulPathTree implements SpanningTreeStrategy {
 	}
 
 	int ijvInd = 0;
-	
+
 	PriorityQueue<NodeEvent> pq = new PriorityQueue<>(graph.nv, new Comparator<NodeEvent>() {
 		public int compare(NodeEvent X, NodeEvent Y) {
 		    return (X.time > Y.time ? 1 : -1 );
 		} });
 
-	
+
 	// load up the pq with events for every vertex
 	for (int u = 0; u < graph.nv; u++) {
 	    for (int i = 0; i < graph.deg[u]; i++) {
@@ -226,12 +226,12 @@ public class SimulPathTree implements SpanningTreeStrategy {
 		    leastRate[permutation] = rates[u];
 		    NodeEvent ev = new NodeEvent(permutation, u, t, rates[u]);
 		    pq.add(ev);
-		    
+
 		}
 	    }
 	}
 
-	
+
 	UnionFind uf = new UnionFind(graph.nv);
 
 	while (ijvInd < graph.nv-1) {
@@ -263,7 +263,7 @@ public class SimulPathTree implements SpanningTreeStrategy {
 
 	    }
 	}
-	
+
 	Graph wg = new Graph();
 	wg.fromMatlab(ijvI,ijvJ,ijvV);
 
