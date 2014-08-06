@@ -61,13 +61,11 @@ public class SlowDelayedSimulPathTree implements SpanningTreeStrategy {
 
         TreeSet<EdgeEvent> pq = new TreeSet<>(new Comparator<EdgeEvent>() {
             public int compare(EdgeEvent X, EdgeEvent Y) {
-                if (X.time * X.number == Y.time * Y.number) {
-                    if (X.time == Y.time) {
-                        if (X.u == Y.u) return Integer.compare(X.v, Y.v);
-                        return Integer.compare(X.u, Y.u);
-                    }
+                if (X.time == Y.time) {
+                    if (X.u == Y.u) return Integer.compare(X.v, Y.v);
+                    return Integer.compare(X.u, Y.u);
                 }
-                return Double.compare(X.time * X.number, Y.time * Y.number);
+                return Double.compare(X.time, Y.time);
             }
         });
 
@@ -81,7 +79,7 @@ public class SlowDelayedSimulPathTree implements SpanningTreeStrategy {
                     double wt = graph.weights[u][i];
                     times[e] = rate * wt;
 
-                    EdgeEvent ev = new EdgeEvent(u, v, rate * wt, rate, wt);
+                    EdgeEvent ev = new EdgeEvent(u, v, 1, rate * wt, rate, wt);
                     events[e] = ev;
                     pq.add(ev);
                 }
@@ -116,7 +114,7 @@ public class SlowDelayedSimulPathTree implements SpanningTreeStrategy {
             for (int i = 0; i < graph.deg[u]; i++) {
                 int e = edgeNums[u][i];
                 double wt = graph.weights[u][i];
-                double t = ev.time + ev.rate * ev.number * wt;
+                double t = ev.time + rateFunction(ev) * wt;
 
                 t += rand.nextDouble() * perturbEpsilon;
 
@@ -127,7 +125,7 @@ public class SlowDelayedSimulPathTree implements SpanningTreeStrategy {
                     if (events[e] != null)
                         pq.remove(events[e]);
 
-                    EdgeEvent ev2 = new EdgeEvent(u, graph.nbrs[u][i], t, ev.rate, wt);
+                    EdgeEvent ev2 = new EdgeEvent(u, graph.nbrs[u][i], ev.number, t, ev.rate, wt);
                     pq.add(ev2);
                     events[e] = ev2;
                 }
@@ -137,7 +135,7 @@ public class SlowDelayedSimulPathTree implements SpanningTreeStrategy {
             for (int i = 0; i < graph.deg[v]; i++) {
                 int e = edgeNums[v][i];
                 double wt = graph.weights[v][i];
-                double t = ev.time + ev.rate * ev.number * wt;
+                double t = ev.time + rateFunction(ev) * wt;
 
                 t += rand.nextDouble() * perturbEpsilon;
 
@@ -148,7 +146,7 @@ public class SlowDelayedSimulPathTree implements SpanningTreeStrategy {
                     if (events[e] != null)
                         pq.remove(events[e]);
 
-                    EdgeEvent ev2 = new EdgeEvent(v, graph.nbrs[v][i], t, ev.rate, wt);
+                    EdgeEvent ev2 = new EdgeEvent(v, graph.nbrs[v][i], ev.number, t, ev.rate, wt);
                     pq.add(ev2);
                     events[e] = ev2;
                 }
@@ -159,20 +157,8 @@ public class SlowDelayedSimulPathTree implements SpanningTreeStrategy {
         return new EdgeList(ijvI, ijvJ, ijvV);
     }
 
-    public class NodeEvent {
-        int node;
-        int from;
-        double time;
-        double rate;
-        double wt;
-
-        public NodeEvent(int node, int from, double time, double rate, double wt) {
-            this.node = node;
-            this.from = from;
-            this.time = time;
-            this.rate = rate;
-            this.wt = wt;
-        }
+    public double rateFunction(SlowDelayedSimulPathTree.EdgeEvent ev) {
+        return ev.rate * ev.number;
     }
 
     public class EdgeEvent {
@@ -183,13 +169,14 @@ public class SlowDelayedSimulPathTree implements SpanningTreeStrategy {
         double rate;
         double wt;
 
-        public EdgeEvent(int u, int v, double time, double rate, double wt) {
+        public EdgeEvent(int u, int v, int number, double time, double rate, double wt) {
             this.u = u;
             this.v = v;
-            this.number = 1;
+            this.number = number;
             this.time = time;
             this.rate = rate;
             this.wt = wt;
         }
     }
+
 }
