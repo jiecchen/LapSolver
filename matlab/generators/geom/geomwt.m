@@ -6,7 +6,7 @@ if nargin < 3
 end
 
 [i, j] = find(a);
-norms = sum(abs(xy(i,:) - xy(j,:)) .^ p, 2) .^ (1/p);
+norms = sum(abs(xy(i,:) - xy(j,:)) .^ p, 2) .^ (-1/p);
 n = length(a);
 b = sparse(i, j, norms, n, n);
 
