@@ -22,7 +22,7 @@ import java.util.Random;
 import java.util.TreeSet;
 
 public class SlowDelayedSimulPathTree implements SpanningTreeStrategy {
-    public double[] times;
+    public double[] edgeCosts;
     public double[] rates;
     public int[] ijvI;
     public int[] ijvJ;
@@ -40,7 +40,7 @@ public class SlowDelayedSimulPathTree implements SpanningTreeStrategy {
 
         Random rand = new Random();
 
-        times = new double[graph.ne];
+        edgeCosts = new double[graph.ne];
         rates = new double[graph.ne];
         EdgeEvent[] events = new EdgeEvent[graph.ne];
 
@@ -61,11 +61,11 @@ public class SlowDelayedSimulPathTree implements SpanningTreeStrategy {
 
         TreeSet<EdgeEvent> pq = new TreeSet<>(new Comparator<EdgeEvent>() {
             public int compare(EdgeEvent X, EdgeEvent Y) {
-                if (X.time == Y.time) {
+                if (costFunction(X) == costFunction(Y)) {
                     if (X.u == Y.u) return Integer.compare(X.v, Y.v);
                     return Integer.compare(X.u, Y.u);
                 }
-                return Double.compare(X.time, Y.time);
+                return Double.compare(costFunction(X), costFunction(Y));
             }
         });
 
@@ -77,9 +77,9 @@ public class SlowDelayedSimulPathTree implements SpanningTreeStrategy {
                     double rate = rand.nextDouble();
                     int e = edgeNums[u][i];
                     double wt = graph.weights[u][i];
-                    times[e] = rate * wt;
+                    edgeCosts[e] = rate * wt;
 
-                    EdgeEvent ev = new EdgeEvent(u, v, 1, rate * wt, rate, wt);
+                    EdgeEvent ev = new EdgeEvent(u, v, 1, rate, wt);
                     events[e] = ev;
                     pq.add(ev);
                 }
@@ -88,6 +88,9 @@ public class SlowDelayedSimulPathTree implements SpanningTreeStrategy {
         int ijvInd = 0;
 
         UnionFind uf = new UnionFind(graph.nv);
+
+       // for (EdgeEvent it : pq)
+         //   System.out.println(it.u + " " + it.v + " " + it.number + " " + it.rate + " " + it.wt);
 
         while (ijvInd < graph.nv - 1) {
             EdgeEvent ev = pq.pollFirst();
@@ -110,22 +113,23 @@ public class SlowDelayedSimulPathTree implements SpanningTreeStrategy {
                 if (uf.find(i) == uf.find(u))
                     ev.number++;
 
+//            System.out.println(ev.number + " " + ev.wt + " " + ev.rate);
+
             // for each edge attached to u, see if gives a lower time
             for (int i = 0; i < graph.deg[u]; i++) {
                 int e = edgeNums[u][i];
                 double wt = graph.weights[u][i];
-                double t = ev.time + rateFunction(ev) * wt;
+                double c = costFunction(ev);
+                double per = rand.nextDouble() * perturbEpsilon;
 
-                t += rand.nextDouble() * perturbEpsilon;
-
-                if (t < times[e]) {
-                    times[e] = t;
+                if (c < edgeCosts[e]) {
+                    edgeCosts[e] = c;
 
                     // if was on pq, remove it
                     if (events[e] != null)
                         pq.remove(events[e]);
 
-                    EdgeEvent ev2 = new EdgeEvent(u, graph.nbrs[u][i], ev.number, t, ev.rate, wt);
+                    EdgeEvent ev2 = new EdgeEvent(u, graph.nbrs[u][i], ev.number, ev.rate + per, wt);
                     pq.add(ev2);
                     events[e] = ev2;
                 }
@@ -135,18 +139,17 @@ public class SlowDelayedSimulPathTree implements SpanningTreeStrategy {
             for (int i = 0; i < graph.deg[v]; i++) {
                 int e = edgeNums[v][i];
                 double wt = graph.weights[v][i];
-                double t = ev.time + rateFunction(ev) * wt;
+                double c = costFunction(ev);
+                double per = rand.nextDouble() * perturbEpsilon;
 
-                t += rand.nextDouble() * perturbEpsilon;
-
-                if (t < times[e]) {
-                    times[e] = t;
+                if (c < edgeCosts[e]) {
+                    edgeCosts[e] = c;
 
                     // if was on pq, remove it
                     if (events[e] != null)
                         pq.remove(events[e]);
 
-                    EdgeEvent ev2 = new EdgeEvent(v, graph.nbrs[v][i], ev.number, t, ev.rate, wt);
+                    EdgeEvent ev2 = new EdgeEvent(v, graph.nbrs[v][i], ev.number, ev.rate + per, wt);
                     pq.add(ev2);
                     events[e] = ev2;
                 }
@@ -157,23 +160,21 @@ public class SlowDelayedSimulPathTree implements SpanningTreeStrategy {
         return new EdgeList(ijvI, ijvJ, ijvV);
     }
 
-    public double rateFunction(SlowDelayedSimulPathTree.EdgeEvent ev) {
-        return ev.rate * ev.number;
+    public double costFunction(SlowDelayedSimulPathTree.EdgeEvent ev) {
+        return ev.rate * Math.sqrt(ev.number) * ev.wt;
     }
 
     public class EdgeEvent {
         int u;
         int v;
         int number;
-        double time;
         double rate;
         double wt;
 
-        public EdgeEvent(int u, int v, int number, double time, double rate, double wt) {
+        public EdgeEvent(int u, int v, int number, double rate, double wt) {
             this.u = u;
             this.v = v;
             this.number = number;
-            this.time = time;
             this.rate = rate;
             this.wt = wt;
         }
