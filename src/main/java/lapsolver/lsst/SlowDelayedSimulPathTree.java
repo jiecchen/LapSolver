@@ -15,15 +15,10 @@ package lapsolver.lsst;
 import lapsolver.EdgeList;
 import lapsolver.Graph;
 import lapsolver.Tree;
-import lapsolver.algorithms.UnionFind;
 
-import java.util.Comparator;
 import java.util.Random;
-import java.util.TreeSet;
 
 public class SlowDelayedSimulPathTree implements SpanningTreeStrategy {
-    public double[] edgeCosts;
-    public double[] rates;
     public int[] ijvI;
     public int[] ijvJ;
     public double[] ijvV;
@@ -38,146 +33,93 @@ public class SlowDelayedSimulPathTree implements SpanningTreeStrategy {
         ijvJ = new int[graph.nv - 1];
         ijvV = new double[graph.nv - 1];
 
-        Random rand = new Random();
-
-        edgeCosts = new double[graph.ne];
-        rates = new double[graph.ne];
-        EdgeEvent[] events = new EdgeEvent[graph.ne];
-
-        int edgeNum = 0;
-        int[][] edgeNums = new int[graph.nv][];
-        for (int u = 0; u < graph.nv; u++) {
-            edgeNums[u] = new int[graph.deg[u]];
-            for (int i = 0; i < graph.deg[u]; i++) {
-                int v = graph.nbrs[u][i];
-                if (u < v)
-                    edgeNums[u][i] = edgeNum++;
-                else
-                    edgeNums[u][i] = edgeNums[v][graph.backInd[u][i]];
-            }
-        }
-
         double perturbEpsilon = 1. / graph.ne;
 
-        TreeSet<EdgeEvent> pq = new TreeSet<>(new Comparator<EdgeEvent>() {
-            public int compare(EdgeEvent X, EdgeEvent Y) {
-                if (costFunction(X) == costFunction(Y)) {
-                    if (X.u == Y.u) return Integer.compare(X.v, Y.v);
-                    return Integer.compare(X.u, Y.u);
+        EdgeList edges = new EdgeList(graph);
+
+        double[] rates = new double[graph.ne];
+        Random rand = new Random();
+        for (int i = 0; i < graph.ne; i++)
+            rates[i] = rand.nextDouble();
+
+        int[] taken = new int[graph.ne];
+        for (int i = 0; i < graph.ne; i++)
+            taken[i] = 0;
+
+        int[] comp = new int[graph.nv];
+        int[] compSize = new int[graph.nv];
+        for (int i = 0; i < graph.nv; i++) {
+            comp[i] = i;
+            compSize[i] = 1;
+        }
+
+        for (int treeCount = 0; treeCount < graph.nv - 1; treeCount++) {
+            double vmin = -1;
+            int index = 0;
+            for (int i = 0; i < graph.ne; i++)
+                if (taken[i] == 0 && comp[edges.u[i]] != comp[edges.v[i]]) {
+                    int totalCompSize = compSize[comp[edges.u[i]]] + compSize[comp[edges.v[i]]];
+                    if (costFunction(rates[i], edges.weight[i], totalCompSize) < vmin || vmin == -1) {
+                        vmin = costFunction(rates[i], edges.weight[i], totalCompSize);
+                        index = i;
+                    }
                 }
-                return Double.compare(costFunction(X), costFunction(Y));
-            }
-        });
+            taken[index] = 1;
 
-        for (int u = 0; u < graph.nv; u++)
-            for (int i = 0; i < graph.deg[u]; i++) {
-                int v = graph.nbrs[u][i];
-                // so, we include each edge just once
-                if (u < v) {
-                    double rate = rand.nextDouble();
-                    int e = edgeNums[u][i];
-                    double wt = graph.weights[u][i];
-                    edgeCosts[e] = rate * wt;
+            //System.out.println(index + " " + graph.nv + " " + graph.ne);
 
-                    EdgeEvent ev = new EdgeEvent(u, v, 1, rate, wt);
-                    events[e] = ev;
-                    pq.add(ev);
-                }
-            }
+            //System.out.println(rates[index] + " " + edges.weight[index] + " " + (compSize[comp[edges.u[index]]] + compSize[comp[edges.v[index]]]));
+            //System.out.println(costFunction(rates[index], edges.weight[index], compSize[comp[edges.u[index]]] + compSize[comp[edges.v[index]]]));
 
-        int ijvInd = 0;
+            // unite the components determined by the edge
+            //System.out.println(comp[edges.u[index]] + " " + comp[edges.v[index]] + " " + compSize[comp[edges.u[index]]]);
 
-        UnionFind uf = new UnionFind(graph.nv);
-
-       // for (EdgeEvent it : pq)
-         //   System.out.println(it.u + " " + it.v + " " + it.number + " " + it.rate + " " + it.wt);
-
-        while (ijvInd < graph.nv - 1) {
-            EdgeEvent ev = pq.pollFirst();
-
-            int u = ev.u;
-            int v = ev.v;
-
-            // if in different comps, add that edge
-            if (uf.find(u) != uf.find(v)) {
-                uf.union(u, v);
-
-                ijvI[ijvInd] = u;
-                ijvJ[ijvInd] = v;
-                ijvV[ijvInd] = ev.wt;
-                ijvInd++;
-            }
-
-            ev.number = 0;
+            int c = comp[edges.u[index]];
             for (int i = 0; i < graph.nv; i++)
-                if (uf.find(i) == uf.find(u))
-                    ev.number++;
+                if (comp[i] == c)
+                    comp[i] = comp[edges.v[index]];
 
-//            System.out.println(ev.number + " " + ev.wt + " " + ev.rate);
+            // update the component sizes
+            compSize[edges.v[index]] += compSize[c];
+            compSize[c] = 0;
+            c = comp[edges.v[index]];
 
-            // for each edge attached to u, see if gives a lower time
-            for (int i = 0; i < graph.deg[u]; i++) {
-                int e = edgeNums[u][i];
-                double wt = graph.weights[u][i];
-                double c = costFunction(ev);
-                double per = rand.nextDouble() * perturbEpsilon;
-
-                if (c < edgeCosts[e]) {
-                    edgeCosts[e] = c;
-
-                    // if was on pq, remove it
-                    if (events[e] != null)
-                        pq.remove(events[e]);
-
-                    EdgeEvent ev2 = new EdgeEvent(u, graph.nbrs[u][i], ev.number, ev.rate + per, wt);
-                    pq.add(ev2);
-                    events[e] = ev2;
+            // gets the smallest rate in the component
+            double bestRate = -1;
+            for (int i = 0; i < graph.ne; i++)
+                if (comp[edges.u[i]] == comp[c] && comp[edges.v[i]] == comp[c]) {
+                    if (bestRate == -1 || bestRate > rates[i]) {
+                        bestRate = rates[i];
+                    }
                 }
-            }
 
-            // for each edge attached to v, see if gives a lower time
-            for (int i = 0; i < graph.deg[v]; i++) {
-                int e = edgeNums[v][i];
-                double wt = graph.weights[v][i];
-                double c = costFunction(ev);
-                double per = rand.nextDouble() * perturbEpsilon;
-
-                if (c < edgeCosts[e]) {
-                    edgeCosts[e] = c;
-
-                    // if was on pq, remove it
-                    if (events[e] != null)
-                        pq.remove(events[e]);
-
-                    EdgeEvent ev2 = new EdgeEvent(v, graph.nbrs[v][i], ev.number, ev.rate + per, wt);
-                    pq.add(ev2);
-                    events[e] = ev2;
+            // update all edges in the component with the smallest rate
+            for (int i = 0; i < graph.ne; i++)
+                if (comp[edges.u[i]] == comp[c] && comp[edges.v[i]] == comp[c]) {
+                    rates[i] = bestRate;
                 }
-            }
 
+            // update edges surrounding the component
+            for (int i = 0; i < graph.ne; i++)
+                if ((comp[edges.u[i]] == c || comp[edges.v[i]] == c) && (comp[edges.u[i]] != comp[edges.v[i]])) {
+                    double perturbation = rand.nextDouble() * perturbEpsilon;
+                    if (rates[i] > bestRate + perturbation)
+                        rates[i] = bestRate + perturbation;
+
+                    //if (rates[i] > edges.weight[index] + perturbation)
+                    //    rates[i] = edges.weight[index] + perturbation;
+                }
+
+            ijvI[treeCount] = edges.u[index];
+            ijvJ[treeCount] = edges.v[index];
+            ijvV[treeCount] = edges.weight[index];
         }
 
         return new EdgeList(ijvI, ijvJ, ijvV);
     }
 
-    public double costFunction(SlowDelayedSimulPathTree.EdgeEvent ev) {
-        return ev.rate * Math.sqrt(ev.number) * ev.wt;
+
+    double costFunction(double rate, double weight, int compSize) {
+        return rate * weight * compSize * Math.log(compSize);
     }
-
-    public class EdgeEvent {
-        int u;
-        int v;
-        int number;
-        double rate;
-        double wt;
-
-        public EdgeEvent(int u, int v, int number, double rate, double wt) {
-            this.u = u;
-            this.v = v;
-            this.number = number;
-            this.rate = rate;
-            this.wt = wt;
-        }
-    }
-
 }
