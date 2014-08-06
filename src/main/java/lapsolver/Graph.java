@@ -43,10 +43,13 @@ public class Graph {
 
     //-----------------------------
     //  backInd[x][i] = the position of x in the neighbor list of u = graph.nbrs[x][i]
-    //  nbrs[nbrs[x][i],backInd[x][i]] = x
+    //  nbrs[nbrs[x][i]][backInd[x][i]] = x
     public int[][] backInd;
 
-    public Graph() { }
+    // get graph from tree
+    public Graph(Tree tree) {
+        this(new EdgeList(tree));
+    }
 
     // constructor from edge list
     public Graph(EdgeList edges) {
@@ -119,11 +122,6 @@ public class Graph {
         }
     }
 
-    // get graph from tree
-    public Graph(Tree tree) {
-        this(new EdgeList(tree));
-    }
-
     // copy constructor (perform a deep copy)
     public Graph(Graph other) {
         nv = other.nv;
@@ -139,5 +137,22 @@ public class Graph {
             weights[i] = other.weights[i].clone();
             backInd[i] = other.backInd[i].clone();
         }
+    }
+
+    public void setWeight(int u, int v, double weight) {
+        int iV = -1;
+        for (int i = 0; i < deg[u]; i++)
+            if (nbrs[u][i] == v) {
+                iV = i;
+                break;
+            }
+        if (iV == -1)
+            throw new RuntimeException("Error! (u,v) does not exist in graph.");
+        setWeightByIndex(u, iV, weight);
+    }
+
+    public void setWeightByIndex(int u, int i, double weight) {
+        weights[u][i] = weight;
+        weights[nbrs[u][i]][backInd[u][i]] = weight;
     }
 }

@@ -5,7 +5,6 @@
  * @date Fri Jun 13 2014
  *
  * An implementation of the star decomposition tree algorithm in EEST05.
- * Just a skeleton for now.
  */
 
 package lapsolver.lsst;
