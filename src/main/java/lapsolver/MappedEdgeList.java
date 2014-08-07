@@ -1,4 +1,8 @@
 /**
+ * @file MappedEdgeList.java
+ * @author Cyril Zhang <cyril.zhang@yale.edu>
+ * @date Thu Aug 7 2014
+ *
  * A bijective mapping between edge list and adjacency list graph representations.
  */
 
@@ -8,8 +12,8 @@ import lapsolver.EdgeList;
 import lapsolver.Graph;
 
 public class MappedEdgeList {
-    public EdgeList edges;
-    public int[][] index;
+    public EdgeList edges; // a flat EdgeList with g.ne elements
+    public int[][] index; // edges[index[u][i]] = i-th edge going out of u
 
     public MappedEdgeList (Graph graph) {
         edges = new EdgeList(graph.ne);
