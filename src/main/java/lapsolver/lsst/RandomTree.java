@@ -1,9 +1,10 @@
 /**
- * @file RandomTree.java
+ * @file KruskalTree.java
  * @author Alex Reinking <alexander.reinking@yale.edu>
- * @date Fri Jun 13 2014
+ * @date Tue Jun 3 2014
  *
- * A random spanning tree. Very high stretch, probably ;)
+ * A not-so-low-stretch spanning tree strategy, which just uses Kruskal's algorithm.
+ * This will not produce good low stretch spanning trees.
  *
  */
 package lapsolver.lsst;
@@ -13,40 +14,23 @@ import lapsolver.Graph;
 import lapsolver.Tree;
 import lapsolver.algorithms.UnionFind;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class RandomTree implements SpanningTreeStrategy {
     @Override
     public Tree getTree(Graph graph) {
-        UnionFind disjointSet = new UnionFind(graph.nv);
-        EdgeList treeEdges = new EdgeList(graph.nv - 1);
+        return new Tree(getTreeEdges(graph));
+    }
 
-        // Compute index
-        EdgeList inputEdges = new EdgeList(graph);
+    public EdgeList getTreeEdges(Graph graph) {
+        EdgeList edges = new EdgeList(graph);
+        double[] randTimes = new double[graph.ne];
 
-        final double[] weights = inputEdges.weight;
-        List<Integer> indices = new ArrayList<>(weights.length);
-        for (int i = 0; i < weights.length; i++) {
-            indices.add(i, i);
+        Random rand = new Random();
+        for (int i = 0; i < graph.ne; i++) {
+            randTimes[i] = rand.nextDouble();
         }
 
-        Collections.shuffle(indices);
-
-        int currentEdge = 0;
-        for (Integer edge : indices) {
-            int u = inputEdges.u[edge];
-            int v = inputEdges.v[edge];
-
-            if (disjointSet.find(u) != disjointSet.find(v)) {
-                disjointSet.union(u, v);
-
-                treeEdges.u[currentEdge] = u;
-                treeEdges.v[currentEdge] = v;
-                treeEdges.weight[currentEdge++] = weights[edge];
-            }
-        }
-        return new Tree(treeEdges);
+        return UnionFindTreeBuilder.buildTree(edges, graph.nv, randTimes);
     }
 }
