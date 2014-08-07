@@ -19,12 +19,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class KruskalTree implements SpanningTreeStrategy {
+public class KruskalTree extends OrderedSpanningTreeStrategy {
     @Override
-    public Tree getTree(Graph graph) {
-        return new Tree(getTreeEdges(graph));
-    }
-
     public EdgeList getTreeEdges(Graph graph) {
         EdgeList edges = new EdgeList(graph);
         return UnionFindTreeBuilder.buildTree(edges, graph.nv, edges.weight);

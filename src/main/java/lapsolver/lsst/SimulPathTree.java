@@ -24,7 +24,7 @@ import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.TreeSet;
 
-public class SimulPathTree implements SpanningTreeStrategy {
+public class SimulPathTree extends OrderedSpanningTreeStrategy {
     // times[node] is time at which node should fire
     public double[] times;
     public double[] rates;
@@ -34,10 +34,6 @@ public class SimulPathTree implements SpanningTreeStrategy {
     public double[] ijvV;
 
     @Override
-    public Tree getTree(Graph graph) {
-        return new Tree(getTreeEdges(graph));
-    }
-
     public EdgeList getTreeEdges(Graph graph) {
 //        Logger logger = new Logger();
 //        logger.start("SimulPathTree.log");

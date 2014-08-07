@@ -16,12 +16,8 @@ import lapsolver.algorithms.UnionFind;
 
 import java.util.*;
 
-public class RandomTree implements SpanningTreeStrategy {
+public class RandomTree extends OrderedSpanningTreeStrategy {
     @Override
-    public Tree getTree(Graph graph) {
-        return new Tree(getTreeEdges(graph));
-    }
-
     public EdgeList getTreeEdges(Graph graph) {
         EdgeList edges = new EdgeList(graph);
         double[] randTimes = new double[graph.ne];
