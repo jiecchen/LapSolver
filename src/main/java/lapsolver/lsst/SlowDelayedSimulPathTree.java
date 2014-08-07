@@ -1,12 +1,9 @@
 /**
  * @file SimulPathTree.java
- * @author Daniel Spielman <spielman@cs.yale.edu>
- * @date Fri May 30 2014
+ * @author Serban Stan <serban.stan@yale.edu>
+ * @date Wed Aug 6 2014
  *
- * An attempt at a low-stretch spanning tree, formed by
- * growing shortest path trees at different rates.
- *
- *  javac -classpath ~/rep/YINSmat/java/:. SimulPathTree.java
+ * Implements the slowing down of component growth in Dan's SimulPathTree algorithm.
  *
  */
 
@@ -120,6 +117,6 @@ public class SlowDelayedSimulPathTree implements SpanningTreeStrategy {
 
 
     double costFunction(double rate, double weight, int compSize) {
-        return rate * weight * compSize * Math.log(compSize);
+        return rate * weight * compSize;
     }
 }
