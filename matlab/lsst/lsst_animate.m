@@ -1,6 +1,8 @@
 function lsst_animate(a, xy, strat, fps)
 %LSST_ANIMATE Shows an LSST building animation.
     import lapsolver.lsst.*;
+    import lapsolver.util.*;
+    
     if nargin < 2
         xy = specxy(a);
     end
@@ -11,7 +13,9 @@ function lsst_animate(a, xy, strat, fps)
         fps = 30;
     end
     
-    edges = strat.getTreeEdges(a2g(a));
+    g = a2g(a);
+    GraphUtils.reciprocateWeights(g);
+    edges = strat.getTreeEdges(g);
     gplot(a, xy, 'c');
     hold on;
     

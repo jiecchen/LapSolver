@@ -151,6 +151,18 @@ public class Graph {
         setWeightByIndex(u, iV, weight);
     }
 
+    public double getWeight(int u, int v) {
+        int iV = -1;
+        for (int i = 0; i < deg[u]; i++)
+            if (nbrs[u][i] == v) {
+                iV = i;
+                break;
+            }
+        if (iV == -1)
+            throw new RuntimeException("Error! (u,v) does not exist in graph.");
+        return weights[u][iV];
+    }
+
     public void setWeightByIndex(int u, int i, double weight) {
         weights[u][i] = weight;
         weights[nbrs[u][i]][backInd[u][i]] = weight;
