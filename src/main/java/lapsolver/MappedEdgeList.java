@@ -20,13 +20,14 @@ public class MappedEdgeList {
         int edgePos = 0;
 
         // build array in same shape as adjacency list
+        index = new int[graph.nv][];
         for (int u = 0; u < graph.nv; u++) {
             index[u] = new int[graph.deg[u]];
         }
 
         // traverse edges
         for (int u = 0; u < graph.nv; u++) {
-            for (int i = 0; i < graph.deg[i]; i++) {
+            for (int i = 0; i < graph.deg[u]; i++) {
                 int v = graph.nbrs[u][i];
                 if (u < v) { // first time seeing this edge: add it
                     edges.u[edgePos] = u;
