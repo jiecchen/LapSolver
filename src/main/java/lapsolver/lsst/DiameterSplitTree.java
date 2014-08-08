@@ -16,25 +16,26 @@ import lapsolver.algorithms.ShortestPathTree;
 import java.util.Arrays;
 
 public class DiameterSplitTree implements SpanningTreeStrategy{
-    public int total = 0;
-
     @Override
     public Tree getTree(Graph graph) {
-        total = graph.nv;
-
-        return new Tree(recTree(graph));
+        return new Tree(getTreeEdges(graph));
     }
 
-    public Tree recTree(Graph graph) {
-        if (graph.nv < 50) {
+    public EdgeList getTreeEdges(Graph graph) {
+        if (graph.nv < 20) {
             SpanningTreeStrategy lsst = new StarDecompositionTree();
-            return lsst.getTree(graph);
+            EdgeList treeEdges = new EdgeList(lsst.getTree(graph));
+            return treeEdges;
         }
 
         // find diameter in graph
         int v = getFurthestVertex(0, graph);
         int u = getFurthestVertex(v, graph);
         v = getFurthestVertex(u, graph);
+
+        int start = u, stop = v;
+        u = getOneThirdVertex(start, stop, graph);
+        v = getOneThirdVertex(stop, start, graph);
 
         // create the split
         ShortestPathTree sptU = new ShortestPathTree(graph, u);
@@ -56,10 +57,12 @@ public class DiameterSplitTree implements SpanningTreeStrategy{
                 int p = i;
                 int q = graph.nbrs[i][j];
 
-                if (side[p] == 0 && side[q] == 0)
-                    sizeU++;
-                if (side[p] == 1 && side[q] == 1)
-                    sizeV++;
+                if (p < q) {
+                    if (side[p] == 0 && side[q] == 0)
+                        sizeU++;
+                    if (side[p] == 1 && side[q] == 1)
+                        sizeV++;
+                }
             }
 
         EdgeList sideU = new EdgeList(sizeU);
@@ -74,21 +77,23 @@ public class DiameterSplitTree implements SpanningTreeStrategy{
                 int p = i;
                 int q = graph.nbrs[i][j];
 
-                if (side[p] == 0 && side[q] == 0) {
-                    verticesU[p] = 1;
-                    verticesU[q] = 1;
+                if (p < q) {
+                    if (side[p] == 0 && side[q] == 0) {
+                        verticesU[p] = 1;
+                        verticesU[q] = 1;
 
-                    sideU.u[sizeU] = p;
-                    sideU.v[sizeU] = q;
-                    sideU.weight[sizeU++] = graph.weights[i][j];
-                }
-                if (side[p] == 1 && side[q] == 1) {
-                    verticesV[p] = 1;
-                    verticesV[q] = 1;
+                        sideU.u[sizeU] = p;
+                        sideU.v[sizeU] = q;
+                        sideU.weight[sizeU++] = graph.weights[i][j];
+                    }
+                    if (side[p] == 1 && side[q] == 1) {
+                        verticesV[p] = 1;
+                        verticesV[q] = 1;
 
-                    sideV.u[sizeV] = p;
-                    sideV.v[sizeV] = q;
-                    sideV.weight[sizeV++] = graph.weights[i][j];
+                        sideV.u[sizeV] = p;
+                        sideV.v[sizeV] = q;
+                        sideV.weight[sizeV++] = graph.weights[i][j];
+                    }
                 }
             }
 
@@ -137,24 +142,6 @@ public class DiameterSplitTree implements SpanningTreeStrategy{
         EdgeList treeEdges = new EdgeList(graph.nv);
         int cnt = 0;
 
-        int p = 0, q = 0;
-        double cost = -1;
-        for (int i = 0; i < graph.nv; i++)
-            for (int j = 0; j < graph.nbrs[i].length; j++) {
-                if (side[i] != side[graph.nbrs[i][j]]) {
-                    if (cost == -1 || graph.weights[i][j] < cost) {
-                        cost = graph.weights[i][j];
-                        p = i;
-                        q = graph.nbrs[i][j];
-                    }
-                }
-            }
-
-        treeEdges.u[0] = p;
-        treeEdges.v[0] = q;
-        treeEdges.weight[0] = cost;
-        cnt++;
-
         for (int i = 0; i < lsstU.nv; i++) {
             if (i == lsstU.root) continue;
 
@@ -171,7 +158,34 @@ public class DiameterSplitTree implements SpanningTreeStrategy{
             treeEdges.weight[cnt++] = lsstV.weight[i];
         }
 
-        return new Tree(treeEdges);
+        //System.out.println("***********");
+
+        int p = 0, q = 0;
+        double cost = -1;
+        for (int i = 0; i < graph.nv; i++)
+            for (int j = 0; j < graph.nbrs[i].length; j++) {
+                if (i < graph.nbrs[i][j] && side[i] != side[graph.nbrs[i][j]]) {
+                    //System.out.println("! " + graph.weights[i][j] + " " + i + " " + graph.nbrs[i][j]);
+
+                    if (cost == -1 || graph.weights[i][j] < cost) {
+                        cost = graph.weights[i][j];
+                        p = i;
+                        q = graph.nbrs[i][j];
+                    }
+                }
+            }
+
+        //System.out.println("**************");
+
+        //System.out.println(p + " " + q);
+
+        treeEdges.u[cnt] = p;
+        treeEdges.v[cnt] = q;
+        treeEdges.weight[cnt++] = cost;
+
+        //System.out.println(cnt + " " + graph.nv);
+
+        return treeEdges;
     }
 
     public int getFurthestVertex(int start, Graph graph) {
@@ -187,5 +201,27 @@ public class DiameterSplitTree implements SpanningTreeStrategy{
             }
 
         return index;
+    }
+
+    public int getOneThirdVertex(int start, int stop, Graph graph) {
+        ShortestPathTree spt = new ShortestPathTree(graph, start);
+        double[] distStart = spt.getDist();
+
+        spt = new ShortestPathTree(graph, stop);
+        double[] distStop = spt.getDist();
+
+        double distTotal = distStart[stop];
+
+        double vmax = 0;
+        int ret = start;
+        for (int i = 0; i < graph.nv; i++)
+            if (distStart[i] + distStop[i] == distTotal) {
+                if (distStart[i] < distTotal / 3 && distStart[i] > vmax) {
+                    vmax = distStart[i];
+                    ret = i;
+                }
+            }
+
+        return ret;
     }
 }

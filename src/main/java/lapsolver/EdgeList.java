@@ -48,7 +48,7 @@ public class EdgeList {
             this.weight[i] = 1;
     }
 
-    // EdgeList from a three lists of length N
+    // EdgeList from three lists of length N
     public EdgeList(int[] u, int[] v, double[] weight) {
         ne = u.length;
         this.u = u;
