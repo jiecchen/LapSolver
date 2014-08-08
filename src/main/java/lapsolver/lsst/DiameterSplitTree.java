@@ -22,7 +22,7 @@ public class DiameterSplitTree implements SpanningTreeStrategy{
     }
 
     public EdgeList getTreeEdges(Graph graph) {
-        if (graph.nv < 20) {
+        if (graph.nv < 5) {
             SpanningTreeStrategy lsst = new StarDecompositionTree();
             EdgeList treeEdges = new EdgeList(lsst.getTree(graph));
             return treeEdges;
@@ -34,8 +34,11 @@ public class DiameterSplitTree implements SpanningTreeStrategy{
         v = getFurthestVertex(u, graph);
 
         int start = u, stop = v;
-        u = getOneThirdVertex(start, stop, graph);
-        v = getOneThirdVertex(stop, start, graph);
+
+        // k should be smaller than 0.5
+        double k = 0.4;
+        u = getRatioVertex(k, start, stop, graph);
+        v = getRatioVertex(k, stop, start, graph);
 
         // create the split
         ShortestPathTree sptU = new ShortestPathTree(graph, u);
@@ -203,7 +206,9 @@ public class DiameterSplitTree implements SpanningTreeStrategy{
         return index;
     }
 
-    public int getOneThirdVertex(int start, int stop, Graph graph) {
+    public int getRatioVertex(double k, int start, int stop, Graph graph) {
+        //System.out.println(k);
+
         ShortestPathTree spt = new ShortestPathTree(graph, start);
         double[] distStart = spt.getDist();
 
@@ -216,7 +221,7 @@ public class DiameterSplitTree implements SpanningTreeStrategy{
         int ret = start;
         for (int i = 0; i < graph.nv; i++)
             if (distStart[i] + distStop[i] == distTotal) {
-                if (distStart[i] < distTotal / 3 && distStart[i] > vmax) {
+                if (distStart[i] < k * distTotal && distStart[i] > vmax) {
                     vmax = distStart[i];
                     ret = i;
                 }
