@@ -11,6 +11,8 @@
 
 package lapsolver;
 
+import java.util.Arrays;
+
 public class EdgeList {
     public int ne;
     public int[] u;
@@ -99,6 +101,14 @@ public class EdgeList {
                 }
             }
         }
+    }
+
+    // change number of edges, without affecting old elements
+    public void resize(int ne) {
+        this.ne = ne;
+        u = Arrays.copyOf(u, ne);
+        v = Arrays.copyOf(v, ne);
+        weight = Arrays.copyOf(weight, ne);
     }
 
 }
