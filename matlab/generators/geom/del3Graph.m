@@ -1,4 +1,4 @@
-function [a,xyz] = del3Graph(n, xyz)
+function [a,xyz] = del3Graph(xyz)
 % function [a,xyz] = del3Graph(n, type, param)
 %
 % type is 'plain', 'gauss', 'skew', 'aniso' 
@@ -7,8 +7,11 @@ function [a,xyz] = del3Graph(n, xyz)
 % return those points
 %
 
-if (nargin < 2)
-  xyz = randxy(n, 'uniform', 3);
+if isscalar(xyz)
+    n = xyz;
+    xyz = randxy(n, 'uniform', 3);
+else
+    n = length(xyz);
 end
 
 tri = delaunay(xyz(:,1), xyz(:,2), xyz(:,3));
@@ -20,5 +23,5 @@ a23 = sparse(tri(:,2),tri(:,3),1,n,n);
 a24 = sparse(tri(:,2),tri(:,4),1,n,n);
 a34 = sparse(tri(:,3),tri(:,4),1,n,n);
 
-a = double(a12 | a13 | a14 | a23 | a24 | a34);
-a = a + a';
+a = a12 | a13 | a14 | a23 | a24 | a34;
+a = double(a | a');
