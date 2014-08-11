@@ -30,4 +30,8 @@ public:
     {
         mkl_free(p);
     }
+
+    template <typename U> struct rebind {
+        typedef aligned_allocator<U, TALIGN, TBLOCK> other;
+    };
 };
