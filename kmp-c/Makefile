@@ -1,4 +1,6 @@
 CC:=icc
+BUILD:=build
+SRC:=src
 TARGET:=kmp
 MKLROOT=/opt/intel/composerxe/mkl
 MKL_CFLAGS = -ipo -openmp -mkl=parallel
@@ -12,22 +14,27 @@ else
 endif
 MKL_LFLAGS += -lpthread -lm
 
-CFLAGS:=-O3 -std=c++11 -mtune=native -march=native -I.
+CFLAGS:=-O3 -std=c++11 -mtune=native -march=native -I$(SRC)
 LFLAGS:=$(CFLAGS)
 
-SOURCES = main.cpp structures/edgelist.cpp
-OBJECTS=$(SOURCES:.cpp=.o)
+SOURCES := $(shell find $(SRC) -name *.cpp)
+OBJECTS := $(addprefix $(BUILD)/,$(notdir $(SOURCES:.cpp=.o)))
 
 .PHONY: all clean
-all: $(TARGET)
+all: $(BUILD) $(TARGET)
 clean:
+	rm -rf $(BUILD)
 	rm -f $(TARGET)
-	rm -f $(OBJECTS)
+
+$(BUILD):
+	mkdir -p $@
 
 $(TARGET): $(OBJECTS)
 	$(CC) $(LFLAGS) $^ -o $@ $(MKL_LFLAGS)
 
-%.o: %.cpp
-	$(CC) $(CFLAGS) $(MKL_CFLAGS) -c $< -o $@
+define sourcerule
+$(patsubst %.cpp, $(BUILD)/%.o, $(notdir $(1))): $(1)
+	$$(CC) $$(CFLAGS) $$(MKL_CFLAGS) -c $$< -o $$@
+endef
 
-
+$(foreach src, $(SOURCES), $(eval $(call sourcerule, $(src))))
