@@ -11,10 +11,8 @@ package lapsolver.lsst;
 
 import lapsolver.EdgeList;
 import lapsolver.Graph;
-import lapsolver.Tree;
-import lapsolver.algorithms.UnionFind;
 
-import java.util.*;
+import java.util.Random;
 
 public class RandomTree extends OrderedSpanningTreeStrategy {
     @Override

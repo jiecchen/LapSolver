@@ -14,13 +14,9 @@ package lapsolver.lsst;
 
 import lapsolver.EdgeList;
 import lapsolver.Graph;
-import lapsolver.util.GraphUtils;
-import lapsolver.util.Logger;
-import lapsolver.Tree;
 import lapsolver.algorithms.UnionFind;
 
 import java.util.Comparator;
-import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.TreeSet;
 
