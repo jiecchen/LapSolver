@@ -14,7 +14,7 @@ else
 endif
 MKL_LFLAGS += -lpthread -lm
 
-CFLAGS:=-O3 -std=c++11 -mtune=native -march=native -I$(SRC)
+CFLAGS:=-O3 -xHost -std=c++11 -I$(SRC)
 LFLAGS:=$(CFLAGS)
 
 SOURCES := $(shell find $(SRC) -name *.cpp)

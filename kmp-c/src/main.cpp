@@ -3,22 +3,16 @@
  *
  * Example benchmark for vector arithmetic
  */
-#include <sys/time.h>
-#include <mkl.h>
-#include <vector>
-#include <numeric>
 #include <cstdlib>
-#include <cstdint>
-#include <ctime>
-#include <algorithm>
 #include "util/aligned.h"
 #include "structures/graph.h"
+#include "algorithms/ShortestPathTree.h"
 
 int main(int argc, char const *argv[])
 {
-    aligned_vector<int> u = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 0, 1 };
-    aligned_vector<int> v = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 5, 8 };
-    aligned_vector<double> w = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+    aligned_vector<int> u    = { 0, 1, 2, 2, 3 };
+    aligned_vector<int> v    = { 1, 2, 3, 4, 4 };
+    aligned_vector<double> w = { 1, 1, 1, 1, 5 };
 
     EdgeList edges(u,v,w);
     Graph g(edges);
@@ -35,6 +29,12 @@ int main(int argc, char const *argv[])
         }
         printf("\n");
     }
+
+    ShortestPathTree spt(g, 4);
+    printf("Dijkstra:");
+    for (int i = 0; i < g.nv; ++i)
+        printf(" %d", spt.getParentArray()[i]);
+    printf("\n");
 
     return 0;
 }
