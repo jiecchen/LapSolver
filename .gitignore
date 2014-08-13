@@ -8,6 +8,7 @@
 *.gcda
 target/
 src/main/native/grid2benchmark
+kmp-c/build/
 
 # Eclipse
 .classpath
