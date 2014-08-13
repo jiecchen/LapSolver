@@ -16,9 +16,6 @@
 
 int main(int argc, char const *argv[])
 {
-    vmlSetMode(VML_EP);
-    srand(time(NULL));
-
     aligned_vector<int> u = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 0, 1 };
     aligned_vector<int> v = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 5, 8 };
     aligned_vector<double> w = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
@@ -26,7 +23,18 @@ int main(int argc, char const *argv[])
     EdgeList edges(u,v,w);
     Graph g(edges);
 
-    printGraph(g);
+    g.debugPrint();
+
+    printf("\nAdjacency List:\n");
+    for (int v = 0; v < g.nv; ++v) {
+        int deg = g.getDegree(v);
+        auto nbrs = g.getNeighbors(v);
+        printf("%d(%d):", v, deg);
+        for (int i = 0; i < deg; ++i) {
+            printf(" %d", nbrs[i]);
+        }
+        printf("\n");
+    }
 
     return 0;
 }
