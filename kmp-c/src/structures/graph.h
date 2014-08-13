@@ -4,7 +4,7 @@
  * Graph class for easy use with BLAS
  */
 #pragma once
-#include <util/aligned.h>
+#include "util/aligned.h"
 #include "edgelist.h"
 
 typedef struct CSRMatrix
