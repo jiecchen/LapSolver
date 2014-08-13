@@ -1,4 +1,4 @@
-#include "lapsolver_generators_cbt.h"
+#include "lapsolver_generators_CBT.h"
 #include "generators.h"
 
 JNIEXPORT void JNICALL Java_lapsolver_generators_CBT_populateCBT

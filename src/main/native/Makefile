@@ -44,7 +44,7 @@ profile-build:
 	PROF_FLAGS=-fprofile-use make all
 
 $(CLASSES):
-	cd ../java && javah -d ../native/include $@
+	cd ../java && javah -classpath . -d ../native/include $@
 
 $(LIBRARY): $(OBJECTS)
 	$(CC) $(LFLAGS) $(PROF_FLAGS) $(DYNAMIC) $^ -o $@
