@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <algorithm>
 #include "structures/graph.h"
 
 using namespace std;
@@ -8,24 +9,26 @@ using namespace std;
 class PartialCholeskyOrder
 {
 public:
-	PartialCholeskyOrder(const Graph &g);			// The constructor computes 
+	PartialCholeskyOrder(const Graph &g);					// The constructor computes 
 	~PartialCholeskyOrder();
 
-	//EnhancedArray OrderDegreeTwo();				// Gets the ordering for degree two vertices
-	//EnhancedArray OrderDegreeTwoChains();			// Orders the vertices in degree two chains
-	//EnhancedArray CheckIfCycle();					// Check if the graph is composed of a cycle
+	vector <int> DegreeTwoOrdering();						// The ordering in which the degree two vertices should be processed
+	vector <int> DegreeTwoChainOrdering();					// The ordering in which the degree two vertices present in chains should be processed
+	vector <int> CheckIfCycle();							// Checks if the graphs is a cycle. Treat this case accordingly.
 
-	//EnhancedArray OrderDegreeOne();				// Get the Cholesky order for degree one vertices
-	//EnhancedArray OrderBFS();						// Find the order using a BFS search
+	vector <int> DegreeOneOrdering(); 						// Gets the ordering for degree one vertices
 
-	//EnhancedArray ConstructPermutation();			// The answer generated should be a permutation
+	vector <int> ConstructFinalOrdering(vector <int> v);	// Turns the given vertices into a permutation
 
 private:
-	struct EnhancedArray {
-		int *v;
-		int size;
-	} answer;
-
 	int n;
 	Graph graph;
+
+	int *permutation;
+	int removal_count;
+
+	int *removed;
+    int *updated_deg;
+
+    int *un_removable;
 };
