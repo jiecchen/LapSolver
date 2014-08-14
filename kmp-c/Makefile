@@ -21,9 +21,15 @@ clean:
 	rm -f $(TARGET)
 	rm -f test/$(TARGET)
 
-test: $(TARGET)
+test: $(BUILD) $(TARGET)
 	@cp $(TARGET) test/$(TARGET)
+	@echo
+	@echo =======================
+	@echo "        TESTING"
+	@echo =======================
+	@echo
 	@make -C test
+	@echo
 
 $(BUILD):
 	mkdir -p $@
