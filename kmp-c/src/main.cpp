@@ -5,7 +5,7 @@
  */
 #include <cstdlib>
 #include <string>
-#include "structures/GraphFactory.h"
+#include "structures/GraphLoader.h"
 #include "algorithms/ShortestPathTree.h"
 #include "structures/TreeChildList.h"
 
@@ -19,7 +19,7 @@ int main(int argc, char const *argv[])
             inFileName = "inG.ijv";
         else
             inFileName = argv[1];
-        g = GraphFactory::fromFile(inFileName);
+        g = GraphLoader::fromFile(inFileName);
     }
     catch (int e)
     {
