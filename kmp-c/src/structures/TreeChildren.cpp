@@ -1,8 +1,8 @@
 #include <cstring>
 
-#include "TreeChildList.h"
+#include "TreeChildren.h"
 
-TreeChildList::TreeChildList(int nv, const int* parent) {
+TreeChildren::TreeChildren(int nv, const int* parent) {
     // offset = cumulative sums of child counts
     offset = new int[nv+1];
     memset(offset, 0, (nv+1)*sizeof(*offset));
@@ -27,7 +27,7 @@ TreeChildList::TreeChildList(int nv, const int* parent) {
     delete[] childIndex;
 }
 
-TreeChildList::~TreeChildList() {
+TreeChildren::~TreeChildren() {
     delete[] child;
     delete[] offset;
 }
