@@ -33,7 +33,7 @@ int main(int argc, char const *argv[])
     ShortestPathTree spt(g, 4);
     printf("Dijkstra:");
     for (int i = 0; i < g.nv; ++i)
-        printf(" %d", spt.getParentArray()[i]);
+        printf(" %d", spt.parent[i]);
     printf("\n");
 
     return 0;

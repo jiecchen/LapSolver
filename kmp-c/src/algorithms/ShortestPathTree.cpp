@@ -51,11 +51,11 @@ ShortestPathTree::ShortestPathTree(const Graph &g, int source)
         for (int i = 0, deg = g.getDegree(u); i < deg; ++i) {
             int v = nbrs_u[i];
             if(!settled[v]) {
-                double alt = dist[u] + wght_u[i];
+                double alt = dist[u] + 1/wght_u[i];
                 if(alt < dist[v]) {
                     nextNodes.erase(v);
                     dist[v] = alt;
-                    weight[v] = wght_u[i];
+                    weight[v] = 1/wght_u[i];
                     parent[v] = u;
                     nextNodes.insert(v);
                 }
