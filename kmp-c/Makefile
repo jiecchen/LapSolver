@@ -19,10 +19,11 @@ all: $(BUILD) $(TARGET)
 clean:
 	rm -rf $(BUILD)
 	rm -f $(TARGET)
+	rm -f test/$(TARGET)
 
 test: $(TARGET)
-	cp $(TARGET) test/$(TARGET)
-	make -C test
+	@cp $(TARGET) test/$(TARGET)
+	@make -C test
 
 $(BUILD):
 	mkdir -p $@
