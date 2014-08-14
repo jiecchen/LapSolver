@@ -18,10 +18,11 @@ Graph GraphLoader::fromFile(const string &filename)
     string line;
     ifstream ijvFile(filename);
     if (!ijvFile)
-        throw - 1;
+        throw -1;
 
     while (getline(ijvFile, line))
     {
+        if (line.empty()) break;
         istringstream iss(line);
         int a, b;
         double c;

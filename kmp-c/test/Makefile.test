@@ -1,34 +1,34 @@
 CC:=icc
 BUILD:=build
-SRC:=src
-TARGET:=libkmp.dylib
+SRC:=../../src
+TARGET:=$(shell basename $$(pwd))
 MKLROOT=/opt/intel/composerxe/mkl
 MKL_CFLAGS = -ipo -openmp -mkl=parallel
-MKL_LFLAGS = -ipo -openmp -L$(MKLROOT)/lib -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -lpthread -lm
+MKL_LFLAGS = -ipo -openmp
+MKL_LFLAGS += -L$(MKLROOT)/lib -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -lpthread -lm
 
-CFLAGS:=-O3 -xHost -std=c++11 -fPIC -I$(SRC)
+KMP_LFLAGS += -L../../ -lkmp
+
+CFLAGS:=-O3 -g -xHost -std=c++11 -I$(SRC)
 LFLAGS:=$(CFLAGS)
 
-SHARED_FLAG:=-dynamiclib
+LIBS:=$(MKL_LFLAGS) $(KMP_LFLAGS)
 
-SOURCES := $(shell find $(SRC) -name *.cpp)
+SOURCES := test.cpp
 OBJECTS := $(addprefix $(BUILD)/,$(notdir $(SOURCES:.cpp=.o)))
 
-.PHONY: all clean test
+.PHONY: all clean
 all: $(BUILD) $(TARGET)
 clean:
 	rm -rf $(BUILD)
 	rm -f $(TARGET)
-
-test: $(TARGET)
-	cp $(TARGET) test/$(TARGET)
-	make -C test
+	rm -f Makefile
 
 $(BUILD):
 	mkdir -p $@
 
 $(TARGET): $(OBJECTS)
-	$(CC) $(LFLAGS) $^ $(SHARED_FLAG) -o $@ $(MKL_LFLAGS)
+	$(CC) $(LFLAGS) $^ -o $@ $(LIBS)
 
 define sourcerule
 $(patsubst %.cpp, $(BUILD)/%.o, $(notdir $(1))): $(1)
