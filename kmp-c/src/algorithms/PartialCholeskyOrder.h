@@ -20,7 +20,6 @@ public:
 
 	vector <int> ConstructFinalOrdering(vector <int> v);	// Turns the given vertices into a permutation
 
-private:
 	int n;
 	Graph graph;
 
