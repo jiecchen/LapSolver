@@ -43,5 +43,12 @@ int main(int argc, char const *argv[])
     }
     printf("\n");
 
+    for (int i = 0; i < g.nv; ++i) {
+        for (int j = 0; j < g.getDegree(i); ++j) {
+            printf("%d ", g.getDataIndex(i,j));
+        }
+    }
+    printf("\n");
+
     return 0;
 }

@@ -22,6 +22,25 @@ Graph::Graph(Graph &&rval)
 
 }
 
+Graph& Graph::operator=(const Graph &g)
+{
+    if (this != &g)
+    {
+        nv = g.nv;
+        adj = g.adj;
+        degrees = g.degrees;
+    }
+    return *this;
+}
+
+Graph& Graph::operator=(Graph && g)
+{
+    nv = std::move(g.nv);
+    adj = std::move(g.adj);
+    degrees = std::move(g.degrees);
+    return *this;
+}
+
 Graph::Graph(EdgeList &&edges) : nv(edges.nv)
 {
     adj.nnz = edges.ne * 2;
