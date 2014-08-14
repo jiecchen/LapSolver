@@ -7,6 +7,7 @@
 #include <string>
 #include "structures/GraphFactory.h"
 #include "algorithms/ShortestPathTree.h"
+#include "structures/TreeChildList.h"
 
 int main(int argc, char const *argv[])
 {
@@ -31,7 +32,15 @@ int main(int argc, char const *argv[])
 
     ShortestPathTree spt(g, 0);
     for (int i = 0; i < g.nv; ++i)
-        printf("%d ", spt.parent[i]);
+        printf("%d,%d ", spt.parent[i], i);
+    printf("\n");
+
+    TreeChildList ch(g.nv, spt.parent);
+    for (int i = 0; i < g.nv; ++i) {
+        for (int j = ch.offset[i]; j < ch.offset[i+1]; ++j) {
+            printf("%d,%d ", i, ch.child[j]);
+        }
+    }
     printf("\n");
 
     return 0;
