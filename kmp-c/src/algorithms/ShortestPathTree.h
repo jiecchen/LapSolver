@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../structures/graph.h"
+#include "structures/Graph.h"
 
 class ShortestPathTree {
 public:

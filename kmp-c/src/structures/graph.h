@@ -4,8 +4,9 @@
  * Graph class for easy use with BLAS
  */
 #pragma once
+#include <utility>
 #include "util/aligned.h"
-#include "edgelist.h"
+#include "EdgeList.h"
 
 typedef struct CSRMatrix
 {
@@ -20,14 +21,38 @@ typedef struct CSRMatrix
 class Graph
 {
 public:
-    explicit Graph(EdgeList &edges);
-    const double * getWeights(int v) const;
-    const int * getNeighbors(int v) const;
+    Graph();
+    Graph(const Graph &rval);
+    Graph(Graph &&rval);
+
+    Graph &operator=(const Graph &g)
+    {
+        if (this != &g)
+        {
+            nv = g.nv;
+            adj = g.adj;
+            degrees = g.degrees;
+        }
+        return *this;
+    }
+
+    Graph &operator=(Graph && g)
+    {
+        nv = std::move(g.nv);
+        adj = std::move(g.adj);
+        degrees = std::move(g.degrees);
+        return *this;
+    }
+
+    explicit Graph(EdgeList &&edges);
+
+    const double *getWeights(int v) const;
+    const int *getNeighbors(int v) const;
     int getDegree(int v) const;
 
     void debugPrint();
 
-    const int nv;
+    int nv;
 
 private:
     CSRMatrix adj;

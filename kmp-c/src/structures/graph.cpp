@@ -1,9 +1,28 @@
+#include <utility>
 #include <mkl.h>
 #include <cilk/cilk.h>
 #include <math.h>
-#include "graph.h"
+#include "Graph.h"
 
-Graph::Graph(EdgeList &edges) : nv(edges.nv)
+Graph::Graph() : nv(0) { }
+
+Graph::Graph(const Graph &rval)
+    : nv(rval.nv),
+      adj(rval.adj),
+      degrees(rval.degrees)
+{
+
+}
+
+Graph::Graph(Graph &&rval)
+    : nv(std::move(rval.nv)),
+      adj(std::move(rval.adj)),
+      degrees(std::move(rval.degrees))
+{
+
+}
+
+Graph::Graph(EdgeList &&edges) : nv(edges.nv)
 {
     adj.nnz = edges.ne * 2;
     adj.dim = edges.nv;
