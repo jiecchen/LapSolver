@@ -28,6 +28,7 @@ ShortestPathTree::ShortestPathTree(const Graph &g, int source)
 {
     dist = new double[g.nv];
     parent = new int[g.nv];
+    parentIndex = new int[g.nv];
     weight = new double[g.nv];
 
     parent[source] = source;
@@ -57,6 +58,7 @@ ShortestPathTree::ShortestPathTree(const Graph &g, int source)
                     dist[v] = alt;
                     weight[v] = 1/wght_u[i];
                     parent[v] = u;
+                    parentIndex[v] = i;
                     nextNodes.insert(v);
                 }
             }
@@ -70,5 +72,6 @@ ShortestPathTree::~ShortestPathTree()
 {
     delete [] dist;
     delete [] parent;
+    delete [] parentIndex;
     delete [] weight;
 }

@@ -8,5 +8,6 @@ struct ShortestPathTree {
 
     double *dist;
     int *parent;
+    int *parentIndex;
     double *weight;
 };
