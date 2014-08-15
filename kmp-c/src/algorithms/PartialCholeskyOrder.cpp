@@ -8,6 +8,13 @@ PartialCholeskyOrder::PartialCholeskyOrder(const Graph &g) : graph(g) {
 	un_removable = new int[n];
 	updated_deg = new int[n];
 
+	for (int i = 0; i < n; i++) {
+		permutation[i] = 0;
+		removed[i] = 0;
+		un_removable[i] = 0;
+		updated_deg[i] = graph.getDegree(i);
+	}
+
 	vector <int> deg1ordering = DegreeOneOrdering();
 	vector <int> deg2ordering = DegreeTwoOrdering();
 
@@ -65,7 +72,7 @@ vector <int> PartialCholeskyOrder::DegreeTwoChainOrdering() {
 							}
 
 							if (v == u) {
-								// The chain is connected to the same vertex
+								// The chain is connected to the same vertex both at start and at finish
 								v = i;
 							}
 						}
@@ -97,20 +104,11 @@ vector <int> PartialCholeskyOrder::CheckIfCycle() {
 		return v;
 
 	// Add all but two vertices from the cycle (so that Cholesky gives a valid output)
-	int last = 0;
 	for (int i = 0; i < n; i++)
 		if (updated_deg[i] == 2)
-			last = i;
-
-	for (int i = last - 1; i >= 0; i--)
-		if (updated_deg[i] == 2) {
-			last = i;
-			break;
-		}
-
-	for (int i = 0; i < last; i++)
-		if (updated_deg[i] == 2)
 			v.push_back(i);
+	v.pop_back();
+	v.pop_back();
 
 	return v;
 }
@@ -128,7 +126,7 @@ vector <int> PartialCholeskyOrder::DegreeOneOrdering() {
 		int u = *it;
 
 		for (int i = 0; i < graph.getDegree(u); i++) {
-			int v = graph.getNeighbors(u)[v];
+			int v = graph.getNeighbors(u)[i];
 			updated_deg[v]--;
 
 			if (removed[v] == 0 && updated_deg[v] == 1) {
@@ -142,8 +140,8 @@ vector <int> PartialCholeskyOrder::DegreeOneOrdering() {
 
 	if (ordering.size() == n) {
 		// In case the graph is a tree, remove all vertices but one
-		removed[ordering[n - 1]] = 0;
-		updated_deg[ordering[n - 1]] = 0;
+		removed[*ordering.rbegin()] = 0;
+		updated_deg[*ordering.rbegin()] = 0;
 		ordering.pop_back();
 	}
 

@@ -27,8 +27,10 @@ int main(int argc, char const *argv[])
         return 0;
     }
 
+    fprintf(stderr, "!@#!@\n");
     PartialCholeskyOrder gvr(g);
-    printf("%d\n", gvr.removed); // 18
+    fprintf(stderr, "!@#!@#!#!@\n");
+    fprintf(stderr, "%d\n", gvr.removal_count); // 18
 
     return 0;
 }
