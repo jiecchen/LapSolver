@@ -11,27 +11,22 @@ Graph GraphLoader::fromArrays(aligned_vector<int> u, aligned_vector<int> v, alig
 
 Graph GraphLoader::fromFile(const string &filename)
 {
-    aligned_vector<int> u = aligned_vector<int>();
-    aligned_vector<int> v = aligned_vector<int>();
-    aligned_vector<double> w = aligned_vector<double>();
-
-    string line;
     ifstream ijvFile(filename);
     if (!ijvFile)
         throw -1;
 
-    while (getline(ijvFile, line))
-    {
-        if (line.empty()) break;
-        istringstream iss(line);
-        int a, b;
-        double c;
-        if (!(iss >> a >> b >> c))
-            throw u.size();
-        u.push_back(a);
-        v.push_back(b);
-        w.push_back(c);
+    int nv, ne;
+    ijvFile >> nv >> ne;
+
+    aligned_vector<int> u = aligned_vector<int>(ne);
+    aligned_vector<int> v = aligned_vector<int>(ne);
+    aligned_vector<double> w = aligned_vector<double>(ne);
+
+    for (int i = 0; i < ne; i++) {
+        ijvFile >> u[i] >> v[i] >> w[i];
     }
+
+    ijvFile.close();
 
     return fromArrays(u, v, w);
 }
