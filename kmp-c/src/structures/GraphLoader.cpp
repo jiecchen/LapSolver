@@ -1,6 +1,6 @@
 #include "GraphLoader.h"
+#include <iostream>
 #include <fstream>
-#include <sstream>
 #include <string>
 using namespace std;
 
@@ -15,18 +15,26 @@ Graph GraphLoader::fromFile(const string &filename)
     if (!ijvFile)
         throw -1;
 
+    return fromStream(ijvFile);
+}
+
+Graph GraphLoader::fromStdin()
+{
+    return fromStream(cin);
+}
+
+Graph GraphLoader::fromStream(istream &inStream)
+{
     int nv, ne;
-    ijvFile >> nv >> ne;
+    inStream >> nv >> ne;
 
     aligned_vector<int> u = aligned_vector<int>(ne);
     aligned_vector<int> v = aligned_vector<int>(ne);
     aligned_vector<double> w = aligned_vector<double>(ne);
 
     for (int i = 0; i < ne; i++) {
-        ijvFile >> u[i] >> v[i] >> w[i];
+        inStream >> u[i] >> v[i] >> w[i];
     }
-
-    ijvFile.close();
 
     return fromArrays(u, v, w);
 }
