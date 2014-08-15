@@ -22,7 +22,7 @@ Graph::Graph(Graph &&rval)
 
 }
 
-Graph& Graph::operator=(const Graph &g)
+Graph &Graph::operator=(const Graph &g)
 {
     if (this != &g)
     {
@@ -33,7 +33,7 @@ Graph& Graph::operator=(const Graph &g)
     return *this;
 }
 
-Graph& Graph::operator=(Graph && g)
+Graph &Graph::operator=(Graph && g)
 {
     nv = std::move(g.nv);
     adj = std::move(g.adj);
@@ -102,7 +102,7 @@ Graph::Graph(EdgeList &&edges) : nv(edges.nv)
 
     // Convert back to 0-based indexing
     cols.data()[0:adj.nnz]--;
-    rows.data()[0:adj.dim]--;
+    rows.data()[0:adj.dim + 1]--;
 
     adj.data = data;
     adj.cols = cols;
@@ -110,21 +110,6 @@ Graph::Graph(EdgeList &&edges) : nv(edges.nv)
 
     degrees = aligned_vector<int>(adj.dim);
     degrees.data()[0:adj.dim] = rows.data()[1:adj.dim] - rows.data()[0:adj.dim];
-}
-
-const double *Graph::getWeights(int v) const
-{
-    return adj.data.data() + adj.rows[v];
-}
-
-const int *Graph::getNeighbors(int v) const
-{
-    return adj.cols.data() + adj.rows[v];
-}
-
-int Graph::getDegree(int v) const
-{
-    return degrees[v];
 }
 
 void Graph::debugPrint()

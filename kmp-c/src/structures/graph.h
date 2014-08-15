@@ -30,10 +30,25 @@ public:
 
     explicit Graph(EdgeList &&edges);
 
-    const double *getWeights(int v) const;
-    const int *getNeighbors(int v) const;
-    int getDegree(int v) const;
-    inline int getDataIndex(int v, int i) const { return adj.rows[v] + i; }
+    inline const double *getWeights(int v) const
+    {
+        return adj.data.data() + adj.rows[v];
+    }
+
+    inline const int *getNeighbors(int v) const
+    {
+        return adj.cols.data() + adj.rows[v];
+    }
+
+    inline int getDegree(int v) const
+    {
+        return degrees[v];
+    }
+
+    inline int getDataIndex(int v, int i) const
+    {
+        return adj.rows[v] + i;
+    }
 
     void debugPrint();
 
