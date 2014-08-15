@@ -9,4 +9,5 @@ class UnionFind {
 
   private:
     int* parent;
+    int* to_compress;
 };

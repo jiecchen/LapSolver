@@ -5,10 +5,11 @@
 enum Alignment : size_t
 {
     AlignSIMD = 16,
-    AlignAVX = 32
+    AlignAVX = 32,
+    AlignFast = 128
 };
 
-template <typename T, size_t TALIGN = AlignSIMD, size_t TBLOCK = 4>
+template <typename T, size_t TALIGN = AlignAVX, size_t TBLOCK = 4>
 class aligned_allocator : public std::allocator<T>
 {
     typedef typename std::allocator<T>::pointer pointer;
@@ -31,7 +32,8 @@ public:
         mkl_free(p);
     }
 
-    template <typename U> struct rebind {
+    template <typename U> struct rebind
+    {
         typedef aligned_allocator<U, TALIGN, TBLOCK> other;
     };
 };
