@@ -150,7 +150,7 @@ vector <int> PartialCholeskyOrder::DegreeOneOrdering() {
 
 vector <int> PartialCholeskyOrder::ConstructFinalOrdering(vector <int> ordering) {
 	int *use = new int[n];
-	memset(use, 0, n * sizeof(int));
+	use[0:n] = 0;
 
 	int index = 0;
 	for (vector <int>::iterator it = ordering.begin(); it != ordering.end(); ++it) {

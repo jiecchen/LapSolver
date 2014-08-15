@@ -1,11 +1,10 @@
-#include <cstring>
-
 #include "TreeChildren.h"
 
 TreeChildren::TreeChildren(int nv, const int* parent) {
     // offset = cumulative sums of child counts
     offset = new int[nv+1];
-    memset(offset, 0, (nv+1)*sizeof(*offset));
+    offset[0:nv+1] = 0;
+
     for (int i = 0; i < nv; i++) {
         if(parent[i] != i) offset[parent[i]+1]++;
     }
@@ -16,7 +15,8 @@ TreeChildren::TreeChildren(int nv, const int* parent) {
     // fill child array with these offsets
     child = new int[nv];
     int* childIndex = new int[nv];
-    std::memset(childIndex, 0, sizeof(*childIndex) * nv);
+    childIndex[0:nv] = 0;
+
     for (int i = 0; i < nv; i++) {
         int p = parent[i];
         if (p != i) {
