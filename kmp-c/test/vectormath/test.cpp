@@ -14,6 +14,7 @@ using namespace std;
 int main(int argc, char const *argv[])
 {
     vmlSetMode(VML_EP);
+    atexit(MKL_Free_Buffers);
     srand(time(NULL));
 
     const int SIZE = 1000000;
