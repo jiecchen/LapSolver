@@ -27,10 +27,18 @@ int main(int argc, char const *argv[])
         return 0;
     }
 
-    fprintf(stderr, "!@#!@\n");
     PartialCholeskyOrder gvr(g);
-    fprintf(stderr, "!@#!@#!#!@\n");
-    fprintf(stderr, "%d\n", gvr.removal_count); // 18
+    printf("Eliminate %d vertices\n", gvr.removal_count);
+
+    printf("Eliminate:\n");
+    for (int i = 0; i < gvr.removal_count; i++) {
+        printf("%d\n", gvr.permutation[i]);
+    }
+
+    printf("Keep:\n");
+    for (int i = gvr.removal_count; i < g.nv; i++) {
+        printf("%d\n", gvr.permutation[i]);
+    }
 
     return 0;
 }
