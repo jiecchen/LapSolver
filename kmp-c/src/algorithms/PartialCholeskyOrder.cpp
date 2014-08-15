@@ -150,6 +150,7 @@ vector <int> PartialCholeskyOrder::DegreeOneOrdering() {
 
 vector <int> PartialCholeskyOrder::ConstructFinalOrdering(vector <int> ordering) {
 	int *use = new int[n];
+	memset(use, 0, n * sizeof(int));
 
 	int index = 0;
 	for (vector <int>::iterator it = ordering.begin(); it != ordering.end(); ++it) {
@@ -159,7 +160,10 @@ vector <int> PartialCholeskyOrder::ConstructFinalOrdering(vector <int> ordering)
 	removal_count = index;
 
 	for (int i = 0; i < n; i++)
-		if (use[i] == 0)
+		if (use[i] == 0) {
 			permutation[index++] = i;
+		}
+
+	delete[] use;
 }
 
