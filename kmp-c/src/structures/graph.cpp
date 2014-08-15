@@ -77,20 +77,25 @@ Graph::Graph(EdgeList &&edges) : nv(edges.nv)
         fprintf(stderr, "error: mkl_dcsrcoo failed with code %d\n", error);
 
     // Allocate final memory
+    aligned_vector<int> rows(adj.dim + 1);
     aligned_vector<double> data(adj.nnz);
     aligned_vector<int> cols(adj.nnz);
-    aligned_vector<int> rows(adj.dim + 1);
 
     // B = A + A'
-    int request = 0, sort = 0;
+    int request = 1, sort = 0;
     double beta = 1.0;
-    int WTF_NNZ = adj.nnz + 1; // TODO: wat iz dis, mkl?
+    mkl_dcsradd("t", &request, &sort, &adj.dim, &adj.dim,
+                triData.data(), triCols.data(), triRows.data(), // A
+                &beta, triData.data(), triCols.data(), triRows.data(), // bA'
+                NULL, NULL, rows.data(),
+                NULL, &error);
+
+    request = 2;
     mkl_dcsradd("t", &request, &sort, &adj.dim, &adj.dim,
                 triData.data(), triCols.data(), triRows.data(), // A
                 &beta, triData.data(), triCols.data(), triRows.data(), // bA'
                 data.data(), cols.data(), rows.data(),
-                &WTF_NNZ, &error);
-    rows[adj.dim]--; // TODO: wat iz dis, mkl? (this compensates for WTF_NNZ)
+                NULL, &error);
 
     if (error)
         fprintf(stderr, "error: mkl_dcsradd failed with code %d\n", error);
