@@ -17,10 +17,11 @@ int main(int argc, char const *argv[])
     atexit(MKL_Free_Buffers);
     srand(time(NULL));
 
-    const int SIZE = 1000000;
+    const int SIZE = 1000;
     aligned_vector<double> x(SIZE);
     aligned_vector<double> y(SIZE);
-    for (int i = 0; i < SIZE; ++i) {
+    for (int i = 0; i < SIZE; ++i)
+    {
         x[i] = RANDOM;
         y[i] = RANDOM;
     }
@@ -28,8 +29,8 @@ int main(int argc, char const *argv[])
     auto z = x + y;
     z.data()[0:SIZE] -= x.data()[0:SIZE];
     z.data()[0:SIZE] -= y.data()[0:SIZE];
-    for(auto &pt : z)
-	printf("%.2f\n", fabs(pt));
+    for (auto &pt : z)
+        printf("%.2f\n", fabs(pt));
 
     return 0;
 }

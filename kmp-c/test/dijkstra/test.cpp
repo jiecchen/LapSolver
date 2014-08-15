@@ -10,6 +10,8 @@
 
 int main(int argc, char const *argv[])
 {
+    atexit(MKL_Free_Buffers);
+
     Graph g;
     std::string inFileName;
     try

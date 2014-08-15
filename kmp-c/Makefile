@@ -14,15 +14,17 @@ SHARED_FLAG:=-dynamiclib
 SOURCES := $(shell find $(SRC) -name *.cpp)
 OBJECTS := $(addprefix $(BUILD)/,$(notdir $(SOURCES:.cpp=.o)))
 
-.PHONY: all clean test
-all: $(BUILD) $(TARGET)
+.PHONY: all clean deploy test
+all: $(BUILD) $(TARGET) deploy
 clean:
 	rm -rf $(BUILD)
 	rm -f $(TARGET)
 	rm -f test/$(TARGET)
 
-test: $(BUILD) $(TARGET)
+deploy:
 	@cp $(TARGET) test/$(TARGET)
+
+test: $(BUILD) $(TARGET) deploy
 	@echo
 	@echo =======================
 	@echo "        TESTING"
