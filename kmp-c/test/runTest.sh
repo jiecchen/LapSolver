@@ -9,6 +9,8 @@ if [ "$TESTMODE" = "auto" ]; then
 else
 	cp ../Makefile.test Makefile
 	make 2>&1 > /dev/null
-	cat test.in | ./$1
+	PROG=$1
+	shift 1
+	cat test.in | ./$PROG $@
 	make clean 2>&1 > /dev/null
 fi
