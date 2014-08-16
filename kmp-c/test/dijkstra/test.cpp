@@ -19,7 +19,7 @@ int main(int argc, char **argv)
     std::shared_ptr<ShortestPathTree> spt;
 
     auto bench = make_benchmark(argc, argv, [&] () {
-    	spt.reset(new ShortestPathTree(g, 0));
+        spt.reset(new ShortestPathTree(g, 0));
     });
 
     for (int i = 0; i < g.nv; ++i)

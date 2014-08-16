@@ -3,14 +3,15 @@ cd $1
 source /opt/intel/composerxe/bin/compilervars.sh intel64
 export DYLD_LIBRARY_PATH=../../:$DYLD_LIBRARY_PATH
 export LD_LIBRARY_PATH=../../:$LD_LIBRARY_PATH
+# Munch the arguments
+PROG=$1
+shift 1
 # Run the test
 if [ "$TESTMODE" = "auto" ]; then
-	cat test.in | ./$1 | cmp - test.out
+	./$PROG $@ < test.in | cmp - test.out
 else
 	cp ../Makefile.test Makefile
 	make 2>&1 > /dev/null
-	PROG=$1
-	shift 1
-	cat test.in | ./$PROG $@
+	./$PROG $@ < test.in
 	make clean 2>&1 > /dev/null
 fi

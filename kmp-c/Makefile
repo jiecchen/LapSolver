@@ -14,7 +14,7 @@ SHARED_FLAG:=-dynamiclib
 SOURCES := $(shell find $(SRC) -name *.cpp)
 OBJECTS := $(addprefix $(BUILD)/,$(notdir $(SOURCES:.cpp=.o)))
 
-.PHONY: all clean test
+.PHONY: all clean test bench
 all: $(BUILD) $(TARGET)
 clean:
 	rm -rf $(BUILD)
@@ -27,6 +27,15 @@ test: $(BUILD) $(TARGET)
 	@echo =======================
 	@echo
 	@make -C test
+	@echo
+
+bench: $(BUILD) $(TARGET)
+	@echo
+	@echo =======================
+	@echo "       BENCHMARK"
+	@echo =======================
+	@echo
+	@make -C test bench
 	@echo
 
 $(BUILD):
