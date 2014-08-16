@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <algorithm>
-#include "structures/graph.h"
+#include "structures/Graph.h"
 
 using namespace std;
 
@@ -18,7 +18,7 @@ public:
 
 	vector <int> DegreeOneOrdering(); 						// Gets the ordering for degree one vertices
 
-	vector <int> ConstructFinalOrdering(vector <int> v);	// Turns the given vertices into a permutation
+	void ConstructFinalOrdering(vector <int> v);	// Turns the given vertices into a permutation
 
 	int n;
 	Graph graph;

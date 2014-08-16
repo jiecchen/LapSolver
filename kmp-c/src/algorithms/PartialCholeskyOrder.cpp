@@ -148,7 +148,7 @@ vector <int> PartialCholeskyOrder::DegreeOneOrdering() {
 	return ordering;
 }
 
-vector <int> PartialCholeskyOrder::ConstructFinalOrdering(vector <int> ordering) {
+void PartialCholeskyOrder::ConstructFinalOrdering(vector <int> ordering) {
 	int *use = new int[n];
 	use[0:n] = 0;
 

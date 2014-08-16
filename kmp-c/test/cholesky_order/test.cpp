@@ -8,7 +8,7 @@
 
 int main(int argc, char const *argv[])
 {
-    atexit(MKL_Free_Buffers);
+    atexit(mkl_free_buffers);
     Graph g = GraphLoader::fromStdin();
 
     PartialCholeskyOrder gvr(g);

@@ -1,5 +1,5 @@
 #pragma once
-#include "util/aligned_types.h"
+#include "util/aligned.h"
 
 struct EdgeList
 {

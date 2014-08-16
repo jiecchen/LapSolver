@@ -3,8 +3,6 @@ CC:=g++-4.9
 BUILD:=build
 SRC:=src
 TARGET:=kmp
-AS:=clang
-ASFLAGS:=-c
 MKLROOT=/opt/intel/composerxe/mkl
 MKL_CFLAGS = -flto -fopenmp -I$(MKLROOT)/include
 MKL_LFLAGS = -flto -fopenmp
@@ -17,7 +15,7 @@ else
 endif
 MKL_LFLAGS += -lpthread -lm
 
-CFLAGS:=-fcilkplus -lcilkrts -O3 -std=c++11 -mtune=native -march=native -I$(SRC)
+CFLAGS:=-fcilkplus -lcilkrts -O3 -march=native -mtune=native -std=c++11 -I$(SRC)
 LFLAGS:=$(CFLAGS)
 
 SOURCES := $(shell find $(SRC) -name *.cpp)
@@ -36,8 +34,8 @@ $(TARGET): $(OBJECTS)
 	$(CC) $(LFLAGS) $^ -o $@ $(MKL_LFLAGS)
 
 define sourcerule
-$(patsubst %.cpp, $(BUILD)/%.s, $(notdir $(1))): $(1)
-	$$(CC) $$(CFLAGS) $$(MKL_CFLAGS) -S -c $$< -o $$@
+$(patsubst %.cpp, $(BUILD)/%.o, $(notdir $(1))): $(1)
+	$$(CC) $$(CFLAGS) $$(MKL_CFLAGS) -c $$< -o $$@
 endef
 
 $(foreach src, $(SOURCES), $(eval $(call sourcerule, $(src))))

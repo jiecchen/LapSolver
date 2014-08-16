@@ -1,3 +1,4 @@
+#!/bin/bash
 cd $1
 # Set up library paths
 source /opt/intel/composerxe/bin/compilervars.sh intel64

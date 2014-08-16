@@ -1,6 +1,6 @@
 #pragma once
 #include <util/aligned.h>
-#include <structures/graph.h>
+#include "structures/Graph.h"
 #include "LinearOperator.h"
 
 class Solver : public LinearOperator

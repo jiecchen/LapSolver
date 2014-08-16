@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 CC:=icc
 BUILD:=build
 SRC:=src
@@ -6,10 +7,15 @@ MKLROOT=/opt/intel/composerxe/mkl
 MKL_CFLAGS = -ipo -openmp -mkl=parallel
 MKL_LFLAGS = -ipo -openmp -L$(MKLROOT)/lib -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -lpthread -lm
 
-CFLAGS:=-O3 -xHost -std=c++11 -fPIC -I$(SRC)
+CFLAGS:=-g -std=c++11 -fPIC -I$(SRC)
 LFLAGS:=$(CFLAGS)
 
 SHARED_FLAG:=-dynamiclib
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S), Linux)
+	SHARED_FLAG=-shared
+	TARGET=libkmp.so
+endif
 
 SOURCES := $(shell find $(SRC) -name *.cpp)
 OBJECTS := $(addprefix $(BUILD)/,$(notdir $(SOURCES:.cpp=.o)))
@@ -26,7 +32,7 @@ test: $(BUILD) $(TARGET)
 	@echo "        TESTING"
 	@echo =======================
 	@echo
-	@make -C test
+	@make -s -C test
 	@echo
 
 bench: $(BUILD) $(TARGET)
@@ -35,7 +41,7 @@ bench: $(BUILD) $(TARGET)
 	@echo "       BENCHMARK"
 	@echo =======================
 	@echo
-	@make -C test bench
+	@make -s -C test bench
 	@echo
 
 $(BUILD):
