@@ -7,7 +7,7 @@ MKLROOT=/opt/intel/composerxe/mkl
 MKL_CFLAGS = -ipo -openmp -mkl=parallel
 MKL_LFLAGS = -ipo -openmp -L$(MKLROOT)/lib -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -lpthread -lm
 
-CFLAGS:=-g -std=c++11 -fPIC -I$(SRC)
+CFLAGS:=-O3 -xHost -std=c++11 -fPIC -I$(SRC)
 LFLAGS:=$(CFLAGS)
 
 SHARED_FLAG:=-dynamiclib
