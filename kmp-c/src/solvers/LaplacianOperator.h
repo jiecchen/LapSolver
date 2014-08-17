@@ -6,6 +6,7 @@
 class LaplacianOperator : public VectorOperator
 {
 public:
+    using VectorOperator::apply;
     explicit LaplacianOperator(const Graph &g)
         : g(g), dim(g.nv) {}
     explicit LaplacianOperator(Graph &&g)

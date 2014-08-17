@@ -4,8 +4,10 @@
 class ConjugateGradientSolver : public VectorOperator
 {
 public:
-    ConjugateGradientSolver(VectorOperator *a, VectorOperator *m,
+	using VectorOperator::apply;
+    ConjugateGradientSolver(VectorOperator *a, VectorOperator *m = nullptr,
                             int maxIters = 1000, double tolerance = 1e-10);
+    virtual ~ConjugateGradientSolver() {}
 
     virtual int getDimension() const
     {
@@ -17,7 +19,7 @@ public:
         return nIter;
     }
 
-    virtual void apply(double *x, double *b);
+    virtual void apply(double *b, double *x);
 
 private:
     VectorOperator *a;

@@ -16,16 +16,19 @@ ConjugateGradientSolver::ConjugateGradientSolver(VectorOperator *a, VectorOperat
 
 #define dcg_throw(f) throw fprintf(stderr, "Error! " f " failed with code %d\n", rci), rci;
 
-void ConjugateGradientSolver::apply(double *x, double *b)
+void ConjugateGradientSolver::apply(double *b, double *x)
 {
     // Necessary variables for RCI solver
     int rci;
-    double norm;
+    double norm = 1.0 + tolerance;
 
     int one_i = 1;
     double one_d = -1.e0;
 
     aligned_vector<double> scratch(dim);
+
+    // Initialize the solution
+    x[0:dim] = 1.0;
 
     dcg_init(&dim, x, b, &rci, ipar, dpar, tmp.data());
     if (rci != 0)
@@ -52,7 +55,7 @@ void ConjugateGradientSolver::apply(double *x, double *b)
             norm = dnrm2(&dim, scratch.data(), &one_i);
             break;
         case 3: // Apply the preconditioner, if any. Will never reach if no precon.
-            m->apply(&tmp[2*dim], &tmp[3*dim]);
+            m->apply(&tmp[2 * dim], &tmp[3 * dim]);
             break;
         default:
             dcg_throw("dcg");
