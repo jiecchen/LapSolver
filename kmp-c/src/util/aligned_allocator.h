@@ -9,7 +9,7 @@ enum Alignment : size_t
     AlignFast = 128
 };
 
-template <typename T, size_t TALIGN = AlignAVX, size_t TBLOCK = 4>
+template <typename T, size_t TALIGN = AlignAVX>
 class aligned_allocator : public std::allocator<T>
 {
     typedef typename std::allocator<T>::pointer pointer;
@@ -18,12 +18,9 @@ public:
     pointer allocate(size_type n, const void *hint = nullptr)
     {
         size_t count = sizeof(T) * n;
-        size_t count_left = count % TBLOCK;
-        if (count_left != 0)
-            count += TBLOCK - count_left;
         return reinterpret_cast<pointer>
                ((!hint)
-                ? mkl_malloc(count, TALIGN)
+                ? mkl_calloc(sizeof(T), n, TALIGN)
                 : mkl_realloc((void *) hint, count));
     }
 
@@ -34,6 +31,6 @@ public:
 
     template <typename U> struct rebind
     {
-        typedef aligned_allocator<U, TALIGN, TBLOCK> other;
+        typedef aligned_allocator<U, TALIGN> other;
     };
 };
