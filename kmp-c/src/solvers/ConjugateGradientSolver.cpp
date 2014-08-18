@@ -6,12 +6,9 @@ ConjugateGradientSolver::ConjugateGradientSolver(VectorOperator *a, VectorOperat
     : a(a), m(m), maxIters(maxIters), tolerance(tolerance), dim(a->getDimension())
 {
     if (m && dim != m->getDimension())
-        throw "";
+        throw "preconditioner-matrix dimension mismatch";
 
     tmp = aligned_vector<double>(4 * dim);
-
-    ipar[4] = maxIters;
-    ipar[10] = (m != nullptr); // 0 => no preconditioner; else => precondition
 }
 
 #define dcg_throw(f) throw fprintf(stderr, "Error! " f " failed with code %d\n", rci), rci;
@@ -34,6 +31,9 @@ void ConjugateGradientSolver::apply(double *b, double *x)
     if (rci != 0)
         dcg_throw("dcg_init");
 
+    ipar[4] = maxIters;
+    ipar[10] = (m != nullptr); // 0 => no preconditioner; else => precondition
+
     dcg_check(&dim, x, b, &rci, ipar, dpar, tmp.data());
     if (rci != 0)
         dcg_throw("dcg_check");
@@ -50,7 +50,7 @@ void ConjugateGradientSolver::apply(double *b, double *x)
             a->apply(&tmp[0], &tmp[dim]);
             break;
         case 2: // Compute the norm - decide whether to stop early
-            a->apply(b, scratch.data());
+            a->apply(x, scratch.data());
             daxpy (&dim, &one_d, b, &one_i, scratch.data(), &one_i);
             norm = dnrm2(&dim, scratch.data(), &one_i);
             break;
