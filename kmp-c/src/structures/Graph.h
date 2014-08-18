@@ -7,16 +7,7 @@
 #include <utility>
 #include "util/aligned.h"
 #include "EdgeList.h"
-
-typedef struct CSRMatrix
-{
-    aligned_vector<double> data;
-    aligned_vector<int> cols;
-    aligned_vector<int> rows;
-
-    int dim;
-    int nnz;
-} CSRMatrix;
+#include "CSRMatrix.h"
 
 class Graph
 {

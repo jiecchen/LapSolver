@@ -25,3 +25,9 @@ public:
 
     virtual int getDimension() const = 0;
 };
+
+template <typename Vec>
+aligned_vector<double> operator*(const VectorOperator &lhs, Vec rhs)
+{
+    return lhs.apply(rhs);
+}
