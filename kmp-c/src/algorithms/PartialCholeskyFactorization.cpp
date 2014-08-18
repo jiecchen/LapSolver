@@ -263,6 +263,28 @@ static aligned_vector<double> ApplyLTransInv(EdgeList L, aligned_vector<double> 
 
 Graph PartialCholeskyFactorization::GetReducedGraph(EdgeList D, int shift) {
 	EdgeList* sanitized_D = SanitizeEdgeList(D);
+
+	int size = D.ne;
+	aligned_vector <int> edges_to_add(size);
+
+	for (int i = 0; i < sanitized_D->ne; i++) {
+		if (sanitized_D->u[i] >= sanitized_D->v[i]) continue;
+		if (sanitized_D->u[i] >= shift && sanitized_D->v[i] >= shift) {
+			edges_to_add.push_back(i);
+		}
+	}
+
+	EdgeList reduced_sparsifier_edges = EdgeList(edges_to_add.size());
+
+	int position = 0;
+	for (int i : edges_to_add) {
+		reduced_sparsifier_edges.u[position] = sanitized_D->u[i] - shift;
+		reduced_sparsifier_edges.v[position] = sanitized_D->v[i] - shift;
+		reduced_sparsifier_edges.w[position] = -sanitized_D->w[i];
+		position++;
+	}
+
+	return Graph(std::move(reduced_sparsifier_edges));
 }
 
 
