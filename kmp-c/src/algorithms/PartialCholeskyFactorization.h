@@ -26,6 +26,9 @@ public:
 	void InitD();
 
 	static aligned_vector<double> ApplyLInv(EdgeList L, aligned_vector<double> x);
+	static aligned_vector<double> ApplyLTransInv(EdgeList L, aligned_vector<double> x);
+
+	Graph GetReducedGraph(EdgeList D, int shift);
 
 	Graph graph;
 	aligned_vector<double> diag_values;

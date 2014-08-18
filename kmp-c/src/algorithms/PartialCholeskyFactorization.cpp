@@ -229,10 +229,40 @@ static aligned_vector<double> ApplyLInv(EdgeList L, aligned_vector<double> x) {
 	for (int i = 0; i < size; i++)
 		index[i] = i;
 
-//	std::sort(index, index + size, [&] (int lhs, int rhs) {
+	// sort L
+	std::sort(index, index + size, [&] (int lhs, int rhs) {
+		if (L.u[lhs] != L.u[rhs])
+			return L.v[lhs] < L.v[rhs];
+		return L.u[lhs] < L.u[rhs];
+	});
 
-//	});
+	for (int i = 0; i < size; i++)
+		x[L.u[index[i]]] -= L.w[index[i]] * x[L.v[index[i]]];
 
+	return x;
+}
+
+static aligned_vector<double> ApplyLTransInv(EdgeList L, aligned_vector<double> x) {
+	int size = L.ne;
+	int index[size];
+	for (int i = 0; i < size; i++)
+		index[i] = i;
+
+	// sort L
+	std::sort(index, index + size, [&] (int lhs, int rhs) {
+		if (L.u[lhs] != L.u[rhs])
+			return L.v[lhs] > L.v[rhs];
+		return L.u[lhs] > L.u[rhs];
+	});
+
+	for (int i = 0; i < size; i++)
+		x[L.v[index[i]]] -= L.w[index[i]] * x[L.u[index[i]]];
+
+	return x;
+}
+
+Graph PartialCholeskyFactorization::GetReducedGraph(EdgeList D, int shift) {
+	EdgeList* sanitized_D = SanitizeEdgeList(D);
 }
 
 
