@@ -7,11 +7,12 @@
 #include <mkl.h>
 #include <util/aligned.h>
 #include <cmath>
+#include <util/Benchmark.h>
 using namespace std;
 
 #define RANDOM (((double) rand()) / RAND_MAX)
 
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
     vmlSetMode(VML_EP);
     atexit(MKL_Free_Buffers);
@@ -26,7 +27,10 @@ int main(int argc, char const *argv[])
         y[i] = RANDOM;
     }
 
-    auto z = x + y;
+    aligned_vector<double> z;
+    auto bench = make_benchmark(argc, argv, [&] () {
+        z = x + y;
+    });
     z.data()[0:SIZE] -= x.data()[0:SIZE];
     z.data()[0:SIZE] -= y.data()[0:SIZE];
     for (auto &pt : z)
@@ -34,4 +38,3 @@ int main(int argc, char const *argv[])
 
     return 0;
 }
-

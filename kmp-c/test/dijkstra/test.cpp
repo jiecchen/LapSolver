@@ -13,7 +13,7 @@
 
 int main(int argc, char **argv)
 {
-    atexit(MKL_Free_Buffers);
+    atexit(mkl_free_buffers);
     Graph g = GraphLoader::fromStdin();
 
     std::shared_ptr<ShortestPathTree> spt;

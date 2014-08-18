@@ -38,6 +38,7 @@ private:
 
 int main(int argc, char **argv)
 {
+    atexit(mkl_free_buffers);
     TestOperator a;
     ConjugateGradientSolver cg(&a);
 
