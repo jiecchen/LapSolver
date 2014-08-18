@@ -12,7 +12,7 @@ PartialCholeskyOrder::PartialCholeskyOrder(const Graph &g) : graph(g) {
 		permutation[i] = 0;
 		removed[i] = 0;
 		un_removable[i] = 0;
-		updated_deg[i] = graph.getDegree(i);
+		updated_deg[i] = graph.degree(i);
 	}
 
 	vector <int> deg1ordering = DegreeOneOrdering();
@@ -49,8 +49,8 @@ vector <int> PartialCholeskyOrder::DegreeTwoChainOrdering() {
 
 	for (int i = 0; i < n; i++)
 		if (un_removable[i] == 1) {
-			for (int j = 0; j < graph.getDegree(i); j++) {
-				int u = graph.getNeighbors(i)[j];
+			for (int j = 0; j < graph.degree(i); j++) {
+				int u = graph.neighbor(i, j);
 
 				if (updated_deg[u] == 2 && removed[u] == 0) {
 					// This is a degree two chain
@@ -59,16 +59,16 @@ vector <int> PartialCholeskyOrder::DegreeTwoChainOrdering() {
 						chains.push_back(u);
 
 						int v = u;
-						for (int k = 0; k < graph.getDegree(u); k++) {
-							if (updated_deg[graph.getNeighbors(u)[k]] == 2 && removed[graph.getNeighbors(u)[k]] == 0)
-								v = graph.getNeighbors(u)[k];
+						for (int k = 0; k < graph.degree(u); k++) {
+							if (updated_deg[graph.neighbor(u,k)] == 2 && removed[graph.neighbor(u,k)] == 0)
+								v = graph.neighbor(u,k);
 						}
 
 						if (v == u) {
 							// Try to exit the chain 
-							for (int k = 0; k < graph.getDegree(u); k++) {
-								if (updated_deg[graph.getNeighbors(u)[k]] > 2 && graph.getNeighbors(u)[k] != i)
-									v = graph.getNeighbors(u)[k];
+							for (int k = 0; k < graph.degree(u); k++) {
+								if (updated_deg[graph.neighbor(u,k)] > 2 && graph.neighbor(u,k) != i)
+									v = graph.neighbor(u,k);
 							}
 
 							if (v == u) {
@@ -116,7 +116,7 @@ vector <int> PartialCholeskyOrder::CheckIfCycle() {
 vector <int> PartialCholeskyOrder::DegreeOneOrdering() {
 	vector <int> ordering; ordering.reserve(n);
 	for (int i = 0; i < n; i++)
-		if (graph.getDegree(i) == 1) {
+		if (graph.degree(i) == 1) {
 			ordering.push_back(i);
 			removed[i] = 1;
 		}
@@ -125,8 +125,8 @@ vector <int> PartialCholeskyOrder::DegreeOneOrdering() {
 	while (it != ordering.end()) {
 		int u = *it;
 
-		for (int i = 0; i < graph.getDegree(u); i++) {
-			int v = graph.getNeighbors(u)[i];
+		for (int i = 0; i < graph.degree(u); i++) {
+			int v = graph.neighbor(u, i);
 			updated_deg[v]--;
 
 			if (removed[v] == 0 && updated_deg[v] == 1) {

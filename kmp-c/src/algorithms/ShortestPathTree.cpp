@@ -47,17 +47,15 @@ ShortestPathTree::ShortestPathTree(const Graph &g, int source)
     while(!nextNodes.empty()) {
         int u = *nextNodes.begin();
         nextNodes.erase(u);
-        auto nbrs_u = g.getNeighbors(u);
-        auto wght_u = g.getWeights(u);
 
-        for (int i = 0, deg = g.getDegree(u); i < deg; ++i) {
-            int v = nbrs_u[i];
+        for (int i = 0, deg = g.degree(u); i < deg; ++i) {
+            int v = g.neighbor(u, i);
             if(!settled[v]) {
-                double alt = dist[u] + 1/wght_u[i];
+                double alt = dist[u] + 1/g.weight(u, i);
                 if(alt < dist[v]) {
                     nextNodes.erase(v);
                     dist[v] = alt;
-                    weight[v] = 1/wght_u[i];
+                    weight[v] = 1/g.weight(u, i);
                     parent[v] = u;
                     parentIndex[v] = i;
                     nextNodes.insert(v);

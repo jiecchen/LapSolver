@@ -12,7 +12,7 @@ int main(int argc, char const *argv[])
 
     printf("%d vertices\n", g.nv());
     for (int i = 0; i < g.nv(); i++) {
-        printf("deg(%d) = %d\n", i, g.getDegree(i));
+        printf("deg(%d) = %d\n", i, g.degree(i));
     }
 
     return 0;

@@ -21,9 +21,9 @@ PartialCholeskyFactorization::~PartialCholeskyFactorization() {
 
 void PartialCholeskyFactorization::DoFactorization() {
 	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < graph.getDegree(i); j++)
-			diag_values[i] = diag_values[i] + graph.getWeights(i)[j];
-		updated_degree[i] = graph.getDegree(i);
+		for (int j = 0; j < graph.degree(i); j++)
+			diag_values[i] = diag_values[i] + graph.weight(i, j);
+		updated_degree[i] = graph.degree(i);
 
 		AddToD(i, i, diag_values[i]);
 	}
@@ -44,28 +44,28 @@ void PartialCholeskyFactorization::DoFactorization() {
 
             // pick outer_start and outer_stop
             if (start == stop) {
-            	for (int j = 0; j < graph.getDegree(start); j++)
-            		if (graph.getNeighbors(start)[j] >= num_steps) {
-            			outer_start = graph.getNeighbors(start)[j];
+            	for (int j = 0; j < graph.degree(start); j++)
+            		if (graph.neighbor(start, j) >= num_steps) {
+            			outer_start = graph.neighbor(start, j);
 
-            			for (int k = j + 1; k < graph.getDegree(start); k++) 
-            				if (graph.getNeighbors(start)[k] >= num_steps) {
-            					outer_stop = graph.getNeighbors(start)[k];
+            			for (int k = j + 1; k < graph.degree(start); k++) 
+            				if (graph.neighbor(start, k) >= num_steps) {
+            					outer_stop = graph.neighbor(start, k);
             					break;
             				}
 
             			break;
             		}
             } else {
-            	for (int j = 0; j < graph.getDegree(start); j++)
-            		if (graph.getNeighbors(start)[j] >= num_steps) {
-            			outer_start = graph.getNeighbors(start)[j];
+            	for (int j = 0; j < graph.degree(start); j++)
+            		if (graph.neighbor(start, j) >= num_steps) {
+            			outer_start = graph.neighbor(start, j);
             			break;
             		}
 
-            	for (int j = 0; j < graph.getDegree(stop); j++) 
-            		if (graph.getNeighbors(stop)[j] >= num_steps) {
-            			outer_stop = graph.getNeighbors(stop)[j];
+            	for (int j = 0; j < graph.degree(stop); j++) 
+            		if (graph.neighbor(stop, j) >= num_steps) {
+            			outer_stop = graph.neighbor(stop, j);
             			break;
             		}
             }
@@ -79,9 +79,9 @@ void PartialCholeskyFactorization::DoFactorization() {
 void PartialCholeskyFactorization::FactorizeDegreeTwoChains(int start, int stop, int outer_start, int outer_stop) {
 	// outer_value is used to compute the L values of type (outer_start, u)
 	double outer_value = -1;
-	for (int i = 0; i < graph.getDegree(start); i++)
-		if (graph.getNeighbors(start)[i] == outer_start)
-			outer_value = -1.0 * graph.getWeights(start)[i];
+	for (int i = 0; i < graph.degree(start); i++)
+		if (graph.neighbor(start, i) == outer_start)
+			outer_value = -1.0 * graph.weight(start, i);
 
 	// new_value_in_lap is sued to mimic the update of the laplacian matrix
 	double new_value_in_lap = outer_value;
@@ -95,9 +95,9 @@ void PartialCholeskyFactorization::FactorizeDegreeTwoChains(int start, int stop,
 		AddToL(outer_start, u, outer_value);
 		AddToD(outer_start, outer_start, -new_value_in_lap * outer_value);
 
-		for (int i = 0; i < graph.getDegree(u); i++) {
-			int v = graph.getNeighbors(u)[i];
-			double weight = graph.getWeights(u)[i];
+		for (int i = 0; i < graph.degree(u); i++) {
+			int v = graph.neighbor(u, i);
+			double weight = graph.weight(u, i);
 
 			if (updated_degree[v] > 1 && v > u && v != outer_start) {
 				diag_values[v] = diag_values[v] - weight * weight / diag_values[u];
@@ -115,9 +115,9 @@ void PartialCholeskyFactorization::FactorizeDegreeTwoChains(int start, int stop,
 }
 
 void PartialCholeskyFactorization::FactorizeDegreeOne(int u) {
-	for (int i = 0; i < graph.getDegree(i); i++) {
-		int v = graph.getNeighbors(u)[i];
-		double weight = graph.getWeights(u)[i];
+	for (int i = 0; i < graph.degree(i); i++) {
+		int v = graph.neighbor(u, i);
+		double weight = graph.weight(u, i);
 
 		if (u < v) {
 			AddToL(v, u, -1.0 * weight / diag_values[u]);
@@ -180,8 +180,8 @@ EdgeList* PartialCholeskyFactorization::SanitizeEdgeList(EdgeList edges) {
 }
 
 bool PartialCholeskyFactorization::IsNeighbor(int u, int v) {
-	for (int i = 0; i < graph.getDegree(u); i++)
-		if (graph.getNeighbors(u)[i] == v)
+	for (int i = 0; i < graph.degree(u); i++)
+		if (graph.neighbor(u, i) == v)
 			return true;
 	return false;
 }
@@ -189,7 +189,7 @@ bool PartialCholeskyFactorization::IsNeighbor(int u, int v) {
 void PartialCholeskyFactorization::InitL() {
 	int cnt = n;
 	for (int i = 0; i < num_steps; i++)
-		cnt = cnt + graph.getDegree(i) + 1;
+		cnt = cnt + graph.degree(i) + 1;
 
 	L = new EdgeList(cnt);
 	for (int i = 0; i < n; i++)
@@ -199,15 +199,15 @@ void PartialCholeskyFactorization::InitL() {
 void PartialCholeskyFactorization::InitD() {
 	int cnt = n + 2 * num_steps;
 	for (int i = 0; i < num_steps; i++)
-		cnt = cnt + 2 * graph.getDegree(i);
+		cnt = cnt + 2 * graph.degree(i);
 
 	D = new EdgeList(cnt);
 
 	for (int i = num_steps; i < n; i++)
-		for (int j = 0; j < graph.getDegree(i); j++)
-			if (graph.getNeighbors(i)[j] > i) {
-				AddToD(i, graph.getNeighbors(i)[j], -graph.getWeights(i)[j]);
-				AddToD(graph.getNeighbors(i)[j], i, -graph.getWeights(i)[j]);
+		for (int j = 0; j < graph.degree(i); j++)
+			if (graph.neighbor(i, j) > i) {
+				AddToD(i, graph.neighbor(i, j), -graph.weight(i, j));
+				AddToD(graph.neighbor(i, j), i, -graph.weight(i, j));
 			}
 }
 
