@@ -32,14 +32,13 @@ void PartialCholeskyFactorization::DoFactorization() {
 		if (updated_degree[i] == 1)
 			FactorizeDegreeOne(i);
 		else {
-			// Will eliminate  chain starting at 'start' and ending at 'stop'
+			// Will eliminate chains starting at 'start' and ending at 'stop'
 			int start = i;
 			int stop = i;
 			while (stop < num_steps - 1 && IsNeighbor(stop, stop + 1))
 				stop++;	
 
 			// outer_start and outer_stop represent the higher degree vertices connected to the chain
-            // these variables are initialized to 0 so I don't get any warning
             int outer_start = 0, outer_stop = 0;
 
             // pick outer_start and outer_stop
@@ -83,12 +82,12 @@ void PartialCholeskyFactorization::FactorizeDegreeTwoChains(int start, int stop,
 		if (graph.neighbor(start, i) == outer_start)
 			outer_value = -1.0 * graph.weight(start, i);
 
-	// new_value_in_lap is sued to mimic the update of the laplacian matrix
+	// new_value_in_lap is used to mimic the update of the laplacian matrix
 	double new_value_in_lap = outer_value;
 
 	// go through the chain and update values
 	for (int u = start; u <= stop; u++) {
-		outer_value =outer_value / diag_values[u];
+		outer_value = outer_value / diag_values[u];
 
 		diag_values[outer_start] = diag_values[outer_start] - new_value_in_lap * outer_value;
 
@@ -115,15 +114,15 @@ void PartialCholeskyFactorization::FactorizeDegreeTwoChains(int start, int stop,
 }
 
 void PartialCholeskyFactorization::FactorizeDegreeOne(int u) {
-	for (int i = 0; i < graph.degree(i); i++) {
+	for (int i = 0; i < graph.degree(u); i++) {
 		int v = graph.neighbor(u, i);
 		double weight = graph.weight(u, i);
 
 		if (u < v) {
-			AddToL(v, u, -1.0 * weight / diag_values[u]);
-			AddToD(v, v, -1.0 * weight * weight / diag_values[u]);
+			AddToL(v, u, -weight / diag_values[u]);
+			AddToD(v, v, -weight * weight / diag_values[u]);
 
-			diag_values[v] = diag_values[v] - 1.0 * weight * weight / diag_values[u];
+			diag_values[v] = diag_values[v] - weight * weight / diag_values[u];
 
 			updated_degree[v]--;
 		}
@@ -136,7 +135,7 @@ EdgeList* PartialCholeskyFactorization::SanitizeEdgeList(EdgeList edges) {
 	aligned_vector <int> v(size);
 	aligned_vector <double> w(size);
 
-	// move the edges elements to the three vectors, and get rid of (0,0,0) triplets
+	// move edges' elements to the three vectors, and get rid of (0,0,0) triplets
 	for (int i = 0; i < size; i++)
 		if (!(edges.u[i] == 0 && edges.v[i] == 0 && edges.w[i] == 0)) {
 			u.push_back(edges.u[i]);
@@ -151,8 +150,8 @@ EdgeList* PartialCholeskyFactorization::SanitizeEdgeList(EdgeList edges) {
 		index[i] = i;
 
 	std::sort(index, index + size, [&] (int lhs, int rhs) {
-		if (edges.u[lhs] != edges.v[lhs])
-			return edges.u[lhs] < edges.v[lhs];
+		if (edges.u[lhs] != edges.u[rhs])
+			return edges.u[lhs] < edges.u[rhs];
 		return edges.v[lhs] < edges.v[rhs];
 	});
 
@@ -162,19 +161,18 @@ EdgeList* PartialCholeskyFactorization::SanitizeEdgeList(EdgeList edges) {
 
 	int last = 0;
 	for (int i = 0; i < size; i++)
-		if (i > 0 && u[i] == fin_u[last] && v[i] == fin_w[last]) {
-			fin_w[last - 1] += w[index[i]];
+		if (i > 0 && u[i] == *fin_u.rbegin() && v[i] == *fin_v.rbegin()) {
+			*fin_u.rbegin() += w[index[i]];
 		}
 		else {
-			last++;
 			fin_u.push_back(u[index[i]]);
 			fin_v.push_back(v[index[i]]);
 			fin_w.push_back(w[index[i]]);
 		}
 
-	fin_u.resize(last);
-	fin_v.resize(last);
-	fin_w.resize(last);
+	fin_u.resize(fin_u.size());
+	fin_v.resize(fin_v.size());
+	fin_w.resize(fin_w.size());
 
 	return new EdgeList(std::move(fin_u), std::move(fin_v), std::move(fin_w));
 }
@@ -231,7 +229,7 @@ static aligned_vector<double> ApplyLInv(EdgeList L, aligned_vector<double> x) {
 
 	// sort L
 	std::sort(index, index + size, [&] (int lhs, int rhs) {
-		if (L.u[lhs] != L.u[rhs])
+		if (L.v[lhs] != L.v[rhs])
 			return L.v[lhs] < L.v[rhs];
 		return L.u[lhs] < L.u[rhs];
 	});
@@ -250,7 +248,7 @@ static aligned_vector<double> ApplyLTransInv(EdgeList L, aligned_vector<double> 
 
 	// sort L
 	std::sort(index, index + size, [&] (int lhs, int rhs) {
-		if (L.u[lhs] != L.u[rhs])
+		if (L.v[lhs] != L.v[rhs])
 			return L.v[lhs] > L.v[rhs];
 		return L.u[lhs] > L.u[rhs];
 	});
@@ -264,8 +262,7 @@ static aligned_vector<double> ApplyLTransInv(EdgeList L, aligned_vector<double> 
 Graph PartialCholeskyFactorization::GetReducedGraph(EdgeList D, int shift) {
 	EdgeList* sanitized_D = SanitizeEdgeList(D);
 
-	int size = D.ne;
-	aligned_vector <int> edges_to_add(size);
+	aligned_vector <int> edges_to_add(sanitized_D->ne);
 
 	for (int i = 0; i < sanitized_D->ne; i++) {
 		if (sanitized_D->u[i] >= sanitized_D->v[i]) continue;
