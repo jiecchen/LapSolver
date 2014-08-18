@@ -12,7 +12,6 @@
 class Graph
 {
 public:
-    Graph();
     Graph(const Graph &rval);
     Graph(Graph &&rval);
 

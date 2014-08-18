@@ -27,7 +27,7 @@ public:
 };
 
 template <typename Vec>
-aligned_vector<double> operator*(const VectorOperator &lhs, Vec rhs)
+aligned_vector<double> operator*(VectorOperator &lhs, Vec rhs)
 {
     return lhs.apply(rhs);
 }

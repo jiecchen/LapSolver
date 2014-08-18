@@ -3,18 +3,18 @@
 #include "solvers/VectorOperator.h"
 #include "mkl.h"
 
-struct CSRMatrix : public VectorOperator
+struct CSRSymMatrix : public VectorOperator
 {
     using VectorOperator::apply;
-    CSRMatrix() {}
+    CSRSymMatrix() {}
 
-    CSRMatrix(const aligned_vector<int> &rows, const aligned_vector<int> &cols, const aligned_vector<double> &data)
+    CSRSymMatrix(const aligned_vector<int> &rows, const aligned_vector<int> &cols, const aligned_vector<double> &data)
         : rows(rows), cols(cols), data(data), dim(rows.size() - 1), nnz(cols.size())
     {
 
     }
 
-    CSRMatrix(aligned_vector<int> &&rows, aligned_vector<int> &&cols, aligned_vector<double> &&data)
+    CSRSymMatrix(aligned_vector<int> &&rows, aligned_vector<int> &&cols, aligned_vector<double> &&data)
         : rows(rows), cols(cols), data(data), dim(rows.size() - 1), nnz(cols.size())
     {
 
@@ -22,8 +22,8 @@ struct CSRMatrix : public VectorOperator
 
     virtual void apply(double *x, double *y)
     {
-        char normal = 'n';
-        mkl_cspblas_dcsrgemv(&normal, &dim, data.data(), rows.data(), cols.data(), x, y);
+        char upper = 'u';
+        mkl_cspblas_dcsrsymv(&upper, &dim, data.data(), rows.data(), cols.data(), x, y);
     }
 
     virtual int getDimension() const

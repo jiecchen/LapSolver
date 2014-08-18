@@ -4,8 +4,6 @@
 #include <math.h>
 #include "Graph.h"
 
-Graph::Graph() { }
-
 Graph::Graph(const Graph &rval)
     : adj(rval.adj),
       degrees(rval.degrees)
