@@ -17,5 +17,5 @@ $(BENCH):
 	$(eval TEST := $(patsubst %-bench, %, $@))
 	@cp Makefile.test $(TEST)/Makefile
 	@cd $(TEST) && make 2>&1 > /dev/null && cd ..
-	@TESTMODE=auto ./runTest.sh $(TEST) -v -n 10
+	@TESTMODE=auto ./runTest.sh $(TEST) -v -n 50
 	@cd $(TEST) && make clean 2>&1 > /dev/null && cd ..

@@ -17,7 +17,7 @@ void ConjugateGradientSolver::apply(double *b, double *x)
 {
     // Necessary variables for RCI solver
     int rci;
-    double norm = 1.0 + tolerance;
+    double norm = tolerance+1;
 
     int one_i = 1;
     double one_d = -1.e0;
@@ -25,7 +25,7 @@ void ConjugateGradientSolver::apply(double *b, double *x)
     aligned_vector<double> scratch(dim);
 
     // Initialize the solution
-    x[0:dim] = 1.0;
+    x[0:dim] = 0.0;
 
     dcg_init(&dim, x, b, &rci, ipar, dpar, tmp.data());
     if (rci != 0)

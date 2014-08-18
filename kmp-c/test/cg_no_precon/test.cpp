@@ -4,7 +4,7 @@
 #include "mkl.h"
 
 /*
- * Note: this test is identical to Intel's own cg_no_precon.
+ * Note: this test is identical to Intel's own cg_st_criteria.
  *
  * It is here to verify that our interface does not change the
  * correct running of Intel's PCG implementation.
@@ -13,7 +13,7 @@
  * dimension 6 (index 5)
  */
 
-// I should probably refactor this into a class in solers
+// I should probably refactor this into a class in solvers
 class TestOperator : public VectorOperator
 {
 public:
@@ -44,13 +44,13 @@ int main(int argc, char **argv)
 
     // initialize solution via original operator
     double expected_sol[8] = { 1, 0, 1, 0, 1, 0, 1, 0 };
-    aligned_vector<double> b(8);
-    a.apply(expected_sol, b.data());
+    aligned_vector<double> rhs(8);
+    a.apply(expected_sol, rhs.data());
 
-    aligned_vector<double> x;
+    aligned_vector<double> x(8);
     auto bench = make_benchmark(argc, argv, [&] ()
     {
-        x = cg.apply(b);
+        x = cg.apply(rhs);
     });
 
     for (auto xi : x)
