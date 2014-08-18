@@ -192,7 +192,6 @@ public class LDLDecomposition {
 
     public void initL(int steps) {
         // This number of declared elements is an overestimate for the actual needed memory.
-        // It has an extra O(steps) field used.
         int cnt = N;
         for (int i = 0; i < steps; i++)
             cnt += graph.deg[i] + 1;
@@ -207,7 +206,7 @@ public class LDLDecomposition {
     }
 
     public void initD(int steps) {
-        int cnt = N;    // The number of entries on the diagonal
+        int cnt = N;                    // The number of entries on the diagonal
         cnt += 2 * steps;
         for (int i = steps; i < N; i++)
             cnt += 2 * graph.deg[i];    // The number of edges already existing in L

@@ -6,8 +6,7 @@
 
 using namespace std;
 
-class PartialCholeskyOrder
-{
+class PartialCholeskyOrder {
 public:
 	PartialCholeskyOrder(const Graph &g);					// The constructor computes 
 	~PartialCholeskyOrder();
