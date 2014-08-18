@@ -17,7 +17,7 @@ void ConjugateGradientSolver::apply(double *b, double *x)
 {
     // Necessary variables for RCI solver
     int rci;
-    double norm = tolerance+1;
+    double norm = tolerance + 1;
 
     int one_i = 1;
     double one_d = -1.e0;

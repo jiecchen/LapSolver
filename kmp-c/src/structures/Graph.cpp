@@ -41,6 +41,8 @@ Graph &Graph::operator=(Graph && g)
     return *this;
 }
 
+#define mkl_throw(f) throw fprintf(stderr, "Error! " f " failed with code %d\n", error), error;
+
 Graph::Graph(EdgeList &&edges) : nv(edges.nv)
 {
     adj.nnz = edges.ne * 2;
@@ -74,7 +76,7 @@ Graph::Graph(EdgeList &&edges) : nv(edges.nv)
                 &error);
 
     if (error)
-        fprintf(stderr, "error: mkl_dcsrcoo failed with code %d\n", error);
+        mkl_throw("mkl_dcsrcoo");
 
     // Allocate final memory
     aligned_vector<int> rows(adj.dim + 1);
@@ -98,7 +100,7 @@ Graph::Graph(EdgeList &&edges) : nv(edges.nv)
                 NULL, &error);
 
     if (error)
-        fprintf(stderr, "error: mkl_dcsradd failed with code %d\n", error);
+        mkl_throw("mkl_dcsradd");
 
     // Convert back to 0-based indexing
     cols.data()[0:adj.nnz]--;

@@ -59,3 +59,15 @@ EdgeList::EdgeList(const aligned_vector<int> &u,
       w(aligned_vector<double>(w))
 {
 }
+
+EdgeList::EdgeList(aligned_vector<int> &&u,
+                   aligned_vector<int> &&v,
+                   aligned_vector<double> &&w)
+    : ne(u.size()),
+      nv(1 + std::max(arrayMax(u.data(), ne),
+                      arrayMax(v.data(), ne))),
+      u(std::move(u)),
+      v(std::move(v)),
+      w(std::move(w))
+{
+}
