@@ -1,29 +1,17 @@
 #include <iostream>
 
-#include "TarjanLCA.h"
-#include "UnionFind.h"
 #include "structures/Graph.h"
 #include "structures/TreeChildren.h"
+#include "TarjanLCA.h"
+#include "UnionFind.h"
+#include "TreeDFS.h"
 
 using namespace std;
 
 TarjanLCA::TarjanLCA (const Graph& g, int tRoot, const int* tParent, const TreeChildren& tChildren) {
     // get dfs order
     int n = g.nv();
-    int* dfsStack = new int[n]; dfsStack[0] = tRoot;
-    int dfsStackPos = 1;
-    int* dfsOrder = new int[n];
-    int dfsOrderPos = 0;
-
-    while (dfsStackPos > 0) {
-        int curNode = dfsStack[--dfsStackPos];
-        dfsOrder[dfsOrderPos++] = curNode;
-        for (int i = tChildren.offset[curNode]; i < tChildren.offset[curNode+1]; i++) {
-            dfsStack[dfsStackPos++] = tChildren.child[i];
-        }
-    }
-
-    delete[] dfsStack;
+    vector<int> dfsOrder = TreeDFS(n, tRoot, tChildren);
 
     // run LCA
     int* ancestor = new int[n];
@@ -67,17 +55,11 @@ TarjanLCA::TarjanLCA (const Graph& g, int tRoot, const int* tParent, const TreeC
             components.link(parent, curNode);
             ancestor[components.find_set(parent)] = parent;
         }
-
-        // push children
-        for (int i = tChildren.offset[curNode]; i < tChildren.offset[curNode+1]; i++) {
-            dfsStack[dfsStackPos++] = tChildren.child[i];
-        }
     }
 
     delete[] ancestor;
     delete[] black;
     delete[] childrenLeft;
-    delete[] dfsOrder;
 }
 
 TarjanLCA::~TarjanLCA () {
