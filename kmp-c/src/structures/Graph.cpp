@@ -4,19 +4,17 @@
 #include <math.h>
 #include "Graph.h"
 
-Graph::Graph() : nv(0) { }
+Graph::Graph() { }
 
 Graph::Graph(const Graph &rval)
-    : nv(rval.nv),
-      adj(rval.adj),
+    : adj(rval.adj),
       degrees(rval.degrees)
 {
 
 }
 
 Graph::Graph(Graph &&rval)
-    : nv(std::move(rval.nv)),
-      adj(std::move(rval.adj)),
+    : adj(std::move(rval.adj)),
       degrees(std::move(rval.degrees))
 {
 
@@ -26,7 +24,6 @@ Graph &Graph::operator=(const Graph &g)
 {
     if (this != &g)
     {
-        nv = g.nv;
         adj = g.adj;
         degrees = g.degrees;
     }
@@ -35,7 +32,6 @@ Graph &Graph::operator=(const Graph &g)
 
 Graph &Graph::operator=(Graph && g)
 {
-    nv = std::move(g.nv);
     adj = std::move(g.adj);
     degrees = std::move(g.degrees);
     return *this;
@@ -43,7 +39,7 @@ Graph &Graph::operator=(Graph && g)
 
 #define mkl_throw(f) throw fprintf(stderr, "Error! " f " failed with code %d\n", error), error;
 
-Graph::Graph(EdgeList &&edges) : nv(edges.nv)
+Graph::Graph(EdgeList &&edges)
 {
     adj.nnz = edges.ne * 2;
     adj.dim = edges.nv;

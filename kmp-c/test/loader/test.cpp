@@ -10,8 +10,8 @@ int main(int argc, char const *argv[])
     atexit(mkl_free_buffers);
     Graph g = GraphLoader::fromStdin();
 
-    printf("%d vertices\n", g.nv);
-    for (int i = 0; i < g.nv; i++) {
+    printf("%d vertices\n", g.nv());
+    for (int i = 0; i < g.nv(); i++) {
         printf("deg(%d) = %d\n", i, g.getDegree(i));
     }
 

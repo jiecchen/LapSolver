@@ -22,7 +22,7 @@ int main(int argc, char **argv)
         spt.reset(new ShortestPathTree(g, 0));
     });
 
-    for (int i = 0; i < g.nv; ++i)
+    for (int i = 0; i < g.nv(); ++i)
         printf("%d,%d ", spt->parent[i], i);
     printf("\n");
 

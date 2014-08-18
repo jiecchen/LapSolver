@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     }
 
     printf("Keep:\n");
-    for (int i = gvr->removal_count; i < g.nv; i++) {
+    for (int i = gvr->removal_count; i < g.nv(); i++) {
         printf("%d\n", gvr->permutation[i]);
     }
 

@@ -4,7 +4,7 @@ PartialCholeskyFactorization::PartialCholeskyFactorization(const Graph &g, const
 	: graph(g), 
 	  diag_values(diag_values), 
 	  num_steps(num_steps) {
-	n = graph.nv;
+	n = graph.nv();
 	updated_degree = new int[n];
 
 	InitL();

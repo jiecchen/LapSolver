@@ -26,22 +26,23 @@ static set<Key, Comparator> make_set(Comparator c) {
 
 ShortestPathTree::ShortestPathTree(const Graph &g, int source)
 {
-    dist = new double[g.nv];
-    parent = new int[g.nv];
-    parentIndex = new int[g.nv];
-    weight = new double[g.nv];
+    int n = g.nv();
+    dist = new double[n];
+    parent = new int[n];
+    parentIndex = new int[n];
+    weight = new double[n];
 
     parent[source] = source;
 
-    dist[0:g.nv] = numeric_limits<double>::infinity();
+    dist[0:n] = numeric_limits<double>::infinity();
     dist[source] = 0;
     
     auto nextNodes = make_set<int, ArrayComparator>(ArrayComparator(dist));
 
-    for (int i = 0; i < g.nv; ++i)
+    for (int i = 0; i < n; ++i)
         nextNodes.insert(i);
 
-    vector<bool> settled(g.nv);
+    vector<bool> settled(n);
 
     while(!nextNodes.empty()) {
         int u = *nextNodes.begin();

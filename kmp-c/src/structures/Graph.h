@@ -43,7 +43,15 @@ public:
 
     void debugPrint();
 
-    int nv;
+    inline int nv() const
+    {
+        return adj.dim;
+    }
+
+    inline int ne() const
+    {
+        return adj.nnz >> 1;
+    }
 
 private:
     CSRMatrix adj;
