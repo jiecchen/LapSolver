@@ -4,7 +4,7 @@
 class ConjugateGradientSolver : public VectorOperator
 {
 public:
-	using VectorOperator::apply;
+    using VectorOperator::apply;
     ConjugateGradientSolver(VectorOperator *a, VectorOperator *m = nullptr,
                             int maxIters = 1000, double tolerance = 1e-8);
     virtual ~ConjugateGradientSolver() {}

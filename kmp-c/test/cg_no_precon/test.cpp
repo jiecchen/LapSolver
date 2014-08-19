@@ -1,7 +1,7 @@
 #include <solvers/ConjugateGradientSolver.h>
 #include <util/aligned.h>
 #include <util/Benchmark.h>
-#include <structures/CSRSymMatrix.h>
+#include <structures/CSRMatrix.h>
 #include "mkl.h"
 
 /*
@@ -26,7 +26,7 @@ int main(int argc, char **argv)
     ia.data()[0:ia.size()]--;
     ja.data()[0:ja.size()]--;
 
-    CSRSymMatrix a(ia, ja, da);
+    CSRMatrix<RealSym> a(ia, ja, da);
     ConjugateGradientSolver cg(&a);
 
     // initialize solution via original operator

@@ -3,6 +3,15 @@
 #include "solvers/VectorOperator.h"
 #include "mkl.h"
 
+enum MatrixType
+{
+    RealSym = 1,
+    RealSymPosDef = 2,
+    RealSymIndef = -2,
+    RealGeneral = 11,
+};
+
+template <MatrixType M = RealGeneral>
 struct CSRMatrix : public VectorOperator
 {
     using VectorOperator::apply;
@@ -20,15 +29,20 @@ struct CSRMatrix : public VectorOperator
 
     }
 
-    virtual void apply(double *x, double *y)
+    void apply(double *x, double *y)
     {
         char normal = 'n';
         mkl_cspblas_dcsrgemv(&normal, &dim, data.data(), rows.data(), cols.data(), x, y);
     }
 
-    virtual int getDimension() const
+    int getDimension() const
     {
         return dim;
+    }
+
+    MatrixType getType() const
+    {
+        return M;
     }
 
     aligned_vector<double> data;
@@ -40,4 +54,23 @@ struct CSRMatrix : public VectorOperator
 
 };
 
+template <>
+void CSRMatrix<RealSym>::apply(double *x, double *y)
+{
+    char upper = 'u';
+    mkl_cspblas_dcsrsymv(&upper, &dim, data.data(), rows.data(), cols.data(), x, y);
+}
 
+template <>
+void CSRMatrix<RealSymPosDef>::apply(double *x, double *y)
+{
+    char upper = 'u';
+    mkl_cspblas_dcsrsymv(&upper, &dim, data.data(), rows.data(), cols.data(), x, y);
+}
+
+template <>
+void CSRMatrix<RealSymIndef>::apply(double *x, double *y)
+{
+    char upper = 'u';
+    mkl_cspblas_dcsrsymv(&upper, &dim, data.data(), rows.data(), cols.data(), x, y);
+}

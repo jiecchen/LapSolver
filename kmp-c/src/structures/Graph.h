@@ -63,6 +63,6 @@ public:
     }
 
 private:
-    CSRMatrix adj;
+    CSRMatrix<RealGeneral> adj;
     aligned_vector<int> degrees;
 };
