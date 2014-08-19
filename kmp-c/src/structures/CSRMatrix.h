@@ -5,13 +5,13 @@
 
 enum MatrixType
 {
-    RealSym = 1,
-    RealSymPosDef = 2,
-    RealSymIndef = -2,
-    RealGeneral = 11,
+    Real,
+    RealPosDef,
+    RealSym,
+    RealSymPosDef,
 };
 
-template <MatrixType M = RealGeneral>
+template <MatrixType M = Real>
 struct CSRMatrix : public VectorOperator
 {
     using VectorOperator::apply;
@@ -63,13 +63,6 @@ void CSRMatrix<RealSym>::apply(double *x, double *y)
 
 template <>
 void CSRMatrix<RealSymPosDef>::apply(double *x, double *y)
-{
-    char upper = 'u';
-    mkl_cspblas_dcsrsymv(&upper, &dim, data.data(), rows.data(), cols.data(), x, y);
-}
-
-template <>
-void CSRMatrix<RealSymIndef>::apply(double *x, double *y)
 {
     char upper = 'u';
     mkl_cspblas_dcsrsymv(&upper, &dim, data.data(), rows.data(), cols.data(), x, y);

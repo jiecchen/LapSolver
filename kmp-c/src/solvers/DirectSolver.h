@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include "structures/CSRMatrix.h"
 #include "VectorOperator.h"
 
@@ -8,7 +9,7 @@ class DirectSolver : public VectorOperator
 public:
     using VectorOperator::apply;
     DirectSolver(CSRMatrix<M> *csr);
-    virtual ~DirectSolver() {}
+    virtual ~DirectSolver();
 
     virtual int getDimension() const
     {
@@ -18,7 +19,10 @@ public:
     virtual void apply(double *b, double *x);
 
 private:
-    CSRMatrix<M> *csr;
-    int iparm[64];
     int dim;
+    CSRMatrix<M> *csr;
+
+    // Opaque pointers, aww yeah
+    struct DSS_impl;
+    std::unique_ptr<DSS_impl> _impl;
 };
