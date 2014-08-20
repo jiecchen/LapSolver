@@ -4,7 +4,7 @@
 #include "structures/TreeChildren.h"
 
 struct TarjanLCA {
-    TarjanLCA (const Graph& g, int tRoot, const int* tParent, const TreeChildren& tChildren);
+    TarjanLCA (const Graph& g, int tRoot, const int* tParent, const TreeChildren& tChildren, int* dfsOrder);
     ~TarjanLCA ();
 
     int ne;

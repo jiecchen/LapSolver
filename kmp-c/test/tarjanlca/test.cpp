@@ -5,6 +5,7 @@
 #include <string>
 #include <algorithm>
 #include <algorithms/TarjanLCA.h>
+#include <algorithms/TreeDFS.h>
 #include <structures/TreeChildren.h>
 #include <structures/GraphLoader.h>
 
@@ -26,11 +27,12 @@ int main(int argc, char *argv[])
         if (parent[i] == i) root = i;
     }
 
-    // get children
+    // precompute children and dfs order
     TreeChildren tChildren(n, parent.data());
+    vector<int> dfsOrder = TreeDFS(n, root, tChildren);
 
     // run lca
-    TarjanLCA lca(g, root, parent.data(), tChildren);
+    TarjanLCA lca(g, root, parent.data(), tChildren, dfsOrder.data());
 
     // canonize lca results
     for (int i = 0; i < lca.ne; i++) {

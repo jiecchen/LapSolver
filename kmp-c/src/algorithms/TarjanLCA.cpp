@@ -8,10 +8,8 @@
 
 using namespace std;
 
-TarjanLCA::TarjanLCA (const Graph& g, int tRoot, const int* tParent, const TreeChildren& tChildren) {
-    // get dfs order
+TarjanLCA::TarjanLCA (const Graph& g, int tRoot, const int* tParent, const TreeChildren& tChildren, int* dfsOrder) {
     int n = g.nv();
-    vector<int> dfsOrder = TreeDFS(n, tRoot, tChildren);
 
     // run LCA
     int* ancestor = new int[n];
