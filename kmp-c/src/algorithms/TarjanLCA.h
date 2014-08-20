@@ -10,5 +10,6 @@ struct TarjanLCA {
     int ne;
     int* u;
     int* v;
+    double* weight;
     int* lca;
 };

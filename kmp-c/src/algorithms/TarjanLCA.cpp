@@ -22,6 +22,7 @@ TarjanLCA::TarjanLCA (const Graph& g, int tRoot, const int* tParent, const TreeC
     ne = g.ne() - n + 1;
     u = new int[ne];
     v = new int[ne];
+    weight = new double[ne];
     lca = new int[ne];
 
     black[0:n] = false; 
@@ -45,6 +46,7 @@ TarjanLCA::TarjanLCA (const Graph& g, int tRoot, const int* tParent, const TreeC
                 if (black[queryNode] && tParent[queryNode] != curNode && tParent[curNode] != queryNode) {
                     u[edgePos] = curNode;
                     v[edgePos] = queryNode;
+                    weight[edgePos] = g.weight(curNode, i);
                     lca[edgePos] = ancestor[components.find_set(queryNode)];
                     edgePos++;
                 }
@@ -63,5 +65,6 @@ TarjanLCA::TarjanLCA (const Graph& g, int tRoot, const int* tParent, const TreeC
 TarjanLCA::~TarjanLCA () {
     delete[] u;
     delete[] v;
+    delete[] weight;
     delete[] lca;
 }
