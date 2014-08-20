@@ -25,6 +25,19 @@ function compLDLmat(graph)
     numRemoved = gvmPair.numRemoved;
     g = Graph(GraphUtils.permuteGraph(graph, perm));
     
+    
+    a = g2a(g);
+    [u,v,w] = find(a);
+    for i = 1:length(u)
+        if u(i) < v(i)
+            fprintf('%d %d %.4f \n', u(i) - 1, v(i) - 1, w(i)); 
+        end
+    end
+    for i = 1:length(X)
+        fprintf('%.4f ', X(i));
+    end
+    fprintf('\n');
+    
     ldl = LDLDecomposition(g, X);
     ldlAns = ldl.solve(numRemoved);
     serbanL = full(e2mat(ldlAns.L.L));
@@ -37,6 +50,9 @@ function compLDLmat(graph)
     eps = 10^(-10);
     valueL = max(max(abs(serbanL - danL)));
     valueD = max(max(abs(serbanD - danD)));
+    
+    danL
+    danD
     
     valueL = 0;
     valueD = 0;
