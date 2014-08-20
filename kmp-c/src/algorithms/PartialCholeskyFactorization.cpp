@@ -1,9 +1,14 @@
 #include "PartialCholeskyFactorization.h"
 
+
 PartialCholeskyFactorization::PartialCholeskyFactorization(const Graph &g, const aligned_vector<double> &diag_values, const int num_steps) 
 	: graph(g), 
 	  diag_values(diag_values), 
 	  num_steps(num_steps) {
+	  	
+
+	return;
+
 	n = graph.nv();
 	updated_degree = new int[n];
 

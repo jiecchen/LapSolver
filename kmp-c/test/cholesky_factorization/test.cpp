@@ -1,15 +1,12 @@
 // Test for Cholesky elimination order
 
 #include <cstdlib>
-#include <iostream>
 #include <string>
 #include <memory>
 #include <structures/Graph.h>
 #include <structures/GraphLoader.h>
 #include <algorithms/PartialCholeskyFactorization.h>
 #include <util/Benchmark.h>
-
-using namespace std;
 
 int main(int argc, char *argv[])
 {
@@ -29,7 +26,7 @@ int main(int argc, char *argv[])
     std::shared_ptr<PartialCholeskyFactorization> ldl;
 
     auto bench = make_benchmark(argc, argv, [&] () {
-        ldl.reset(new PartialCholeskyFactorization(g, diag_values, num_steps));
+         ldl.reset(new PartialCholeskyFactorization(g, diag_values, num_steps));
     });
 
     // printf("Eliminate %d vertices\n", gvr->removal_count);
