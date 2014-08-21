@@ -5,10 +5,7 @@ PartialCholeskyFactorization::PartialCholeskyFactorization(const Graph &g, const
 	: graph(g), 
 	  diag_values(diag_values), 
 	  num_steps(num_steps) {
-	  	
-
-	return;
-
+	
 	n = graph.nv();
 	updated_degree = new int[n];
 
@@ -20,8 +17,8 @@ PartialCholeskyFactorization::PartialCholeskyFactorization(const Graph &g, const
 
 PartialCholeskyFactorization::~PartialCholeskyFactorization() {
 	delete[] updated_degree;
-	delete[] L;
-	delete[] D;
+	delete L;
+	delete D;
 }
 
 void PartialCholeskyFactorization::DoFactorization() {
