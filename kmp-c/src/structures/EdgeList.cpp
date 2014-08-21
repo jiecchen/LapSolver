@@ -12,10 +12,13 @@ static T arrayMax(T *arr, unsigned int n)
 EdgeList::EdgeList(int ne)
     : ne(ne),
       nv(0),
-      u(aligned_vector<int>(ne, 0)),
-      v(aligned_vector<int>(ne, 0)),
-      w(aligned_vector<double>(ne, 0.0))
+      u(aligned_vector<int>()),
+      v(aligned_vector<int>()),
+      w(aligned_vector<double>())
 {
+    u.reserve(ne);
+    v.reserve(ne);
+    w.reserve(ne);
 }
 
 EdgeList::EdgeList(int ne, int *u, int *v)
