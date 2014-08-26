@@ -13,6 +13,6 @@ if [ "$TESTMODE" = "auto" ]; then
 else
 	cp ../Makefile.test Makefile
 	make 2>&1 > /dev/null
-	./$PROG $@ < test.in
-	make clean 2>&1 > /dev/null
+	$VALGRIND ./$PROG $@ < test.in
+	[[ $KEEP = "yes" ]] || make clean 2>&1 > /dev/null
 fi

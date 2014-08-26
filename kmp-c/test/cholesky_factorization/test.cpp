@@ -1,6 +1,7 @@
 // Test for Cholesky elimination order
 
 #include <cstdlib>
+#include <cstring>
 #include <string>
 #include <memory>
 #include <structures/Graph.h>

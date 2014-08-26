@@ -1,9 +1,9 @@
 #pragma once
 
-#import <utility>
+#include <utility>
 
-#import "util/aligned.h"
-#import "structures/Graph.h"
+#include "util/aligned.h"
+#include "structures/Graph.h"
 
 class PartialCholeskyFactorization {
 public:

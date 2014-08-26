@@ -6,10 +6,10 @@ enum Alignment : size_t
 {
     AlignSIMD = 16,
     AlignAVX = 32,
-    AlignFast = 128
+    AlignCache = 128
 };
 
-template <typename T, size_t TALIGN = AlignAVX>
+template <typename T, size_t TALIGN>
 class aligned_allocator : public std::allocator<T>
 {
     typedef typename std::allocator<T>::pointer pointer;

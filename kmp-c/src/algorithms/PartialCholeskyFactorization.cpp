@@ -1,5 +1,5 @@
 #include "PartialCholeskyFactorization.h"
-
+#include <algorithm>
 
 PartialCholeskyFactorization::PartialCholeskyFactorization(const Graph &g, const aligned_vector<double> &diag_values, const int num_steps) 
 	: graph(g), 
