@@ -6,7 +6,7 @@ enum Alignment : size_t
 {
     AlignSIMD = 16,
     AlignAVX = 32,
-    AlignCache = 128
+    AlignCache = 64
 };
 
 template <typename T, size_t TALIGN>
