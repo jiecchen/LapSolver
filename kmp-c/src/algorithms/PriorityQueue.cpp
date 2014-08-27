@@ -40,8 +40,8 @@ void PriorityQueue::DecreaseKey (int key, double pri) {
 pair<int, double> PriorityQueue::Pop () {
     pair<int, double> ret(heap[0], priority[heap[0]]);
 
-    SwapKeys(0, size-1);
-    heap_index[heap[size-1]] = -1;
+    SwapKeys(heap[0], heap[size - 1]);
+    heap_index[heap[size - 1]] = -1;
     size--;
 
     DownHeap(heap[0]);
@@ -52,7 +52,7 @@ pair<int, double> PriorityQueue::Pop () {
 void PriorityQueue::UpHeap (int key) {
     if (heap_index[key] == 0) return;
 
-    int parent = (heap_index[key]-1) / 2;
+    int parent = (heap_index[key] - 1) / 2;
     if (priority[heap[parent]] > priority[key]) {
         SwapKeys (key, heap[parent]);
         UpHeap (key);
@@ -60,8 +60,9 @@ void PriorityQueue::UpHeap (int key) {
 }
 
 void PriorityQueue::DownHeap (int key) {
-    int left_child = 2*(heap_index[key]+1)-1, right_child = 2*(heap_index[key]+1);
-    int to_swap = key;
+    int left_child = 2 * (heap_index[key] + 1) - 1;
+    int right_child = 2 * (heap_index[key] + 1);
+    int to_swap = heap_index[key];
 
     if (left_child < size && priority[heap[left_child]] < priority[heap[to_swap]]) {
         to_swap = left_child;
@@ -71,14 +72,13 @@ void PriorityQueue::DownHeap (int key) {
         to_swap = right_child;
     }
 
-    if (to_swap != key) {
+    if (to_swap != heap_index[key]) {
         SwapKeys (key, heap[to_swap]);
         DownHeap (key);
     }
 }
 
 void PriorityQueue::SwapKeys (int key1, int key2) {
-    swap(heap[key1], heap[key2]);
-    swap(priority[heap[key1]], priority[heap[key2]]);
-    swap(heap_index[heap[key1]], heap_index[heap[key2]]);
+    swap(heap[heap_index[key1]], heap[heap_index[key2]]);
+    swap(heap_index[key1], heap_index[key2]);
 }
