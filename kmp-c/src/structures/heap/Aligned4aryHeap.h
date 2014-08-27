@@ -7,8 +7,10 @@ class Aligned4aryHeap : public Heap<Key, Value>
 {
     typedef HeapElement<Key, Value> Element;
     static const int offset = (AlignCache - 1) / sizeof(Element);
-    static const Key maxValue = std::numeric_limits<Key>::max();
-    static const Key minValue = std::numeric_limits<Key>::min();
+    static const Key maxValue = std::numeric_limits<Key>::has_infinity 
+                              ? std::numeric_limits<Key>::infinity()
+                              : std::numeric_limits<Key>::max();
+    static const Key minValue = std::numeric_limits<Key>::lowest();
 
 public:
     /*
