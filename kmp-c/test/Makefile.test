@@ -10,7 +10,7 @@ MKL_LFLAGS += -L$(MKLROOT)/lib -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -l
 
 KMP_LFLAGS += -L../../ -lkmp
 
-CFLAGS:=-O3 -g -xHost -std=c++11 -I$(SRC)
+CFLAGS:=-O3 -xHost -std=c++11 -I$(SRC)
 LFLAGS:=$(CFLAGS)
 
 LIBS:=$(MKL_LFLAGS) $(KMP_LFLAGS)
