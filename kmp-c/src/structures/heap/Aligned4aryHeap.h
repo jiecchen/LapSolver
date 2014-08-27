@@ -7,10 +7,10 @@ class Aligned4aryHeap : public Heap<Key, Value>
 {
     typedef HeapElement<Key, Value> Element;
     static const int offset = (AlignCache - 1) / sizeof(Element);
-    static const Key maxValue = std::numeric_limits<Key>::has_infinity 
-                              ? std::numeric_limits<Key>::infinity()
-                              : std::numeric_limits<Key>::max();
-    static const Key minValue = std::numeric_limits<Key>::lowest();
+    static const Key highestPriority = std::numeric_limits<Key>::has_infinity
+                                     ? std::numeric_limits<Key>::infinity()
+                                     : std::numeric_limits<Key>::max();
+    static const Key lowestPriority = std::numeric_limits<Key>::lowest();
 
 public:
     /*
@@ -28,10 +28,10 @@ public:
           data(data_v.data() + offset - 1)
     {
         Value defVal = Value();
-        data[0].key = minValue;
-        data[capacity+1] = (Element) { maxValue, defVal };
-        data[capacity+2] = (Element) { maxValue, defVal };
-        data[capacity+3] = (Element) { maxValue, defVal };
+        data[0].key = lowestPriority;
+        data[capacity + 1] = (Element) { highestPriority, defVal };
+        data[capacity + 2] = (Element) { highestPriority, defVal };
+        data[capacity + 3] = (Element) { highestPriority, defVal };
     }
 
     virtual ~Aligned4aryHeap() {}
@@ -105,7 +105,7 @@ void Aligned4aryHeap<Key, Value>::pop(Key *oKey, Value *oValue)
     _data[hole].value = _data[sz].value;
 
     // Clear it out
-    _data[sz].key = maxValue;
+    _data[sz].key = highestPriority;
 }
 
 template <typename Key, typename Value>

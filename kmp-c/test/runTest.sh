@@ -11,7 +11,9 @@ shift 1
 if [ "$TESTMODE" = "auto" ]; then
 	./$PROG $@ < test.in | cmp - test.out
 else
-	make clean 2>&1 > /dev/null
+	if [ -f Makefile ]; then
+		make clean 2>&1 > /dev/null
+	fi
 	cp ../Makefile.test Makefile
 	make 2>&1 > /dev/null
 	$VALGRIND ./$PROG $@ < test.in
