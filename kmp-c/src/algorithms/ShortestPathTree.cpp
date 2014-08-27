@@ -1,28 +1,8 @@
 #include <vector>
 #include <limits>
-#include <set>
+#include "structures/heap/Aligned4aryHeap.h"
 #include "ShortestPathTree.h"
 using namespace std;
-
-class ArrayComparator
-{
-public:
-    ArrayComparator(double * dist):dist(dist) { };
-    
-    bool operator() (const int& x, const int& y) const {
-        if(dist[x] == dist[y])
-            return x < y;
-        return dist[x] < dist[y];
-    }
-
-private:
-    double *dist;
-};
-
-template <class Key, class Comparator>
-static set<Key, Comparator> make_set(Comparator c) {
-    return set<Key, Comparator>(c);
-}
 
 ShortestPathTree::ShortestPathTree(const Graph &g, int source)
 {
@@ -36,29 +16,31 @@ ShortestPathTree::ShortestPathTree(const Graph &g, int source)
 
     dist[0:n] = numeric_limits<double>::infinity();
     dist[source] = 0;
-    
-    auto nextNodes = make_set<int, ArrayComparator>(ArrayComparator(dist));
 
-    for (int i = 0; i < n; ++i)
-        nextNodes.insert(i);
+    Aligned4aryHeap<double, int> pq(n << 1);
+    pq.push(0, source);
 
-    vector<bool> settled(n);
+    vector<int> settled(n, false);
 
-    while(!nextNodes.empty()) {
-        int u = *nextNodes.begin();
-        nextNodes.erase(u);
-
-        for (int i = 0, deg = g.degree(u); i < deg; ++i) {
+    while (!pq.isEmpty())
+    {
+        double k; int u;
+        pq.pop(&k, &u);
+        for (int i = 0, deg = g.degree(u); i < deg; ++i)
+        {
             int v = g.neighbor(u, i);
-            if(!settled[v]) {
-                double alt = dist[u] + 1/g.weight(u, i);
-                if(alt < dist[v]) {
-                    nextNodes.erase(v);
+            if (!settled[v])
+            {
+                double edgeW = 1 / g.weight(u, i);
+                double alt = dist[u] + edgeW;
+                if (alt < dist[v])
+                {
+                    pq.push(alt, v);
+
                     dist[v] = alt;
-                    weight[v] = 1/g.weight(u, i);
+                    weight[v] = edgeW;
                     parent[v] = u;
                     parentIndex[v] = i;
-                    nextNodes.insert(v);
                 }
             }
         }

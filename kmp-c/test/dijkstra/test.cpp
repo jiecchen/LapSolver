@@ -1,7 +1,5 @@
 /* Copyright 2014 Yale Institute for Network Science
  * Author: Alex Reinking
- *
- * Example benchmark for vector arithmetic
  */
 #include <cstdlib>
 #include <string>

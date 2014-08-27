@@ -29,9 +29,7 @@ public:
     {
         Value defVal = Value();
         data[0].key = lowestPriority;
-        data[capacity + 1] = (Element) { highestPriority, defVal };
-        data[capacity + 2] = (Element) { highestPriority, defVal };
-        data[capacity + 3] = (Element) { highestPriority, defVal };
+        data[1:capacity + 3] = (Element) { highestPriority, defVal };
     }
 
     virtual ~Aligned4aryHeap() {}
@@ -68,7 +66,8 @@ void Aligned4aryHeap<Key, Value>::pop(Key *oKey, Value *oValue)
     while (succ < sz)
     {
         // Find the smallest child
-        minKey = _data[succ].key; child = 0; // all the read misses happen here
+        // all the read misses happen here
+        minKey = _data[succ].key; child = 0;
 
         childKey = _data[succ + 1].key;
         if (childKey < minKey) { minKey = childKey; child = 1; }
@@ -112,6 +111,15 @@ template <typename Key, typename Value>
 void Aligned4aryHeap<Key, Value>::push(Key key, Value pri)
 {
     int hole = ++size;
+    if (hole > capacity) {
+        printf("resize!\n");
+        capacity <<= 1;
+        data_v.resize(capacity + 4 + offset);
+        data = data_v.data() + offset - 1;
+        data[capacity + 1] = (Element) { highestPriority, Value() };
+        data[capacity + 2] = (Element) { highestPriority, Value() };
+        data[capacity + 3] = (Element) { highestPriority, Value() };
+    }
     int pred = (hole + 2) >> 2;
     Key predKey = data[pred].key;
 
