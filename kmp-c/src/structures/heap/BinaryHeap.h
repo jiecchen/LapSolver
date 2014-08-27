@@ -1,29 +1,29 @@
 #pragma once
 #include <utility>
 #include <algorithm>
+#include <vector>
 #include "Heap.h"
 
 template <typename Key, typename Value>
 class BinaryHeap : public Heap<Key, Value>
 {
+    typedef HeapElement<Key, Value> Element;
+    static const Key maxValue = std::numeric_limits<Key>::max();
+    static const Key minValue = std::numeric_limits<Key>::min();
+
 public:
     BinaryHeap(int capacity)
         : capacity(capacity),
           size(0),
-          heap(new Value[capacity+1]),
-          heap_index(new int[capacity+1]),
-          priority(new Key[capacity+1])
+          data_v(std::vector<Element>(capacity + 2)),
+          data(data_v.data())
     {
-        heap_index[0:capacity] = -1;
-        priority[0:capacity] = std::numeric_limits<Key>::max();
+        Value defVal = Value();
+        data[0].key = minValue;
+        data[1:capacity + 1] = (Element) { maxValue, defVal };
     }
 
-    virtual ~BinaryHeap()
-    {
-        delete[] heap;
-        delete[] heap_index;
-        delete[] priority;
-    }
+    virtual ~BinaryHeap() {}
 
     inline void pop(Key *oKey, Value *oValue);
     inline void push(Key key, Value pri);
@@ -33,97 +33,61 @@ public:
         return size == 0;
     }
 
-    void print()
-    {
-        for (unsigned i = 0; i < size; ++i)
-        {
-            printf("%d:%lf ", heap[i], priority[heap[i]]);
-        }
-        printf("\n");
-    }
-
 private:
     const int capacity;
     int size;
 
-    Value *heap;
-    Key *priority;
-    int *heap_index;
-
-    inline void upHeap(Value value);
-    inline void downHeap(Value value);
-    inline void swapKeys(Value value1, Value key2);
+    std::vector<Element> data_v;
+    Element *data;
 };
-
 
 template <typename Key, typename Value>
 void BinaryHeap<Key, Value>::pop(Key *oKey, Value *oValue)
 {
-    *oKey = priority[heap[0]];
-    *oValue = heap[0];
+    *oKey = data[1].key;
+    *oValue = data[1].value;
 
+    data[1] = data[size];
+    data[size] = (Element) { maxValue, Value() };
     size--;
-    swapKeys(heap[0], heap[size]);
-    heap_index[heap[size]] = -1;
 
-    downHeap(heap[0]);
+    int cur = 1;
+    int succ = 2;
+    while (succ <= size)
+    {
+        int left = cur << 1;
+        int right = left + 1;
+        succ = (data[left].key < data[right].key) ? left : right;
+
+        if (data[cur].key > data[succ].key)
+            std::swap(data[cur], data[succ]);
+        else break;
+        cur = succ;
+        succ = cur << 1;
+    }
 }
 
 
 template <typename Key, typename Value>
-void BinaryHeap<Key, Value>::push(Key pri, Value key)
+void BinaryHeap<Key, Value>::push(Key pri, Value val)
 {
-    heap[size] = key;
-    heap_index[key] = size++;
-    priority[key] = pri;
+    int cur = ++size;
+    int pred = size >> 1;
+    data[size] = (Element) { pri, val };
 
-    upHeap(key);
+    Key predKey = data[pred].key;
+
+    while (predKey > pri)
+    {
+        std::swap(data[cur], data[pred]);
+        cur = pred;
+        predKey = data[pred >>= 1].key;
+    }
 }
 
 template <typename Key, typename Value>
 void BinaryHeap<Key, Value>::decreaseKey(Key pri, Value key)
 {
-    priority[key] = pri;
-    upHeap(key);
-    downHeap(key);
-}
-
-template <typename Key, typename Value>
-void BinaryHeap<Key, Value>::upHeap(Value value)
-{
-    if (heap_index[value] == 0) return;
-    int parentIdx = (heap_index[value] - 1) / 2;
-    Value parent = heap[parentIdx];
-
-    if (priority[value] < priority[parent])
-    {
-        swapKeys(value, parent);
-        upHeap(value);
-    }
-}
-
-template <typename Key, typename Value>
-void BinaryHeap<Key, Value>::downHeap(Value value)
-{
-    if(value == -1) return;
-    int leftIdx = (heap_index[value] * 2) + 1;
-    int rightIdx = (heap_index[value] * 2) + 2;
-    int to_swap = value;
-
-    if (leftIdx < size && priority[heap[leftIdx]] < priority[to_swap])
-        to_swap = heap[leftIdx];
-    else if (rightIdx < size && priority[heap[rightIdx]] < priority[to_swap])
-        to_swap = heap[rightIdx];
-
-    if(to_swap != value) {
-        swapKeys(value, to_swap);
-        downHeap(value);
-    }
-}
-
-template <typename Key, typename Value>
-void BinaryHeap<Key, Value>::swapKeys(Value value1, Value value2)
-{
-    std::swap(heap[heap_index[value1]], heap[heap_index[value2]]);
-    std::swap(heap_index[value1], heap_index[value2]);
+    fprintf(stderr, "BinaryHeap::decreaseKey not implemented!\n");
+    exit(0);
 }

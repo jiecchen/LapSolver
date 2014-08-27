@@ -1,6 +1,6 @@
 #include <vector>
 #include <cstdio>
-#include "structures/heap/AOS4aryHeap.h"
+#include "structures/heap/Aligned4aryHeap.h"
 #include "util/Benchmark.h"
 #include "mkl.h"
 using namespace std;
@@ -22,7 +22,7 @@ int main(int argc, char **argv)
     }
 
     auto bench = make_benchmark(argc, argv, [&] () {
-        AOS4aryHeap<double, int> heap(nElements);
+        Aligned4aryHeap<double, int> heap(nElements);
         for(unsigned i = 0; i < nElements; ++i)
             heap.push(loadedKeys[i], loadedValues[i]);
         for(unsigned i = 0; i < nElements; ++i)
