@@ -1,32 +1,17 @@
-SHELL := /bin/bash
+SHELL:=/bin/bash
 CC:=icc
 BUILD:=build
-SRC:=src
+
 TARGET:=libkmp.dylib
-MKLROOT=/opt/intel/composerxe/mkl
-MKL_CFLAGS = -ipo -openmp -mkl=parallel
-MKL_LFLAGS = -ipo -openmp -L$(MKLROOT)/lib -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -lpthread -lm
-
-CFLAGS:=-O3 -xHost -std=c++11 -fPIC -I$(SRC)
-LFLAGS:=$(CFLAGS)
-
-SHARED_FLAG:=-dynamiclib
-UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S), Linux)
-	SHARED_FLAG=-shared
-	TARGET=libkmp.so
+ifeq ($(shell uname -s), Linux)
+	TARGET:=libkmp.so	
 endif
 
-SOURCES := $(shell find $(SRC) -name *.cpp)
-OBJECTS := $(addprefix $(BUILD)/,$(notdir $(SOURCES:.cpp=.o)))
+.PHONY: all test bench clean
 
-.PHONY: all clean test bench
-all: $(BUILD) $(TARGET)
-clean:
-	rm -rf $(BUILD)
-	rm -f $(TARGET)
+all: $(TARGET)
 
-test: $(BUILD) $(TARGET)
+test: all
 	@echo
 	@echo =======================
 	@echo "        TESTING"
@@ -35,7 +20,7 @@ test: $(BUILD) $(TARGET)
 	@make -s -C test
 	@echo
 
-bench: $(BUILD) $(TARGET)
+bench: all
 	@echo
 	@echo =======================
 	@echo "       BENCHMARK"
@@ -44,15 +29,13 @@ bench: $(BUILD) $(TARGET)
 	@make -s -C test bench
 	@echo
 
+clean:
+	rm -rf $(TARGET) $(BUILD)
+
 $(BUILD):
 	mkdir -p $@
 
-$(TARGET): $(OBJECTS)
-	$(CC) $(LFLAGS) $^ $(SHARED_FLAG) -o $@ $(MKL_LFLAGS)
-
-define sourcerule
-$(patsubst %.cpp, $(BUILD)/%.o, $(notdir $(1))): $(1)
-	$$(CC) $$(CFLAGS) $$(MKL_CFLAGS) -c $$< -o $$@
-endef
-
-$(foreach src, $(SOURCES), $(eval $(call sourcerule, $(src))))
+$(TARGET): $(BUILD)
+	cd $(BUILD) && CC=${CC} CXX=${CC} ccmake ..
+	cd $(BUILD) && make
+	cp $(BUILD)/$(TARGET) .

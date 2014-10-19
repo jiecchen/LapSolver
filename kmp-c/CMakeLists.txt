@@ -26,20 +26,20 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
     if ("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "14")
         message (FATAL_ERROR "${UNSUPPORTED_CXX}")
     endif ()
-    set(LAP_FLAGS "-fast -xHost")
+    add_definitions("-fast -xHost")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     if ("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.9")
         message (FATAL_ERROR "${UNSUPPORTED_CXX}")
     endif ()
-    set(LAP_FLAGS "-fcilkplus -lcilkrts -O3 -flto -mtune=native -march=native")
+    add_definitions("-fcilkplus -lcilkrts -O3 -flto -mtune=native -march=native")
 else ()
     message (FATAL_ERROR "${UNSUPPORTED_CXX}")
 endif ()
 
 # Set up base set of C flags
 
-set(CMAKE_C_FLAGS   "${LAP_FLAGS} -fopenmp -std=gnu99")
-set(CMAKE_CXX_FLAGS "${LAP_FLAGS} -fopenmp -std=gnu++11")
+set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -fopenmp -std=gnu99")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -std=gnu++11")
 
 # Include the source root for easy (java-like) inclusion.
 
@@ -70,20 +70,18 @@ set(MKLROOT "/opt/intel/mkl")
 include_directories ("${MKLROOT}/include")
 
 if (STATIC_LINKING)
-    set(CMAKE_L_FLAGS   "${CMAKE_L_FLAGS} -static")
-    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -static")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
-    set(MKL_LIBS ${MKLROOT}/lib/libmkl_intel_lp64.a
-                 ${MKLROOT}/lib/libmkl_core.a
-                 ${MKLROOT}/lib/libmkl_intel_thread.a)
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_L_FLAGS} -static")
+    add_definitions("-static")
+    find_library(MKL_LP64 NAMES mkl_intel_lp64.a libmkl_intel_lp64.a HINTS ${MKLROOT}/lib ${MKLROOT}/lib/intel64)
+    find_library(MKL_CORE NAMES mkl_core.a libmkl_core.a HINTS ${MKLROOT}/lib ${MKLROOT}/lib/intel64)
+    find_library(MKL_THREAD NAMES mkl_intel_thread.a libmkl_intel_thread.a HINTS ${MKLROOT}/lib ${MKLROOT}/lib/intel64)
 else()
-    link_directories(${MKLROOT}/lib)
-    find_library(MKL_LP64 NAMES mkl_intel_lp64 libmkl_intel_lp64 HINTS ${MKLROOT}/lib)
-    find_library(MKL_CORE NAMES mkl_core libmkl_core HINTS ${MKLROOT}/lib)
-    find_library(MKL_THREAD NAMES mkl_intel_thread libmkl_intel_thread HINTS ${MKLROOT}/lib)
-
-    set(MKL_LIBS ${MKL_LP64} ${MKL_CORE} ${MKL_THREAD})
+    find_library(MKL_LP64 NAMES mkl_intel_lp64 libmkl_intel_lp64 HINTS ${MKLROOT}/lib ${MKLROOT}/lib/intel64)
+    find_library(MKL_CORE NAMES mkl_core libmkl_core HINTS ${MKLROOT}/lib ${MKLROOT}/lib/intel64)
+    find_library(MKL_THREAD NAMES mkl_intel_thread libmkl_intel_thread HINTS ${MKLROOT}/lib ${MKLROOT}/lib/intel64)
 endif()
+
+set(MKL_LIBS ${MKL_LP64} ${MKL_CORE} ${MKL_THREAD})
 
 # Add all the dependencies
 
