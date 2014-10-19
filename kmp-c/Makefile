@@ -1,5 +1,6 @@
 SHELL:=/bin/bash
 CC:=icc
+CXX:=icc
 BUILD:=build
 
 TARGET:=libkmp.dylib
@@ -36,6 +37,6 @@ $(BUILD):
 	mkdir -p $@
 
 $(TARGET): $(BUILD)
-	cd $(BUILD) && CC=${CC} CXX=${CC} cmake ..
+	cd $(BUILD) && CC=${CC} CXX=${CXX} cmake ..
 	cd $(BUILD) && make
 	cp $(BUILD)/$(TARGET) .
