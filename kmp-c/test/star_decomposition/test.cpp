@@ -29,7 +29,6 @@ int main(int argc, char **argv)
     for (int i = 0; i < g.nv(); ++i) {
         if (i == source) continue;
         int j = g.neighbor(i, sdt->parentIndex[i]);
-        printf("%d %d\n", i, j);
         uf.link(i, j);
     }
 
@@ -37,16 +36,14 @@ int main(int argc, char **argv)
     int c0 = uf.find_set(0);
     bool bad = false;
     for (int i = 1; i < g.nv(); ++i) {
-        //fprintf(stderr, "%d ", uf.find_set(i));
-        /*
         if (uf.find_set(i) != c0) {
             bad = true;
             printf ("SHIT\n");
             break;
-        }*/
+        }
     }
 
-    // if (!bad) printf("OK\n");
+    if (!bad) printf("OK\n");
 
     return 0;
 }

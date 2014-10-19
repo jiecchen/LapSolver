@@ -29,6 +29,7 @@ ShortestPathTree::ShortestPathTree(const Graph &g, int source)
         for (int i = 0, deg = g.degree(u); i < deg; ++i)
         {
             int v = g.neighbor(u, i);
+            // Really want j: u == g.neighbor(v, j);
             if (!settled[v])
             {
                 double edgeW = 1 / g.weight(u, i);
@@ -40,7 +41,13 @@ ShortestPathTree::ShortestPathTree(const Graph &g, int source)
                     dist[v] = alt;
                     weight[v] = edgeW;
                     parent[v] = u;
-                    parentIndex[v] = i;
+
+                    for (int j = 0; j < g.degree(v); ++j) {
+                        if (g.neighbor(v, j) == u) {
+                            parentIndex[v] = j;
+                            break;
+                        }
+                    }
                 }
             }
         }
