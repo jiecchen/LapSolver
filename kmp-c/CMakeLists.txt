@@ -1,18 +1,38 @@
 cmake_minimum_required(VERSION 2.8)
 project(LapSolver C CXX)
 
-# Necessary packages
+# Options
+
+option (STATIC_LINKING "Set this to link statically to appropriate libraries" OFF)
+
+# pthreads: needed by MKL
 
 find_package (Threads REQUIRED)
+
+# Intel Math Kernel Library (MKL)
+# TODO: Make this smart.
+
+set(MKLROOT "/opt/intel/mkl")
+include_directories ("${MKLROOT}/include")
+
+if (STATIC_LINKING)
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -static")
+    add_definitions("-static")
+    find_library(MKL_LP64 NAMES mkl_intel_lp64.a libmkl_intel_lp64.a HINTS ${MKLROOT}/lib ${MKLROOT}/lib/intel64)
+    find_library(MKL_CORE NAMES mkl_core.a libmkl_core.a HINTS ${MKLROOT}/lib ${MKLROOT}/lib/intel64)
+    find_library(MKL_THREAD NAMES mkl_intel_thread.a libmkl_intel_thread.a HINTS ${MKLROOT}/lib ${MKLROOT}/lib/intel64)
+else()
+    find_library(MKL_LP64 NAMES mkl_intel_lp64 libmkl_intel_lp64 HINTS ${MKLROOT}/lib ${MKLROOT}/lib/intel64)
+    find_library(MKL_CORE NAMES mkl_core libmkl_core HINTS ${MKLROOT}/lib ${MKLROOT}/lib/intel64)
+    find_library(MKL_THREAD NAMES mkl_intel_thread libmkl_intel_thread HINTS ${MKLROOT}/lib ${MKLROOT}/lib/intel64)
+endif()
+
+set(MKL_LIBS ${MKL_LP64} ${MKL_CORE} ${MKL_THREAD})
 
 # Error messages
 
 set(UNSUPPORTED_CXX "Sorry, the ${CMAKE_CXX_COMPILER_ID} compiler is unsupported.")
 set(UNSUPPORTED_CXX "${UNSUPPORTED_CXX} Please use either GCC 4.9+ or Intel 14+.")
-
-# Options
-
-option (STATIC_LINKING "Set this to link statically to appropriate libraries" OFF)
 
 # Detect the compilers, throw an error if it doesn't match the C compiler.
 
@@ -62,26 +82,6 @@ add_library (kmp SHARED
     src/structures/GraphLoader.cpp
     src/structures/TreeChildren.cpp
 )
-
-# Set up MKL
-# TODO: Make this smart.
-
-set(MKLROOT "/opt/intel/mkl")
-include_directories ("${MKLROOT}/include")
-
-if (STATIC_LINKING)
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_L_FLAGS} -static")
-    add_definitions("-static")
-    find_library(MKL_LP64 NAMES mkl_intel_lp64.a libmkl_intel_lp64.a HINTS ${MKLROOT}/lib ${MKLROOT}/lib/intel64)
-    find_library(MKL_CORE NAMES mkl_core.a libmkl_core.a HINTS ${MKLROOT}/lib ${MKLROOT}/lib/intel64)
-    find_library(MKL_THREAD NAMES mkl_intel_thread.a libmkl_intel_thread.a HINTS ${MKLROOT}/lib ${MKLROOT}/lib/intel64)
-else()
-    find_library(MKL_LP64 NAMES mkl_intel_lp64 libmkl_intel_lp64 HINTS ${MKLROOT}/lib ${MKLROOT}/lib/intel64)
-    find_library(MKL_CORE NAMES mkl_core libmkl_core HINTS ${MKLROOT}/lib ${MKLROOT}/lib/intel64)
-    find_library(MKL_THREAD NAMES mkl_intel_thread libmkl_intel_thread HINTS ${MKLROOT}/lib ${MKLROOT}/lib/intel64)
-endif()
-
-set(MKL_LIBS ${MKL_LP64} ${MKL_CORE} ${MKL_THREAD})
 
 # Add all the dependencies
 
