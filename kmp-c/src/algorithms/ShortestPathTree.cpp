@@ -6,7 +6,7 @@ using namespace std;
 
 ShortestPathTree::ShortestPathTree(const Graph &g, int source)
 {
-    int n = g.nv();
+    size_t n = (size_t) g.nv();
     dist = new double[n];
     parent = new int[n];
     parentIndex = new int[n];

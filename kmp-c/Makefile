@@ -36,6 +36,6 @@ $(BUILD):
 	mkdir -p $@
 
 $(TARGET): $(BUILD)
-	cd $(BUILD) && CC=${CC} CXX=${CC} ccmake ..
+	cd $(BUILD) && CC=${CC} CXX=${CC} cmake ..
 	cd $(BUILD) && make
 	cp $(BUILD)/$(TARGET) .

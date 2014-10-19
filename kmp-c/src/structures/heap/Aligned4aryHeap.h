@@ -21,7 +21,7 @@ public:
     This implementation is faster than my binary heap (which, granted, is not as
     heavily-optimized).
     */
-    Aligned4aryHeap(int capacity)
+    Aligned4aryHeap(size_t capacity)
         : capacity(capacity),
           size(0),
           data_v(aligned_vector<Element, AlignCache>(capacity + 4 + offset)),
