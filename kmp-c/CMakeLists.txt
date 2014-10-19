@@ -81,6 +81,7 @@ add_library (kmp SHARED
     src/structures/Graph.cpp
     src/structures/GraphLoader.cpp
     src/structures/TreeChildren.cpp
+    src/lsst/StarDecompositionTree.cpp
 )
 
 # Add all the dependencies
