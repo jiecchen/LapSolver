@@ -70,7 +70,7 @@ include_directories ("${PROJECT_SOURCE_DIR}/src")
 
 # Build the library.
 
-add_library (kmp SHARED 
+add_library (kmp SHARED
     src/algorithms/PartialCholeskyFactorization.cpp
     src/algorithms/PartialCholeskyOrder.cpp
     src/algorithms/PriorityQueue.cpp
@@ -90,3 +90,11 @@ add_library (kmp SHARED
 # Add all the dependencies
 
 target_link_libraries (kmp ${MKL_LIBS} pthread m)
+
+##### Matlab LSST Driver #####
+
+add_executable (lsst
+    src/lsst/Driver.cpp
+)
+
+target_link_libraries (lsst kmp ${MKL_LIBS} m)
