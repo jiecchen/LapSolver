@@ -7,6 +7,8 @@ StarDecompositionTree::StarDecompositionTree (const Graph& g_, int source) {
     n = g->nv();
     parentIndex = new int[n];
     currentLevel = new int[n];
+
+    BuildTree(source, 0);
 }
 
 StarDecompositionTree::~StarDecompositionTree () {
