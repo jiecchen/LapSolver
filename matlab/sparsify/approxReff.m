@@ -23,10 +23,11 @@ m = length(ai);
 
 nvecs = ceil(c*log(m));
 
-
-% R = randn(m,nvecs);
-R = countMatrix(m, nvecs);
-
+if m < 1000
+    R = randn(m,nvecs);
+else
+    R = countMatrix(m, nvecs);
+end
 
 B = U*Wh*R;
 
