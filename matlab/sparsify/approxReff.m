@@ -23,7 +23,11 @@ m = length(ai);
 
 nvecs = ceil(c*log(m));
 
-R = randn(m,nvecs);
+
+% R = randn(m,nvecs);
+R = countMatrix(m, nvecs);
+
+
 B = U*Wh*R;
 
 Z = zeros(size(B));
